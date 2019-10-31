@@ -544,106 +544,111 @@ universe-retract-Σ-shrinks : (ua : Univalence)
                              (R : Propositional-resizing)
                              {𝓤 𝓥 : Universe}
                              (Y : 𝓤 ⊔ 𝓥 ̇ )
-                             → is-embedding (universe-retract-Σ-back-up ua R {𝓤} {𝓥} Y)
-universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = {!!}
- where
-  s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
-  s = lift 𝓥
-  unwrap : {Z : 𝓤 ̇ } → s Z → Z
-  unwrap (inl z) = z
-  inl-unwrap : {Z : 𝓤 ̇ } {z : s Z} → inl (unwrap z) ≡ z
-  inl-unwrap {Z} {inl z} = refl
-  r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇ 
-  r = universe-retract-Σ ua R 𝓤 𝓥
-  ρ : r Y → Y
-  ρ = universe-retract-Σ-back-up ua R Y
-  r' : 𝓤 ⊔ 𝓥 ̇ → (𝓤 ⁺) ⊔ (𝓥 ⁺) ̇
-  r' Y = Σ \(p : fiber s Y) → pr₁ p
-  σ : r' Y → Y
-  σ ((X , e) , x) = Idtofun e (inl x)
-  σ-emb : is-embedding σ
-  σ-emb = embedding-criterion σ δ
-   where
-    δ : (w : r' Y) → is-prop (fiber σ (σ w))
-    δ ((X , refl) , x) = retract-of-prop t ipT
-     where
-      ϕ : (w : fiber s Y) → X → pr₁ w
-      ϕ (X' , e') = unwrap ∘ (Idtofun (e' ⁻¹) ∘ inl)
-      T : 𝓤 ⁺ ⊔ 𝓥 ⁺ ̇ 
-      T = Σ \(w : r' Y) → S w
-       where
-        S : (w : r' Y) → 𝓤 ⊔ 𝓥 ̇ 
-        S ((X' , e') , x') = (Idtofun e' (inl x')) ≡
-                              Idtofun e' (inl (ϕ (X' , e') x))
-      t : fiber σ (σ ((X , refl) , x)) ◁ T
-      t = f , (g , fg)
-       where
-        p : (w : fiber s Y) → Idtofun (pr₂ w) (inl (ϕ w x)) ≡ inl x
-        p (X' , e') =
-         Idtofun e' (inl (ϕ w x))             ≡⟨ ap (Idtofun e') p' ⟩
-         Idtofun e' (Idtofun (e' ⁻¹) (inl x)) ≡⟨ i ⟩
-         Idtofun ((e' ⁻¹) ∙ e') (inl x)       ≡⟨ ii ⟩
-         inl x                                ∎
-          where
-           w : fiber s Y
-           w = (X' , e')
-           p' = inl (ϕ w x)                            ≡⟨ refl ⟩
-                inl (unwrap (Idtofun (e' ⁻¹) (inl x))) ≡⟨ inl-unwrap ⟩
-                Idtofun (e' ⁻¹) (inl x)                ∎       
-           i  = (transport-comp id (e' ⁻¹) e') ⁻¹
-           ii = ap (λ - → Idtofun - (inl x)) (left-inverse e')
-        f : T → fiber σ (σ ((X , refl) , x))
-        f (w , q) = (w , (q ∙ (p (pr₁ w))))
-        g : fiber σ (σ ((X , refl) , x)) → T
-        g (w , r) = (w , (r ∙ ((p (pr₁ w)) ⁻¹)))
-        fg : (v : fiber σ (σ ((X , refl) , x))) → f (g v) ≡ v
-        fg (w , r) = to-Σ-≡ (refl , c)
-         where
-          c = r ∙ (v ⁻¹) ∙ v ≡⟨ ∙assoc r (v ⁻¹) v ⟩
-              r ∙ (v ⁻¹ ∙ v) ≡⟨ ap (λ - → r ∙ -) (left-inverse v) ⟩
-              r              ∎
+                             → (universe-retract-Σ ua R 𝓤 𝓥 Y) ↪ Y
+universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y =
+ σ ∘ (etofun ρ) , (comp-embedding (is-embedding-etofun ρ) σ-emb)
+  where
+   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
+   s = lift 𝓥
+   unwrap : {Z : 𝓤 ̇ } → s Z → Z
+   unwrap (inl z) = z
+   inl-unwrap : {Z : 𝓤 ̇ } {z : s Z} → inl (unwrap z) ≡ z
+   inl-unwrap {Z} {inl z} = refl
+   r' : 𝓤 ⊔ 𝓥 ̇ → (𝓤 ⁺) ⊔ (𝓥 ⁺) ̇
+   r' Y = Σ \(p : fiber s Y) → pr₁ p
+   e : is-embedding s
+   e = lift-is-embedding ua
+   r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇ 
+   r Y = universe-retract-Σ ua R 𝓤 𝓥 Y
+   ρ : r Y ↪ r' Y
+   ρ = (eqtofun ν) , (equivs-are-embeddings (eqtofun ν) (eqtofun-is-an-equiv ν))
+    where
+     ν : r Y ≃ r' Y
+     ν = Σ-change-of-variables pr₁ (from-resize R (fiber s Y) (e Y))
+           (pr₂ (pr₂ (R (fiber s Y) (e Y))))
+   σ : r' Y → Y
+   σ ((X , e) , x) = Idtofun e (inl x)
+   σ-emb : is-embedding σ
+   σ-emb = embedding-criterion σ δ
+    where
+     δ : (w : r' Y) → is-prop (fiber σ (σ w))
+     δ ((X , refl) , x) = retract-of-prop t ipT
+      where
+       ϕ : (w : fiber s Y) → X → pr₁ w
+       ϕ (X' , e') = unwrap ∘ (Idtofun (e' ⁻¹) ∘ inl)
+       T : 𝓤 ⁺ ⊔ 𝓥 ⁺ ̇ 
+       T = Σ \(w : r' Y) → S w
+        where
+         S : (w : r' Y) → 𝓤 ⊔ 𝓥 ̇ 
+         S ((X' , e') , x') = (Idtofun e' (inl x')) ≡
+                               Idtofun e' (inl (ϕ (X' , e') x))
+       t : fiber σ (σ ((X , refl) , x)) ◁ T
+       t = f , (g , fg)
+        where
+         p : (w : fiber s Y) → Idtofun (pr₂ w) (inl (ϕ w x)) ≡ inl x
+         p (X' , e') =
+          Idtofun e' (inl (ϕ w x))             ≡⟨ ap (Idtofun e') p' ⟩
+          Idtofun e' (Idtofun (e' ⁻¹) (inl x)) ≡⟨ i ⟩
+          Idtofun ((e' ⁻¹) ∙ e') (inl x)       ≡⟨ ii ⟩
+          inl x                                ∎
            where
-            v = p (pr₁ w)
-      ipT : is-prop T
-      ipT = equiv-to-prop τ (singleton-types'-are-props X)
-       where
-        τ = T                                                   ≃⟨ i ⟩
-            (Σ \w → inl (pr₂ w) ≡ inl (ϕ (pr₁ w) x))            ≃⟨ ii ⟩
-            (Σ \w → pr₂ w ≡ ϕ (pr₁ w) x)                        ≃⟨ Σ-assoc ⟩
-            (Σ \v → (Σ \x' → x' ≡ ϕ v x))                       ≃⟨ Σ-assoc ⟩
-            (Σ \X' → (Σ \e' → (Σ \x' → x' ≡ ϕ (X' , e') x)))    ≃⟨ ≃-refl _ ⟩
-            (Σ \X' → (Σ \e' → singleton-type' (ϕ (X' , e') x))) ≃⟨ iii ⟩
-            (Σ \X' → (s X' ≡ s X) × 𝟙{𝓤})                      ≃⟨ iv ⟩
-            (Σ \X' → s X' ≡ s X)                                ≃⟨ v ⟩
-            (Σ \X' → X' ≡ X)                                    ≃⟨ vi ⟩
-            singleton-type' X ■
-         where
-          i   = Σ-cong (λ w → ≃-sym
-                  (ap (Idtofun (pr₂ (pr₁ w))) ,
-                   embedding-embedding' (Idtofun (pr₂ (pr₁ w)))
-                     (equivs-are-embeddings (Idtofun (pr₂ (pr₁ w)))
-                       (transports-are-equivs {_} {_} {_} {_}
-                                              {s (pr₁ (pr₁ w))} {s X}
-                                              (pr₂ (pr₁ w))))
-                     (inl (pr₂ w)) (inl (ϕ (pr₁ w) x))))
-          ii  = Σ-cong (λ w → ≃-sym
-                  (ap inl ,
-                   embedding-embedding' inl
-                     (inl-embedding (pr₁ (pr₁ w)) 𝟘)
-                     (pr₂ w) (ϕ (pr₁ w) x)))
-          iii = Σ-cong (λ X' →
-                  Σ-cong (λ e' →
-                    singleton-≃-𝟙
-                      (singleton-types'-are-singletons (ϕ (X' , e') x))))
-          iv  = Σ-cong (λ X' → 𝟙-rneutral)
-          v   = Σ-cong (λ X' → ≃-sym
-                  (ap s ,
-                   embedding-embedding' s
-                     (lift-is-embedding ua)
-                     X' X))
-          vi  = ≃-refl (singleton-type' X)
-          
-         
+            w : fiber s Y
+            w = (X' , e')
+            p' = inl (ϕ w x)                            ≡⟨ refl ⟩
+                 inl (unwrap (Idtofun (e' ⁻¹) (inl x))) ≡⟨ inl-unwrap ⟩
+                 Idtofun (e' ⁻¹) (inl x)                ∎       
+            i  = (transport-comp id (e' ⁻¹) e') ⁻¹
+            ii = ap (λ - → Idtofun - (inl x)) (left-inverse e')
+         f : T → fiber σ (σ ((X , refl) , x))
+         f (w , q) = (w , (q ∙ (p (pr₁ w))))
+         g : fiber σ (σ ((X , refl) , x)) → T
+         g (w , r) = (w , (r ∙ ((p (pr₁ w)) ⁻¹)))
+         fg : (v : fiber σ (σ ((X , refl) , x))) → f (g v) ≡ v
+         fg (w , r) = to-Σ-≡ (refl , c)
+          where
+           c = r ∙ (v ⁻¹) ∙ v ≡⟨ ∙assoc r (v ⁻¹) v ⟩
+               r ∙ (v ⁻¹ ∙ v) ≡⟨ ap (λ - → r ∙ -) (left-inverse v) ⟩
+               r              ∎
+            where
+             v = p (pr₁ w)
+       ipT : is-prop T
+       ipT = equiv-to-prop τ (singleton-types'-are-props X)
+        where
+         τ = T                                                   ≃⟨ i ⟩
+             (Σ \w → inl (pr₂ w) ≡ inl (ϕ (pr₁ w) x))            ≃⟨ ii ⟩
+             (Σ \w → pr₂ w ≡ ϕ (pr₁ w) x)                        ≃⟨ Σ-assoc ⟩
+             (Σ \v → (Σ \x' → x' ≡ ϕ v x))                       ≃⟨ Σ-assoc ⟩
+             (Σ \X' → (Σ \e' → (Σ \x' → x' ≡ ϕ (X' , e') x)))    ≃⟨ ≃-refl _ ⟩
+             (Σ \X' → (Σ \e' → singleton-type' (ϕ (X' , e') x))) ≃⟨ iii ⟩
+             (Σ \X' → (s X' ≡ s X) × 𝟙{𝓤})                      ≃⟨ iv ⟩
+             (Σ \X' → s X' ≡ s X)                                ≃⟨ v ⟩
+             (Σ \X' → X' ≡ X)                                    ≃⟨ vi ⟩
+             singleton-type' X ■
+          where
+           i   = Σ-cong (λ w → ≃-sym
+                   (ap (Idtofun (pr₂ (pr₁ w))) ,
+                    embedding-embedding' (Idtofun (pr₂ (pr₁ w)))
+                      (equivs-are-embeddings (Idtofun (pr₂ (pr₁ w)))
+                        (transports-are-equivs {_} {_} {_} {_}
+                                               {s (pr₁ (pr₁ w))} {s X}
+                                               (pr₂ (pr₁ w))))
+                      (inl (pr₂ w)) (inl (ϕ (pr₁ w) x))))
+           ii  = Σ-cong (λ w → ≃-sym
+                   (ap inl ,
+                    embedding-embedding' inl
+                      (inl-embedding (pr₁ (pr₁ w)) 𝟘)
+                      (pr₂ w) (ϕ (pr₁ w) x)))
+           iii = Σ-cong (λ X' →
+                   Σ-cong (λ e' →
+                     singleton-≃-𝟙
+                       (singleton-types'-are-singletons (ϕ (X' , e') x))))
+           iv  = Σ-cong (λ X' → 𝟙-rneutral)
+           v   = Σ-cong (λ X' → ≃-sym
+                   (ap s ,
+                    embedding-embedding' s
+                      (lift-is-embedding ua)
+                      X' X))
+           vi  = ≃-refl (singleton-type' X)
    
 universe-retract-Σ-is-section-on-subsingletons : (ua : Univalence)
                                                  (R : Propositional-resizing)

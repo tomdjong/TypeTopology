@@ -488,12 +488,12 @@ universe-retract-Σ : Univalence
                    → 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
 universe-retract-Σ ua R 𝓤 𝓥 = pr₁ (lift-is-section-Σ ua R 𝓤 𝓥)
 
-universe-retract-back-up : (ua : Univalence)
+universe-retract-Σ-back-up : (ua : Univalence)
                              (R : Propositional-resizing)
                              {𝓤 𝓥 : Universe}
-                             {Y : 𝓤 ⊔ 𝓥 ̇ }
+                             (Y : 𝓤 ⊔ 𝓥 ̇ )
                              → universe-retract-Σ ua R 𝓤 𝓥 Y → Y
-universe-retract-back-up ua R {𝓤} {𝓥} {Y} (p , x) = eqtofun ϕ x
+universe-retract-Σ-back-up ua R {𝓤} {𝓥} Y (p , x) = eqtofun ϕ x
  where
   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
   s = lift 𝓥
@@ -509,14 +509,14 @@ universe-retract-back-up ua R {𝓤} {𝓥} {Y} (p , x) = eqtofun ϕ x
   ϕ = X   ≃⟨ ≃-sym (lift-≃ 𝓥 X) ⟩
       s X ≃⟨ idtoeq (lift 𝓥 X) Y (pr₂ (f Y p)) ⟩
       Y   ■
-
-universe-retract-of-subsingleton-is-subsingleton : (ua : Univalence)
+      
+universe-retract-Σ-of-subsingleton-is-subsingleton : (ua : Univalence)
                                                    (R : Propositional-resizing)
                                                    {𝓤 𝓥 : Universe}
                                                    {Y : 𝓤 ⊔ 𝓥 ̇ }
                                                    → is-prop Y
                                                    → is-prop (universe-retract-Σ ua R 𝓤 𝓥 Y)
-universe-retract-of-subsingleton-is-subsingleton ua R {𝓤} {𝓥} {Y} i = Σ-is-prop a b
+universe-retract-Σ-of-subsingleton-is-subsingleton ua R {𝓤} {𝓥} {Y} i = Σ-is-prop a b
  where
   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
   s = lift 𝓥
@@ -540,6 +540,55 @@ universe-retract-of-subsingleton-is-subsingleton ua R {𝓤} {𝓥} {Y} i = Σ-i
     c : is-prop X
     c = equiv-to-prop ϕ i
 
+universe-retract-Σ-shrinks : (ua : Univalence)
+                             (R : Propositional-resizing)
+                             {𝓤 𝓥 : Universe}
+                             (Y : 𝓤 ⊔ 𝓥 ̇ )
+                             → is-embedding (universe-retract-Σ-back-up ua R Y)
+universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = comp-embedding {!!} {!!}
+ where
+  s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
+  s = lift 𝓥
+  r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇ 
+  r = universe-retract-Σ ua R 𝓤 𝓥
+  ρ : r Y → Y
+  ρ = universe-retract-Σ-back-up ua R Y
+  r' : 𝓤 ⊔ 𝓥 ̇ → (𝓤 ⁺) ⊔ (𝓥 ⁺) ̇
+  r' Y = Σ \(p : fiber s Y) → pr₁ p
+  σ : r' Y → Y
+  σ ((X , e) , x) = idtofun (s X) Y e (inl x)
+  σ-emb : is-embedding σ
+  σ-emb y (((X , e) , x) , p) (((X' , e') , x') , p') = to-Σ-≡ (α , {!!})
+   where
+    ψ : X ≃ X'
+    ψ = X    ≃⟨ ≃-sym (lift-≃ 𝓥 X) ⟩
+        s X  ≃⟨ idtoeq (s X) Y e ⟩
+        Y    ≃⟨ idtoeq Y (s X') (e' ⁻¹) ⟩
+        s X' ≃⟨ lift-≃ 𝓥 X' ⟩
+        X'   ■
+    α : (X , e) , x ≡ (X' , e') , x'
+    α = to-Σ-≡ ((to-Σ-≡ (ϕ , a)) , {!!})
+     where
+      ϕ : X ≡ X'
+      ϕ = eqtoid (ua 𝓤) X X' ψ
+      h : {W : 𝓤 ̇ } (u : s X ≡ Y) (v : X ≡ W)
+        → transport (λ (Z : 𝓤 ̇ ) → s Z ≡ Y) v u ≡ (ap s (v ⁻¹)) ∙ u
+      h refl refl = refl
+      a : transport (λ v → s v ≡ Y) ϕ e ≡ e'
+      a = transport (λ v → s v ≡ Y) ϕ e ≡⟨ h e ϕ ⟩
+                      (ap s (ϕ ⁻¹)) ∙ e ≡⟨ {!!} ⟩
+                                      e' ∎
+   
+
+{-embedding-criterion' σ ε
+   where
+    ε : (x x' : r' Y) → (σ x ≡ σ x') ≃ (x ≡ x')
+    ε ((X , e) , x) ((X' , e') , x') = (σ ((X , e) , x) ≡ σ ((X' , e') , x')) ≃⟨ ≃-refl _ ⟩
+                         (idtofun _ _ e (inl x) ≡ idtofun _ _ e' (inl x')) ≃⟨ {!!} ⟩
+                         (inl x ≡ inl x') ≃⟨ ? ⟩
+                                          (((X , e) , x) ≡ ((X' , e') , x')) ■
+-}
+
 universe-retract-Σ-is-section-on-subsingletons : (ua : Univalence)
                                                  (R : Propositional-resizing)
                                                  {𝓤 𝓥 : Universe}
@@ -556,7 +605,7 @@ universe-retract-Σ-is-section-on-subsingletons ua R {𝓤} {𝓥} {Y} i = γ
   γ = propext-from-univalence (ua (𝓤 ⊔ 𝓥)) (equiv-to-prop (lift-≃ 𝓥 (r Y)) p) i g f
    where
     p : is-prop (r Y)
-    p = universe-retract-of-subsingleton-is-subsingleton ua R i
+    p = universe-retract-Σ-of-subsingleton-is-subsingleton ua R i
     f : Y → s (r Y)
     f y = inl (idtofun 𝟙 (r Y) (χ ∙ ψ) *)
      where
@@ -569,7 +618,7 @@ universe-retract-Σ-is-section-on-subsingletons ua R {𝓤} {𝓥} {Y} i = γ
             𝟙{𝓤} ≃⟨ singleton-≃-𝟙' (pointed-props-are-singletons y i) ⟩
             Y    ■ 
     g : s (r Y) → Y
-    g = universe-retract-back-up ua R ∘ eqtofun (lift-≃ 𝓥 (r Y))
+    g = universe-retract-Σ-back-up ua R Y ∘ eqtofun (lift-≃ 𝓥 (r Y))
 
 Propositional-resizing-Ω-≃ : (ua : Univalence)
                              (R : Propositional-resizing)
@@ -584,7 +633,7 @@ Propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ 
   r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
   r = universe-retract-Σ ua R 𝓤 𝓥
   rΩ : Ω (𝓤 ⊔ 𝓥) → Ω 𝓤
-  rΩ (P , i) = r P , universe-retract-of-subsingleton-is-subsingleton ua R i
+  rΩ (P , i) = r P , universe-retract-Σ-of-subsingleton-is-subsingleton ua R i
   sΩrΩ : (P : Ω (𝓤 ⊔ 𝓥)) → sΩ (rΩ P) ≡ P
   sΩrΩ (P , i) = to-Σ-≡
     (universe-retract-Σ-is-section-on-subsingletons ua R i ,

@@ -545,8 +545,7 @@ universe-retract-Σ-shrinks : (ua : Univalence)
                              {𝓤 𝓥 : Universe}
                              (Y : 𝓤 ⊔ 𝓥 ̇ )
                              → (universe-retract-Σ ua R 𝓤 𝓥 Y) ↪ Y
-universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y =
- σ ∘ (etofun ρ) , (comp-embedding (is-embedding-etofun ρ) σ-emb)
+universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding ρ-emb σ-emb)
   where
    s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
    s = lift 𝓥
@@ -554,18 +553,20 @@ universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y =
    unwrap (inl z) = z
    inl-unwrap : {Z : 𝓤 ̇ } {z : s Z} → inl (unwrap z) ≡ z
    inl-unwrap {Z} {inl z} = refl
-   r' : 𝓤 ⊔ 𝓥 ̇ → (𝓤 ⁺) ⊔ (𝓥 ⁺) ̇
-   r' Y = Σ \(p : fiber s Y) → pr₁ p
-   e : is-embedding s
-   e = lift-is-embedding ua
    r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇ 
    r Y = universe-retract-Σ ua R 𝓤 𝓥 Y
-   ρ : r Y ↪ r' Y
-   ρ = (eqtofun ν) , (equivs-are-embeddings (eqtofun ν) (eqtofun-is-an-equiv ν))
-    where
-     ν : r Y ≃ r' Y
-     ν = Σ-change-of-variables pr₁ (from-resize R (fiber s Y) (e Y))
-           (pr₂ (pr₂ (R (fiber s Y) (e Y))))
+   r' : 𝓤 ⊔ 𝓥 ̇ → (𝓤 ⁺) ⊔ (𝓥 ⁺) ̇
+   r' Y = Σ \(p : fiber s Y) → pr₁ p   
+   ν : r Y ≃ r' Y
+   ν = Σ-change-of-variables pr₁ (from-resize R (fiber s Y) (e Y))
+         (pr₂ (pr₂ (R (fiber s Y) (e Y))))
+    where    
+     e : is-embedding s
+     e = lift-is-embedding ua
+   ρ : r Y → r' Y
+   ρ = eqtofun ν
+   ρ-emb : is-embedding ρ
+   ρ-emb = equivs-are-embeddings ρ (eqtofun-is-an-equiv ν)
    σ : r' Y → Y
    σ ((X , e) , x) = Idtofun e (inl x)
    σ-emb : is-embedding σ

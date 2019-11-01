@@ -394,13 +394,20 @@ Question. If we assume that we have such a retraction, does weak
 propositional resizing follow?
 
 Added 25 October 2019 by Tom de Jong
+
 An answer to the question above is given by the following construction (which is
 in need of a better name).
 
-If we have a retract r of lift such that:
+If we have a retract r of lift such that it "shrinks", i.e. for every Y, we have
+an embedding of r Y into Y, then we get propositional resizing from 𝓤 ⊔ 𝓥 to 𝓤.
+
+In fact, it is enough for the retract r of lift to satisfy:
 (i) if Y is a subsingleton, then so is r Y;
-(ii) we have a map r Y → Y,
-then we get propositional resizing from 𝓤 ⊔ 𝓥 to 𝓤.
+(ii) we have a map r Y → Y.
+
+But the shrinking condition is more intuitive.
+
+(Note that shrinking implies (i) and (ii).)
 
 \begin{code}
 
@@ -419,7 +426,7 @@ nice-universe-retract-gives-propositional-resizing 𝓤 𝓥 ua r rs rprop rback
     f : r P → P
     f = rback P
     g : P → r P
-    g p = idtofun 𝟙 (r P) ϕ *
+    g p = Idtofun ϕ *
      where
       ϕ = 𝟙{𝓤}             ≡⟨ (rs 𝟙) ⁻¹ ⟩
           r (lift {𝓤} 𝓥 𝟙) ≡⟨ ap r (eqtoid ua (lift 𝓥 𝟙) P ψ) ⟩
@@ -436,9 +443,9 @@ nice-universe-retract-gives-propositional-resizing 𝓤 𝓥 ua r rs rprop rback
 \end{code}
 
 We now consider a variant of the retraction in lift-is-section above, where we
-use Σ, rather than Π. We show that this retraction satisfies (i) and (ii)
-above. Moreover, this retraction restricts to an equivalence on the
-subsingletons.
+use Σ, rather than Π. We show that this retraction shrinks. In particular, it
+satisfies (i) and (ii) above. Moreover, this retraction restricts to an
+equivalence on the subsingletons.
 
 \begin{code}
 
@@ -487,58 +494,6 @@ universe-retract-Σ : Univalence
                    → (𝓤 𝓥 : Universe)
                    → 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
 universe-retract-Σ ua R 𝓤 𝓥 = pr₁ (lift-is-section-Σ ua R 𝓤 𝓥)
-
-universe-retract-Σ-back-up : (ua : Univalence)
-                             (R : Propositional-resizing)
-                             {𝓤 𝓥 : Universe}
-                             (Y : 𝓤 ⊔ 𝓥 ̇ )
-                             → universe-retract-Σ ua R 𝓤 𝓥 Y → Y
-universe-retract-Σ-back-up ua R {𝓤} {𝓥} Y (p , x) = eqtofun ϕ x
- where
-  s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
-  s = lift 𝓥
-  e : is-embedding s
-  e = lift-is-embedding ua
-  F : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
-  F Y = resize R (fiber s Y) (e Y)
-  f : (Y : 𝓤 ⊔ 𝓥 ̇ ) → F Y → fiber s Y
-  f Y = from-resize R (fiber s Y) (e Y)
-  X : 𝓤 ̇
-  X = pr₁ (f Y p)
-  ϕ : X ≃ Y
-  ϕ = X   ≃⟨ ≃-sym (lift-≃ 𝓥 X) ⟩
-      s X ≃⟨ idtoeq (lift 𝓥 X) Y (pr₂ (f Y p)) ⟩
-      Y   ■
-      
-universe-retract-Σ-of-subsingleton-is-subsingleton : (ua : Univalence)
-                                                   (R : Propositional-resizing)
-                                                   {𝓤 𝓥 : Universe}
-                                                   {Y : 𝓤 ⊔ 𝓥 ̇ }
-                                                   → is-prop Y
-                                                   → is-prop (universe-retract-Σ ua R 𝓤 𝓥 Y)
-universe-retract-Σ-of-subsingleton-is-subsingleton ua R {𝓤} {𝓥} {Y} i = Σ-is-prop a b
- where
-  s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
-  s = lift 𝓥
-  e : is-embedding s
-  e = lift-is-embedding ua
-  F : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
-  F Y = resize R (fiber s Y) (e Y)
-  f : (Y : 𝓤 ⊔ 𝓥 ̇ ) → F Y → fiber s Y
-  f Y = from-resize R (fiber s Y) (e Y)
-  a : is-prop (F Y)
-  a = resize-is-a-prop R (fiber s Y) (e Y)
-  b : (p : F Y) → is-prop (pr₁ (f Y p))
-  b p = c
-   where
-    X : 𝓤 ̇
-    X = pr₁ (f Y p)
-    ϕ : X ≃ Y
-    ϕ = X   ≃⟨ ≃-sym (lift-≃ 𝓥 X) ⟩
-        s X ≃⟨ idtoeq (lift 𝓥 X) Y (pr₂ (f Y p)) ⟩
-        Y   ■  
-    c : is-prop X
-    c = equiv-to-prop ϕ i
 
 universe-retract-Σ-shrinks : (ua : Univalence)
                              (R : Propositional-resizing)
@@ -650,7 +605,73 @@ universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding �
                       (lift-is-embedding ua)
                       X' X))
            vi  = ≃-refl (singleton-type' X)
-   
+
+\end{code}
+
+It follows that universe-retract-Σ satisfies (i) and (ii).
+
+\begin{code}
+
+universe-retract-Σ-back-up : (ua : Univalence)
+                             (R : Propositional-resizing)
+                             {𝓤 𝓥 : Universe}
+                             (Y : 𝓤 ⊔ 𝓥 ̇ )
+                             → universe-retract-Σ ua R 𝓤 𝓥 Y → Y
+universe-retract-Σ-back-up ua R Y = etofun (universe-retract-Σ-shrinks ua R Y)
+
+universe-retract-Σ-of-subsingleton-is-subsingleton : (ua : Univalence)
+                                                     (R : Propositional-resizing)
+                                                     {𝓤 𝓥 : Universe}
+                                                     {Y : 𝓤 ⊔ 𝓥 ̇ }
+                                                     → is-prop Y
+                                                     → is-prop (universe-retract-Σ ua R 𝓤 𝓥 Y)
+universe-retract-Σ-of-subsingleton-is-subsingleton ua R {𝓤} {𝓥} {Y} i =
+ embedding-into-prop i (universe-retract-Σ-shrinks ua R Y)
+
+\end{code}
+
+That universe-retract-Σ satifies (ii), i.e. preserves propositions can also be
+proved more elementary.
+
+\begin{code}
+
+universe-retract-Σ-of-subsingleton-is-subsingleton' : (ua : Univalence)
+                                                     (R : Propositional-resizing)
+                                                     {𝓤 𝓥 : Universe}
+                                                     {Y : 𝓤 ⊔ 𝓥 ̇ }
+                                                     → is-prop Y
+                                                     → is-prop (universe-retract-Σ ua R 𝓤 𝓥 Y)
+universe-retract-Σ-of-subsingleton-is-subsingleton' ua R {𝓤} {𝓥} {Y} i = Σ-is-prop a b
+ where
+  s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
+  s = lift 𝓥
+  e : is-embedding s
+  e = lift-is-embedding ua
+  F : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
+  F Y = resize R (fiber s Y) (e Y)
+  f : (Y : 𝓤 ⊔ 𝓥 ̇ ) → F Y → fiber s Y
+  f Y = from-resize R (fiber s Y) (e Y)
+  a : is-prop (F Y)
+  a = resize-is-a-prop R (fiber s Y) (e Y)
+  b : (p : F Y) → is-prop (pr₁ (f Y p))
+  b p = c
+   where
+    X : 𝓤 ̇
+    X = pr₁ (f Y p)
+    ϕ : X ≃ Y
+    ϕ = X   ≃⟨ ≃-sym (lift-≃ 𝓥 X) ⟩
+        s X ≃⟨ idtoeq (lift 𝓥 X) Y (pr₂ (f Y p)) ⟩
+        Y   ■  
+    c : is-prop X
+    c = equiv-to-prop ϕ i
+
+\end{code}
+
+We now show that the (lift , universe-retract-Σ) pair is an equivalence when
+restricted to subsingletons.
+
+\begin{code}
+
 universe-retract-Σ-is-section-on-subsingletons : (ua : Univalence)
                                                  (R : Propositional-resizing)
                                                  {𝓤 𝓥 : Universe}
@@ -669,7 +690,7 @@ universe-retract-Σ-is-section-on-subsingletons ua R {𝓤} {𝓥} {Y} i = γ
     p : is-prop (r Y)
     p = universe-retract-Σ-of-subsingleton-is-subsingleton ua R i
     f : Y → s (r Y)
-    f y = inl (idtofun 𝟙 (r Y) (χ ∙ ψ) *)
+    f y = inl (Idtofun (χ ∙ ψ) *)
      where
       χ : 𝟙 ≡ r (s 𝟙)
       χ = (pr₂ (lift-is-section-Σ ua R 𝓤 𝓥) 𝟙) ⁻¹
@@ -682,11 +703,11 @@ universe-retract-Σ-is-section-on-subsingletons ua R {𝓤} {𝓥} {Y} i = γ
     g : s (r Y) → Y
     g = universe-retract-Σ-back-up ua R Y ∘ eqtofun (lift-≃ 𝓥 (r Y))
 
-Propositional-resizing-Ω-≃ : (ua : Univalence)
+propositional-resizing-Ω-≃ : (ua : Univalence)
                              (R : Propositional-resizing)
                              {𝓤 𝓥 : Universe}
                              → Ω 𝓤 ≃ Ω (𝓤 ⊔ 𝓥)
-Propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ , rΩsΩ))
+propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ , rΩsΩ))
  where
   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
   s = lift 𝓥 
@@ -695,15 +716,15 @@ Propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ 
   r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
   r = universe-retract-Σ ua R 𝓤 𝓥
   rΩ : Ω (𝓤 ⊔ 𝓥) → Ω 𝓤
-  rΩ (P , i) = r P , universe-retract-Σ-of-subsingleton-is-subsingleton ua R i
+  rΩ (P , i) = (r P , universe-retract-Σ-of-subsingleton-is-subsingleton ua R i)
   sΩrΩ : (P : Ω (𝓤 ⊔ 𝓥)) → sΩ (rΩ P) ≡ P
   sΩrΩ (P , i) = to-Σ-≡
     (universe-retract-Σ-is-section-on-subsingletons ua R i ,
-    (being-a-prop-is-a-prop (funext-from-univalence (ua (𝓤 ⊔ 𝓥))) _ i))
+     being-a-prop-is-a-prop (funext-from-univalence (ua (𝓤 ⊔ 𝓥))) _ i)
   rΩsΩ : (P : Ω 𝓤) → rΩ (sΩ P) ≡ P
   rΩsΩ (P , i) = to-Σ-≡
     (pr₂ (lift-is-section-Σ ua R 𝓤 𝓥) P ,
-    (being-a-prop-is-a-prop (funext-from-univalence (ua 𝓤)) _ i))
+     being-a-prop-is-a-prop (funext-from-univalence (ua 𝓤)) _ i)
 
 \end{code}
 

@@ -764,7 +764,7 @@ universe-retract-Σ-to-fiber ua R {𝓤} {𝓥} Y =
 
 \end{code}
 
-The retract applied to the universe 𝓤 ̇ is 𝟘.
+The retract applied to the universe to the type 𝓤 ̇ in 𝓤 ⁺ ̇ is 𝟘.
 
 \begin{code}
 

@@ -46,6 +46,8 @@ open import UF-UniverseEmbedding
 open import UF-PropIndexedPiSigma
 open import UF-PropTrunc
 
+open import LawvereFPT
+
 \end{code}
 
 We say that a type X has size 𝓥 if it is equivalent to a type in the
@@ -725,6 +727,81 @@ propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ 
   rΩsΩ (P , i) = to-Σ-≡
     (pr₂ (lift-is-section-Σ ua R 𝓤 𝓥) P ,
      being-a-prop-is-a-prop (funext-from-univalence (ua 𝓤)) _ i)
+
+\end{code}
+
+These helper functions are only here, because for some reason that I can't quite
+figure out, Agda will get stuck typechecking if we don't supply all the implicit
+arguments.
+
+\begin{code}
+
+universe-retract-Σ-pr₁ : (ua : Univalence)
+                            (R : Propositional-resizing)
+                            {𝓤 𝓥 : Universe}
+                            (Y : 𝓤 ⊔ 𝓥 ̇ )
+                            → universe-retract-Σ ua R 𝓤 𝓥 Y
+                            → resize R (fiber (lift {𝓤} 𝓥) Y) (lift-is-embedding ua Y)
+universe-retract-Σ-pr₁ ua R {𝓤} {𝓥} Y =
+ pr₁ {𝓤} {𝓤} {resize R (fiber s Y) (e Y)}
+ {λ w → pr₁ (from-resize R (fiber s Y) (e Y) w)}
+  where
+   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
+   s = lift 𝓥
+   e : is-embedding s
+   e = lift-is-embedding ua
+
+universe-retract-Σ-to-fiber : (ua : Univalence)
+                            (R : Propositional-resizing)
+                            {𝓤 𝓥 : Universe}
+                            (Y : 𝓤 ⊔ 𝓥 ̇ )
+                            → universe-retract-Σ ua R 𝓤 𝓥 Y
+                            → fiber (lift {𝓤} 𝓥) Y
+universe-retract-Σ-to-fiber ua R {𝓤} {𝓥} Y =
+ (from-resize R (fiber (lift {𝓤} 𝓥) Y) (lift-is-embedding ua Y))
+   ∘
+ universe-retract-Σ-pr₁ ua R Y
+
+\end{code}
+
+The retract applied to the universe 𝓤 ̇ is 𝟘.
+
+\begin{code}
+
+universe-retract-Σ-of-𝓤-is-empty : (ua : Univalence)
+                                   (R : Propositional-resizing)
+                                   (𝓤 : Universe)
+                                   → universe-retract-Σ ua R 𝓤 (𝓤 ⁺) (𝓤 ̇ ) → 𝟘{𝓤₀}
+universe-retract-Σ-of-𝓤-is-empty ua R 𝓤  =
+ c ∘ (universe-retract-Σ-to-fiber ua R {𝓤} {𝓤 ⁺} (𝓤 ̇))
+  where
+   c : fiber (lift {𝓤} (𝓤 ⁺)) (𝓤 ̇ ) → 𝟘{𝓤₀}
+   c (X , e) = Coquand.Theorem 𝓤 ((X , γ))
+    where
+     γ = 𝓤 ̇           ≃⟨ idtoeq (𝓤 ̇) (lift (𝓤 ⁺) X) (e ⁻¹) ⟩
+         lift (𝓤 ⁺) X ≃⟨ lift-≃ (𝓤 ⁺) X ⟩
+         X            ■
+
+\end{code}
+
+It follows that the universe-retract-Σ 𝓤 ̇ ↪ 𝓤 ̇ cannot be a surjection.
+
+\begin{code}
+
+module _ (pt : propositional-truncations-exist) where
+ open import UF-ImageAndSurjection
+ open ImageAndSurjection pt
+ open PropositionalTruncation pt
+
+ universe-retract-Σ-not-surjective : (ua : Univalence)
+                                     (R : Propositional-resizing)
+                                     (𝓤 : Universe)
+                                     → ¬ (is-surjection
+                                       (universe-retract-Σ-back-up ua R {𝓤} {𝓤 ⁺} (𝓤 ̇)))
+ universe-retract-Σ-not-surjective ua R 𝓤 s = ∥∥-rec 𝟘-is-prop γ (s (𝟙{𝓤}))
+  where
+   γ : (Σ \r → universe-retract-Σ-back-up ua R {𝓤} {𝓤 ⁺} (𝓤 ̇) r ≡ 𝟙) → 𝟘
+   γ (r , _) = universe-retract-Σ-of-𝓤-is-empty ua R 𝓤 r
 
 \end{code}
 

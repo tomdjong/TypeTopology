@@ -806,6 +806,97 @@ module _ (pt : propositional-truncations-exist) where
 
 \end{code}
 
+Some lemmas taken from HoTT-UF-in-Agda-Lectures-Notes, needed below.
+
+\begin{code}
+
+univalence→' : (ua : Univalence)
+               {𝓤 𝓥 : Universe}
+               (X : 𝓤 ̇ )
+               → is-prop (Σ \(Y : 𝓥 ̇ ) → X ≃ Y)
+univalence→' ua {𝓤} {𝓥} X = s
+ where
+  abstract
+    e : (Y : 𝓥 ̇ ) → (X ≃ Y) ≃ (lift 𝓤 Y ≡ lift 𝓥 X)
+    e Y = (X ≃ Y)                 ≃⟨ i   ⟩
+          (Y ≃ X)                 ≃⟨ ii  ⟩
+          (lift 𝓤 Y ≃ lift 𝓥 X)   ≃⟨ iii ⟩
+          (lift 𝓤 Y ≡ lift 𝓥 X)   ■
+     where
+      fe : FunExt
+      fe = FunExt-from-Univalence ua
+      i   = ≃-Sym fe
+      ii  = Eq-Eq-cong fe (≃-sym (lift-≃ 𝓤 Y)) (≃-sym (lift-≃ 𝓥 X)) 
+      iii =  ≃-sym (is-univalent-≃ (ua (𝓤 ⊔ 𝓥)) (lift 𝓤 Y) (lift 𝓥 X))
+    d : (Σ \(Y : 𝓥 ̇ ) → X ≃ Y) ≃ (Σ \(Y : 𝓥 ̇ ) → lift 𝓤 Y ≡ lift 𝓥 X)
+    d = Σ-cong e
+    j : is-prop (Σ \(Y : 𝓥 ̇ ) → lift 𝓤 Y ≡ lift 𝓥 X)
+    j = lift-is-embedding ua (lift 𝓥 X)
+    s : is-prop (Σ \(Y : 𝓥 ̇ ) → X ≃ Y)
+    s = equiv-to-prop d j
+
+univalence→'-dual : (ua : Univalence)
+                    {𝓤 𝓥 : Universe}
+                    (Y : 𝓤 ̇ )
+                    → is-prop (Σ \(X : 𝓥 ̇ ) → X ≃ Y)
+univalence→'-dual ua {𝓤} {𝓥} Y = equiv-to-prop e i
+ where
+  e : (Σ \(X : 𝓥 ̇ ) → X ≃ Y) ≃ (Σ \(X : 𝓥 ̇ ) → Y ≃ X)
+  e = Σ-cong (λ X → ≃-Sym (FunExt-from-Univalence ua))
+  i : is-prop (Σ \(X : 𝓥 ̇ ) → Y ≃ X)
+  i = univalence→' ua Y
+
+\end{code}
+
+Inspired by the construction above, we now prove (directly) that a particular
+propositional resizing implies general propositional resizing.
+
+\begin{code}
+
+particular-propositional-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ 𝓥 ⁺ ̇ 
+particular-propositional-resizing 𝓤 𝓥 =
+ Π \(Y : 𝓤 ̇ ) → (Σ \(X : 𝓥 ̇ ) → X ≃ Y) has-size 𝓥
+
+particular-implies-general-propositional-resizing : (ua : Univalence)
+                                                    {𝓤 : Universe}
+                                                    → particular-propositional-resizing (𝓤 ⁺) 𝓤
+                                                    → propositional-resizing (𝓤 ⁺) 𝓤
+particular-implies-general-propositional-resizing ua {𝓤} r Y i = S' , γ
+ where
+  T : 𝓤 ⁺ ̇ 
+  T = Σ \(X : 𝓤 ̇ ) → X ≃ Y
+  j : is-prop T
+  j = univalence→'-dual ua Y
+  T' : 𝓤 ̇ 
+  T' = pr₁ (r Y)
+  e : T' ≃ T
+  e = pr₂ (r Y)
+  S : 𝓤 ⁺ ̇
+  S = Σ \(t : T) → pr₁ t
+  k : is-prop S
+  k = Σ-is-prop j (λ (t : T) → equiv-to-prop (pr₂ t) i)
+  S' : 𝓤 ̇
+  S' = Σ \(t' : T') → pr₁ (eqtofun e t')
+  f : S' ≃ S
+  f = Σ-change-of-variables pr₁ (eqtofun e) (eqtofun-is-an-equiv e)
+  γ : S' ≃ Y
+  γ = S' ≃⟨ f ⟩
+      S ≃⟨ ϕ ⟩
+      Y ■
+   where
+    ϕ : S ≃ Y
+    ϕ = logically-equivalent-props-are-equivalent k i a b
+     where
+      a : S → Y
+      a (t , x) = eqtofun (pr₂ t) x
+      b : Y → S
+      b y = ((𝟙{𝓤}) , (≃-sym ψ)) , *
+       where
+        ψ : Y ≃ 𝟙{𝓤}
+        ψ = singleton-≃-𝟙 (pointed-props-are-singletons y i)
+
+\end{code}
+
 The following construction is due to Voevodsky, but we use the
 resizing axiom rather than his rules (and we work with non-cumulative
 universes).

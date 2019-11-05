@@ -784,7 +784,8 @@ universe-retract-Σ-of-𝓤-is-empty ua R 𝓤  =
 
 \end{code}
 
-It follows that the universe-retract-Σ 𝓤 ̇ ↪ 𝓤 ̇ cannot be a surjection.
+It follows that the embedding (universe-retract-Σ 𝓤 ̇) ↪ 𝓤 ̇ cannot be a
+surjection.
 
 \begin{code}
 

@@ -823,7 +823,6 @@ has-size-idempotent ua 𝓤 𝓥 Y i (H , e) = X , γ
  where
   X : 𝓥 ̇
   X = Σ \(h : H) → pr₁ (eqtofun e h)
-  γ : X ≃ Y
   γ = X  ≃⟨ Σ-change-of-variables pr₁ (eqtofun e) (eqtofun-is-an-equiv e) ⟩
       X' ≃⟨ ϕ ⟩
       Y ■

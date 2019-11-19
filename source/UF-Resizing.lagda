@@ -848,6 +848,25 @@ has-size-idempotent-converse ua 𝓤 𝓥 Y r = 𝟙{𝓥} , γ
   γ : 𝟙{𝓥} ≃ (Y has-size 𝓥)
   γ = singleton-≃-𝟙' (pointed-props-are-singletons r (has-size-is-a-prop ua Y 𝓥))
 
+has-size-idempotent-≃ : (ua : Univalence) (𝓤 𝓥 : Universe) (Y : 𝓤 ̇ )
+                      → is-prop Y
+                      → ((Y has-size 𝓥) has-size 𝓥) ≃ (Y has-size 𝓥)
+has-size-idempotent-≃ ua 𝓤 𝓥 Y i =
+ logically-equivalent-props-are-equivalent
+   (has-size-is-a-prop ua (Y has-size 𝓥) 𝓥)
+   (has-size-is-a-prop ua Y 𝓥)
+   (has-size-idempotent ua 𝓤 𝓥 Y i)
+   (has-size-idempotent-converse ua 𝓤 𝓥 Y)
+
+has-size-idempotent-≡ : (ua : Univalence) (𝓤 𝓥 : Universe) (Y : 𝓤 ̇ )
+                      → is-prop Y
+                      → ((Y has-size 𝓥) has-size 𝓥) ≡ (Y has-size 𝓥)
+has-size-idempotent-≡ ua 𝓤 𝓥 Y i =
+  eqtoid (ua (𝓤 ⊔ (𝓥 ⁺)))
+    ((Y has-size 𝓥) has-size 𝓥)
+    (Y has-size 𝓥)
+    (has-size-idempotent-≃ ua 𝓤 𝓥 Y i)
+
 has-size-resizing-implies-propositional-resizing : (ua : Univalence) 
                                                    (𝓤 𝓥 : Universe)
                                                    → has-size-resizing 𝓤 𝓥

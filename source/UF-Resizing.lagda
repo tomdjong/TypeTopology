@@ -491,7 +491,7 @@ lift-is-section-Σ ua R 𝓤 𝓥 = (r , rs)
     γ : r (s X) ≡ X
     γ = eqtoid (ua 𝓤) (r (s X)) X d
 
-universe-retract-Σ : Univalence 
+universe-retract-Σ : Univalence
                    → Propositional-resizing
                    → (𝓤 𝓥 : Universe)
                    → 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
@@ -510,14 +510,14 @@ universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding �
    unwrap (inl z) = z
    inl-unwrap : {Z : 𝓤 ̇ } {z : s Z} → inl (unwrap z) ≡ z
    inl-unwrap {Z} {inl z} = refl
-   r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇ 
+   r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
    r Y = universe-retract-Σ ua R 𝓤 𝓥 Y
    r' : 𝓤 ⊔ 𝓥 ̇ → (𝓤 ⁺) ⊔ (𝓥 ⁺) ̇
-   r' Y = Σ \(p : fiber s Y) → pr₁ p   
+   r' Y = Σ \(p : fiber s Y) → pr₁ p
    ν : r Y ≃ r' Y
    ν = Σ-change-of-variables pr₁ (from-resize R (fiber s Y) (e Y))
          (pr₂ (pr₂ (R (fiber s Y) (e Y))))
-    where    
+    where
      e : is-embedding s
      e = lift-is-embedding ua
    ρ : r Y → r' Y
@@ -534,10 +534,10 @@ universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding �
       where
        ϕ : (w : fiber s Y) → X → pr₁ w
        ϕ (X' , e') = unwrap ∘ (Idtofun (e' ⁻¹) ∘ inl)
-       T : 𝓤 ⁺ ⊔ 𝓥 ⁺ ̇ 
+       T : 𝓤 ⁺ ⊔ 𝓥 ⁺ ̇
        T = Σ \(w : r' Y) → S w
         where
-         S : (w : r' Y) → 𝓤 ⊔ 𝓥 ̇ 
+         S : (w : r' Y) → 𝓤 ⊔ 𝓥 ̇
          S ((X' , e') , x') = (Idtofun e' (inl x')) ≡
                                Idtofun e' (inl (ϕ (X' , e') x))
        t : fiber σ (σ ((X , refl) , x)) ◁ T
@@ -554,7 +554,7 @@ universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding �
             w = (X' , e')
             p' = inl (ϕ w x)                            ≡⟨ refl ⟩
                  inl (unwrap (Idtofun (e' ⁻¹) (inl x))) ≡⟨ inl-unwrap ⟩
-                 Idtofun (e' ⁻¹) (inl x)                ∎       
+                 Idtofun (e' ⁻¹) (inl x)                ∎
             i  = (transport-comp id (e' ⁻¹) e') ⁻¹
             ii = ap (λ - → Idtofun - (inl x)) (left-inverse e')
          f : T → fiber σ (σ ((X , refl) , x))
@@ -638,11 +638,11 @@ proved more elementary.
 \begin{code}
 
 universe-retract-Σ-of-subsingleton-is-subsingleton' : (ua : Univalence)
-                                                     (R : Propositional-resizing)
-                                                     {𝓤 𝓥 : Universe}
-                                                     {Y : 𝓤 ⊔ 𝓥 ̇ }
-                                                     → is-prop Y
-                                                     → is-prop (universe-retract-Σ ua R 𝓤 𝓥 Y)
+                                                      (R : Propositional-resizing)
+                                                      {𝓤 𝓥 : Universe}
+                                                      {Y : 𝓤 ⊔ 𝓥 ̇ }
+                                                      → is-prop Y
+                                                      → is-prop (universe-retract-Σ ua R 𝓤 𝓥 Y)
 universe-retract-Σ-of-subsingleton-is-subsingleton' ua R {𝓤} {𝓥} {Y} i = Σ-is-prop a b
  where
   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
@@ -663,7 +663,7 @@ universe-retract-Σ-of-subsingleton-is-subsingleton' ua R {𝓤} {𝓥} {Y} i = 
     ϕ : X ≃ Y
     ϕ = X   ≃⟨ ≃-sym (lift-≃ 𝓥 X) ⟩
         s X ≃⟨ idtoeq (lift 𝓥 X) Y (pr₂ (f Y p)) ⟩
-        Y   ■  
+        Y   ■
     c : is-prop X
     c = equiv-to-prop ϕ i
 
@@ -701,7 +701,7 @@ universe-retract-Σ-is-section-on-subsingletons ua R {𝓤} {𝓥} {Y} i = γ
        where
         ϕ = s 𝟙  ≃⟨ lift-≃ 𝓥 𝟙 ⟩
             𝟙{𝓤} ≃⟨ singleton-≃-𝟙' (pointed-props-are-singletons y i) ⟩
-            Y    ■ 
+            Y    ■
     g : s (r Y) → Y
     g = universe-retract-Σ-back-up ua R Y ∘ eqtofun (lift-≃ 𝓥 (r Y))
 
@@ -712,7 +712,7 @@ propositional-resizing-Ω-≃ : (ua : Univalence)
 propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ , rΩsΩ))
  where
   s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
-  s = lift 𝓥 
+  s = lift 𝓥
   sΩ : Ω 𝓤 → Ω (𝓤 ⊔ 𝓥)
   sΩ (P , i) = s P , (equiv-to-prop (lift-≃ 𝓥 P) i)
   r : 𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇
@@ -806,8 +806,8 @@ module _ (pt : propositional-truncations-exist) where
 
 \end{code}
 
-Inspired by the construction above, we now prove (directly) that a particular
-propositional resizing implies general propositional resizing.
+Inspired by the retract construction above, we now prove (directly) that a
+particular propositional resizing implies general propositional resizing.
 
 \begin{code}
 
@@ -816,9 +816,9 @@ has-size-resizing 𝓤 𝓥 =
  Π \(Y : 𝓤 ̇ ) → (Y has-size 𝓥) has-size 𝓥
 
 has-size-idempotent : (ua : Univalence) (𝓤 𝓥 : Universe) (Y : 𝓤 ̇ )
-                       → is-prop Y
-                       → (Y has-size 𝓥) has-size 𝓥
-                       → Y has-size 𝓥
+                    → is-prop Y
+                    → (Y has-size 𝓥) has-size 𝓥
+                    → Y has-size 𝓥
 has-size-idempotent ua 𝓤 𝓥 Y i (H , e) = X , γ
  where
   X : 𝓥 ̇
@@ -839,10 +839,10 @@ has-size-idempotent ua 𝓤 𝓥 Y i (H , e) = X , γ
       g : Y → X'
       g y = (((𝟙{𝓥}) , singleton-≃-𝟙' (pointed-props-are-singletons y i)) , *)
 
-has-size-idempotent-converse : (ua : Univalence) (𝓤 𝓥 : Universe) (Y : 𝓤 ̇ )
-                             → Y has-size 𝓥
-                             → (Y has-size 𝓥) has-size 𝓥
-has-size-idempotent-converse ua 𝓤 𝓥 Y r = 𝟙{𝓥} , γ
+has-size-idempotent' : (ua : Univalence) (𝓤 𝓥 : Universe) (Y : 𝓤 ̇ )
+                     → Y has-size 𝓥
+                     → (Y has-size 𝓥) has-size 𝓥
+has-size-idempotent' ua 𝓤 𝓥 Y r = 𝟙{𝓥} , γ
  where
   γ : 𝟙{𝓥} ≃ (Y has-size 𝓥)
   γ = singleton-≃-𝟙' (pointed-props-are-singletons r (has-size-is-a-prop ua Y 𝓥))
@@ -855,7 +855,7 @@ has-size-idempotent-≃ ua 𝓤 𝓥 Y i =
    (has-size-is-a-prop ua (Y has-size 𝓥) 𝓥)
    (has-size-is-a-prop ua Y 𝓥)
    (has-size-idempotent ua 𝓤 𝓥 Y i)
-   (has-size-idempotent-converse ua 𝓤 𝓥 Y)
+   (has-size-idempotent' ua 𝓤 𝓥 Y)
 
 has-size-idempotent-≡ : (ua : Univalence) (𝓤 𝓥 : Universe) (Y : 𝓤 ̇ )
                       → is-prop Y
@@ -866,11 +866,11 @@ has-size-idempotent-≡ ua 𝓤 𝓥 Y i =
     (Y has-size 𝓥)
     (has-size-idempotent-≃ ua 𝓤 𝓥 Y i)
 
-has-size-resizing-implies-propositional-resizing : (ua : Univalence) 
+has-size-resizing-implies-propositional-resizing : (ua : Univalence)
                                                    (𝓤 𝓥 : Universe)
                                                    → has-size-resizing 𝓤 𝓥
                                                    → propositional-resizing 𝓤 𝓥
-has-size-resizing-implies-propositional-resizing ua 𝓤 𝓥 r P i = 
+has-size-resizing-implies-propositional-resizing ua 𝓤 𝓥 r P i =
   has-size-idempotent ua 𝓤 𝓥 P i (r P)
 
 \end{code}

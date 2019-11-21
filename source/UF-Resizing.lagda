@@ -730,6 +730,8 @@ propositional-resizing-Ω-≃ ua R {𝓤} {𝓥} = sΩ , ((rΩ , sΩrΩ) , (rΩ 
 
 \end{code}
 
+Added 5 November 2019 by Tom de Jong
+
 These helper functions are only here, because for some reason that I can't quite
 figure out, Agda will get stuck typechecking if we don't supply all the implicit
 arguments.
@@ -737,11 +739,11 @@ arguments.
 \begin{code}
 
 universe-retract-Σ-pr₁ : (ua : Univalence)
-                            (R : Propositional-resizing)
-                            {𝓤 𝓥 : Universe}
-                            (Y : 𝓤 ⊔ 𝓥 ̇ )
-                            → universe-retract-Σ ua R 𝓤 𝓥 Y
-                            → resize R (fiber (lift {𝓤} 𝓥) Y) (lift-is-embedding ua Y)
+                         (R : Propositional-resizing)
+                         {𝓤 𝓥 : Universe}
+                         (Y : 𝓤 ⊔ 𝓥 ̇ )
+                         → universe-retract-Σ ua R 𝓤 𝓥 Y
+                         → resize R (fiber (lift {𝓤} 𝓥) Y) (lift-is-embedding ua Y)
 universe-retract-Σ-pr₁ ua R {𝓤} {𝓥} Y =
  pr₁ {𝓤} {𝓤} {resize R (fiber s Y) (e Y)}
  {λ w → pr₁ (from-resize R (fiber s Y) (e Y) w)}
@@ -752,11 +754,11 @@ universe-retract-Σ-pr₁ ua R {𝓤} {𝓥} Y =
    e = lift-is-embedding ua
 
 universe-retract-Σ-to-fiber : (ua : Univalence)
-                            (R : Propositional-resizing)
-                            {𝓤 𝓥 : Universe}
-                            (Y : 𝓤 ⊔ 𝓥 ̇ )
-                            → universe-retract-Σ ua R 𝓤 𝓥 Y
-                            → fiber (lift {𝓤} 𝓥) Y
+                              (R : Propositional-resizing)
+                              {𝓤 𝓥 : Universe}
+                              (Y : 𝓤 ⊔ 𝓥 ̇ )
+                              → universe-retract-Σ ua R 𝓤 𝓥 Y
+                              → fiber (lift {𝓤} 𝓥) Y
 universe-retract-Σ-to-fiber ua R {𝓤} {𝓥} Y =
  (from-resize R (fiber (lift {𝓤} 𝓥) Y) (lift-is-embedding ua Y))
    ∘
@@ -771,7 +773,8 @@ The retract applied to the universe to the type 𝓤 ̇ in 𝓤 ⁺ ̇ is 𝟘.
 universe-retract-Σ-of-𝓤-is-empty : (ua : Univalence)
                                    (R : Propositional-resizing)
                                    (𝓤 : Universe)
-                                   → universe-retract-Σ ua R 𝓤 (𝓤 ⁺) (𝓤 ̇ ) → 𝟘{𝓤₀}
+                                   → universe-retract-Σ ua R 𝓤 (𝓤 ⁺) (𝓤 ̇ )
+                                   → 𝟘{𝓤₀}
 universe-retract-Σ-of-𝓤-is-empty ua R 𝓤  =
  c ∘ (universe-retract-Σ-to-fiber ua R {𝓤} {𝓤 ⁺} (𝓤 ̇))
   where
@@ -805,6 +808,8 @@ module _ (pt : propositional-truncations-exist) where
    γ (r , _) = universe-retract-Σ-of-𝓤-is-empty ua R 𝓤 r
 
 \end{code}
+
+Added 5 & 19 November by Tom de Jong
 
 Inspired by the retract construction above, we now prove (directly) that a
 particular propositional resizing implies general propositional resizing.

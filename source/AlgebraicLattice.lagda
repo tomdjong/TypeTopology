@@ -162,12 +162,21 @@ everything-compact-implies-LPO C α = ∥∥-rec i γ h
   i = decidability-of-prop-is-prop (fe 𝓤₀ 𝓤₀) (pr₂ ⟨ α ⟩)
   γ : (Σ \n → ⟨ α ⟩ holds → q n holds)
     → (Σ \n → pr₁ α n ≡ ₁) + ¬ (Σ \n → pr₁ α n ≡ ₁)
-  γ (n , f) = 𝟚-equality-cases a b
+  γ (n , f) = cases a b (⟨ α ⟩ᵤ n -decidable)
+   where
+    a : ⟨ α ⟩¹ᵤ n → (Σ \m → ι α m ≡ ₁) + ¬ (Σ \m → ι α m ≡ ₁)
+    a (m , _ , e) = inl (m , e)
+    b : ¬ (⟨ α ⟩¹ᵤ n) → (Σ \m → ι α m ≡ ₁) + ¬ (Σ \m → ι α m ≡ ₁)
+    b h = inr (h ∘ f)
+
+{-
+𝟚-equality-cases a b
    where
     a : ι α n ≡ ₀ → (Σ \m → ι α m ≡ ₁) + ¬ (Σ \m → ι α m ≡ ₁)
-    a e = inr {!!}
+    a e = {!!}
     b : ι α n ≡ ₁ → (Σ \m → ι α m ≡ ₁) + ¬ (Σ \m → ι α m ≡ ₁)
     b e = inl (n , e)
+-}
 
 \end{code}
 

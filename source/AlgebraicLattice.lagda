@@ -90,8 +90,18 @@ is-compact c = (I : 𝓤₀ ̇ ) (q : I → Ω₀)
   γ : u ≡ v
   γ = pr₂ ⟨ α ⟩ u v
 
+LPO-instance : ℕ∞ → 𝓤₀ ̇
+LPO-instance α = decidable ⟨ ι α ⟩₁
+
 LPO : 𝓤₀ ̇
-LPO = (α : ℕ∞) → decidable ⟨ ι α ⟩₁
+LPO = (α : ℕ∞) → LPO-instance α
+
+instance-of-LPO-is-subsingleton : (α : ℕ∞) → is-prop (LPO-instance α)
+instance-of-LPO-is-subsingleton α =
+ decidability-of-prop-is-prop (fe 𝓤₀ 𝓤₀) (holds-is-prop ⟨ α ⟩)
+
+LPO-is-subsingleton : is-prop LPO
+LPO-is-subsingleton = Π-is-prop (fe 𝓤₀ 𝓤₀) instance-of-LPO-is-subsingleton
 
 ⟨_⟩¹ᵤ_ : ℕ∞ → ℕ → 𝓤₀ ̇
 ⟨ α ⟩¹ᵤ n = (Σ \(m : ℕ) → (m ≤ n) × (ι α m ≡ ₁))
@@ -148,26 +158,54 @@ LPO = (α : ℕ∞) → decidable ⟨ ι α ⟩₁
     b : ι α (succ n) ≡ ₁ → (⟨ α ⟩¹ᵤ succ n) + ¬ (⟨ α ⟩¹ᵤ succ n)
     b e = inl (succ n , ≤-refl (succ n) , e)
 
-everything-compact-implies-LPO : ((p : Ω₀) → is-compact p) → LPO
-everything-compact-implies-LPO C α = ∥∥-rec i γ h
+⟨α⟩-compact-implies-LPO-instance : (α : ℕ∞) → is-compact ⟨ α ⟩ → LPO-instance α
+⟨α⟩-compact-implies-LPO-instance α c = ∥∥-rec (instance-of-LPO-is-subsingleton α) γ h
  where
-  q : ℕ → Ω 𝓤₀
+  q : ℕ → Ω₀
   q n = ⟨ α ⟩ᵤ n
-  h : ∃ \n → (⟨ α ⟩ holds → (q n) holds)
-  h = C ⟨ α ⟩ ℕ q ∣ zero ∣ t
+  h : ∃ \n → ⟨ α ⟩ ⊑ q n
+  h = c ℕ q ∣ 0 ∣ t
    where
-    t : ⟨ α ⟩ holds → (∐ q) holds
+    t : ⟨ α ⟩ ⊑ ∐ q
     t (n , e) = ∣ (n , n , ≤-refl n , e) ∣
-  i : is-prop (decidable ⟨ ι α ⟩₁)
-  i = decidability-of-prop-is-prop (fe 𝓤₀ 𝓤₀) (pr₂ ⟨ α ⟩)
-  γ : (Σ \n → ⟨ α ⟩ holds → q n holds)
-    → (Σ \n → pr₁ α n ≡ ₁) + ¬ (Σ \n → pr₁ α n ≡ ₁)
-  γ (n , f) = cases a b (⟨ α ⟩ᵤ n -decidable)
+  γ : (Σ \n → ⟨ α ⟩ ⊑ q n) → LPO-instance α
+  γ (n , l) = cases a b ⟨ α ⟩ᵤ n -decidable
    where
-    a : ⟨ α ⟩¹ᵤ n → (Σ \m → ι α m ≡ ₁) + ¬ (Σ \m → ι α m ≡ ₁)
+    a : ⟨ α ⟩¹ᵤ n → LPO-instance α
     a (m , _ , e) = inl (m , e)
-    b : ¬ (⟨ α ⟩¹ᵤ n) → (Σ \m → ι α m ≡ ₁) + ¬ (Σ \m → ι α m ≡ ₁)
-    b h = inr (h ∘ f)
+    b : ¬ (⟨ α ⟩¹ᵤ n) → LPO-instance α
+    b h = inr (h ∘ l)
+
+everything-compact-implies-LPO : ((p : Ω₀) → is-compact p) → LPO
+everything-compact-implies-LPO C α =
+ ⟨α⟩-compact-implies-LPO-instance α (C ⟨ α ⟩)
+
+is-algebraic : 𝓤₁ ̇
+is-algebraic = ((p : Ω₀) → ∃ \(I : 𝓤₀ ̇ ) → ∃ \(q : I → Ω₀)
+             → ((i : I) → is-compact (q i)) × ((i : I) → q i ⊑ p) × (p holds ≡ ∐ q holds))
+
+algebraic-implies-LPO : is-algebraic → LPO
+algebraic-implies-LPO A α = ∥∥-rec (instance-of-LPO-is-subsingleton α) γ h
+ where
+  h : ∃ \I → ∃ \q
+    → ((i : I) → is-compact (q i))
+    × ((i : I) → (q i) ⊑ ⟨ α ⟩)
+    × (⟨ α ⟩ holds ≡ ∐ q holds)
+  h = A ⟨ α ⟩
+  γ : (Σ \I → (∃ \q
+    → ((i : I) → is-compact (q i))
+    × ((i : I) → q i ⊑ ⟨ α ⟩)
+    × (⟨ α ⟩ holds ≡ ∐ q holds)))
+    → LPO-instance α
+  γ (I , g) = ∥∥-rec (instance-of-LPO-is-subsingleton α) ϕ g
+   where
+    ϕ : (Σ \q
+      → ((i : I) → is-compact (q i))
+      × ((i : I) → q i ⊑ ⟨ α ⟩)
+      × (⟨ α ⟩ holds ≡ ∐ q holds))
+      → LPO-instance α
+    ϕ (q , c , l , e) = {!!}
+     -- (i : I) → ∃ \n → q i ⊑ ∃ (m < n) → α m ≡ ₁
 
 {-
 𝟚-equality-cases a b

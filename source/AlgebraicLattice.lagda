@@ -8,8 +8,8 @@ open import SpartanMLTT
 open import UF-PropTrunc -- hiding (⊥)
 
 module AlgebraicLattice
-        (fe : FunExt)
-        (pe : PropExt)
+        (fe₀ : funext 𝓤₀ 𝓤₀)
+        -- (pe : PropExt)
         (pt : propositional-truncations-exist)
        where
 
@@ -25,14 +25,32 @@ open import Two-Properties
 -- open import GenericConvergentSequence hiding (_⊑_)
 open import NaturalsOrder
 
-
--- open import NaturalsAddition renaming (_+_ to _+'_)
+open import NaturalsAddition renaming (_+_ to _+'_)
 -- open import NaturalNumbers-Properties
+
+open import Lifting 𝓤₀ hiding (⊥)
+open import UF-Equiv
 
 -- We study Ω as a lattice
 
 Ω₀ : 𝓤₁ ̇
 Ω₀ = Ω 𝓤₀
+
+Ω-≃-𝓛𝟙 : Ω₀ ≃ 𝓛 (𝟙{𝓤₀})
+Ω-≃-𝓛𝟙 = qinveq f (g , gf , fg)
+ where
+  f : Ω₀ → 𝓛 𝟙
+  f p = (p holds , unique-to-𝟙 , holds-is-prop p)
+  g : 𝓛 𝟙 → Ω₀
+  g (p , _ , i) = p , i
+  fg : (l : 𝓛 𝟙) → f (g l) ≡ l
+  fg (p , ϕ , i) = to-Σ-≡ (refl , γ)
+   where
+    γ : (unique-to-𝟙 , i) ≡ (ϕ , i)
+    γ = to-Σ-≡ (dfunext fe₀ (λ x → 𝟙-is-prop (unique-to-𝟙 x) (ϕ x)) ,
+                being-a-prop-is-a-prop fe₀ _ i)
+  gf : (p : Ω₀) → g (f p) ≡ p
+  gf p = refl
 
 _⊑_ : Ω₀ → Ω₀ → 𝓤₀ ̇
 p ⊑ q = p holds → q holds
@@ -40,13 +58,44 @@ p ⊑ q = p holds → q holds
 ∐ : {I : 𝓤₀ ̇ } (q : I → Ω₀) → Ω₀
 ∐ {I} q = ((∃ \(i : I) → (q i) holds) , ∥∥-is-a-prop)
 
+is-directed : {I : 𝓤₀ ̇ } (q : I → Ω₀) → 𝓤₀ ̇
+is-directed {I} q = ∥ I ∥ × ((i j : I) → ∃ \(k : I) → q i ⊑ q k × q j ⊑ q k)
+
+is-directed-inhabited : {I : 𝓤₀ ̇ } (q : I → Ω₀)
+                      → is-directed q
+                      → ∥ I ∥
+is-directed-inhabited q = pr₁
+
+is-directed-order : {I : 𝓤₀ ̇ } (q : I → Ω₀)
+                  → is-directed q
+                  → ((i j : I) → ∃ \(k : I) → q i ⊑ q k × q j ⊑ q k)
+is-directed-order q = pr₂
 
 is-compact : (c : Ω₀) → 𝓤₁ ̇
 is-compact c = (I : 𝓤₀ ̇ ) (q : I → Ω₀)
-             → ∥ I ∥
+             → is-directed q
              → (c ⊑ ∐ q)
              → ∃ \(i : I) → (c ⊑ q i)
 
+decidable-implies-compact : (p : Ω₀)
+                          → decidable (p holds)
+                          → is-compact p
+decidable-implies-compact p (inl x) I q δ l = ∥∥-functor γ (l x)
+ where
+  γ : (Σ \i → (q i) holds) → Σ \i → p ⊑ q i
+  γ (i , qi) = (i , λ _ → qi)
+decidable-implies-compact p (inr y) I q δ l = ∥∥-functor γ (is-directed-inhabited q δ)
+ where
+  γ : I → Σ \i → p ⊑ q i
+  γ i = (i , λ (x : p holds) → 𝟘-elim (y x))
+
+⊤-is-compact : is-compact ⊤
+⊤-is-compact = decidable-implies-compact ⊤ (inl *)
+
+⊥-is-compact : is-compact ⊥
+⊥-is-compact = decidable-implies-compact ⊥ (inr 𝟘-elim)
+
+{-
 ⊤-is-compact : is-compact ⊤
 ⊤-is-compact I q s l = ∥∥-functor γ u
  where
@@ -60,18 +109,15 @@ is-compact c = (I : 𝓤₀ ̇ ) (q : I → Ω₀)
  where
   γ : I → Σ \i → ⊥ ⊑ q i
   γ i = i , 𝟘-elim
+-}
 
--- Cantor space
-ℂ : 𝓤₀ ̇
-ℂ = ℕ → 𝟚
-
-⟨_⟩₁ : ℂ → 𝓤₀ ̇
+⟨_⟩₁ : (ℕ → 𝟚) → 𝓤₀ ̇
 ⟨ α ⟩₁ = Σ \(n : ℕ) → α n ≡ ₁
 
 ℕ∞ : 𝓤₀ ̇
-ℕ∞ = Σ \(α : ℂ) → is-prop ⟨ α ⟩₁
+ℕ∞ = Σ \(α : ℕ → 𝟚) → is-prop ⟨ α ⟩₁
 
-ι : ℕ∞ → ℂ
+ι : ℕ∞ → (ℕ → 𝟚)
 ι = pr₁
 
 ⟨_⟩ : ℕ∞ → Ω₀
@@ -98,10 +144,10 @@ LPO = (α : ℕ∞) → LPO-instance α
 
 instance-of-LPO-is-subsingleton : (α : ℕ∞) → is-prop (LPO-instance α)
 instance-of-LPO-is-subsingleton α =
- decidability-of-prop-is-prop (fe 𝓤₀ 𝓤₀) (holds-is-prop ⟨ α ⟩)
+ decidability-of-prop-is-prop fe₀ (holds-is-prop ⟨ α ⟩)
 
 LPO-is-subsingleton : is-prop LPO
-LPO-is-subsingleton = Π-is-prop (fe 𝓤₀ 𝓤₀) instance-of-LPO-is-subsingleton
+LPO-is-subsingleton = Π-is-prop fe₀ instance-of-LPO-is-subsingleton
 
 ⟨_⟩¹ᵤ_ : ℕ∞ → ℕ → 𝓤₀ ̇
 ⟨ α ⟩¹ᵤ n = (Σ \(m : ℕ) → (m ≤ n) × (ι α m ≡ ₁))
@@ -158,13 +204,27 @@ LPO-is-subsingleton = Π-is-prop (fe 𝓤₀ 𝓤₀) instance-of-LPO-is-subsing
     b : ι α (succ n) ≡ ₁ → (⟨ α ⟩¹ᵤ succ n) + ¬ (⟨ α ⟩¹ᵤ succ n)
     b e = inl (succ n , ≤-refl (succ n) , e)
 
+⟨⟩ᵤ-monotone : (α : ℕ∞) (m n : ℕ)
+             → m ≤ n
+             → (⟨ α ⟩ᵤ m) ⊑ (⟨ α ⟩ᵤ n)
+⟨⟩ᵤ-monotone α m n h (k , l , e) = (k , ≤-trans k m n l h , e)
+
+⟨⟩ᵤ-directed-order : (α : ℕ∞) (m n : ℕ)
+                   → ∃ \(k : ℕ) → (⟨ α ⟩ᵤ m) ⊑ (⟨ α ⟩ᵤ k) × (⟨ α ⟩ᵤ n) ⊑ (⟨ α ⟩ᵤ k)
+⟨⟩ᵤ-directed-order α m n = ∣ (m +' n , u , v) ∣
+ where
+  u : (⟨ α ⟩ᵤ m) ⊑ (⟨ α ⟩ᵤ (m +' n))
+  u = ⟨⟩ᵤ-monotone α m (m +' n) (≤-+ m n)
+  v : (⟨ α ⟩ᵤ n) ⊑ (⟨ α ⟩ᵤ (m +' n))
+  v = ⟨⟩ᵤ-monotone α n (m +' n) (≤-+' m n)
+
 ⟨α⟩-compact-implies-LPO-instance : (α : ℕ∞) → is-compact ⟨ α ⟩ → LPO-instance α
 ⟨α⟩-compact-implies-LPO-instance α c = ∥∥-rec (instance-of-LPO-is-subsingleton α) γ h
  where
   q : ℕ → Ω₀
   q n = ⟨ α ⟩ᵤ n
   h : ∃ \n → ⟨ α ⟩ ⊑ q n
-  h = c ℕ q ∣ 0 ∣ t
+  h = c ℕ q (∣ zero ∣ , ⟨⟩ᵤ-directed-order α) t
    where
     t : ⟨ α ⟩ ⊑ ∐ q
     t (n , e) = ∣ (n , n , ≤-refl n , e) ∣
@@ -184,6 +244,7 @@ is-algebraic : 𝓤₁ ̇
 is-algebraic = ((p : Ω₀) → ∃ \(I : 𝓤₀ ̇ ) → ∃ \(q : I → Ω₀)
              → ((i : I) → is-compact (q i)) × ((i : I) → q i ⊑ p) × (p holds ≡ ∐ q holds))
 
+{-
 algebraic-implies-LPO : is-algebraic → LPO
 algebraic-implies-LPO A α = ∥∥-rec (instance-of-LPO-is-subsingleton α) γ h
  where
@@ -206,6 +267,7 @@ algebraic-implies-LPO A α = ∥∥-rec (instance-of-LPO-is-subsingleton α) γ 
       → LPO-instance α
     ϕ (q , c , l , e) = {!!}
      -- (i : I) → ∃ \n → q i ⊑ ∃ (m < n) → α m ≡ ₁
+-}
 
 {-
 𝟚-equality-cases a b

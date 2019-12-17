@@ -100,6 +100,19 @@ unique-minimal (succ n) ()
 ≤-join m n (inl l) = ≤-trans m n (succ n) l (≤-succ n)
 ≤-join .(succ n) n (inr refl) = ≤-refl n
 
+≤-+ : (m n : ℕ) → (m ≤ m +' n)
+≤-+ m zero     = ≤-refl m
+≤-+ m (succ n) = ≤-join m (m +' n) (inl IH)
+ where
+  IH : m ≤ m +' n
+  IH = ≤-+ m n
+
+≤-+' : (m n : ℕ) → (n ≤ m +' n)
+≤-+' m n = transport (λ k → n ≤ k) γ (≤-+ n m)
+ where
+  γ : n +' m ≡ m +' n
+  γ = addition-commutativity n m
+
 _<_ : ℕ → ℕ → 𝓤₀ ̇
 m < n = succ m ≤ n
 

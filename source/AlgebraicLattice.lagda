@@ -149,13 +149,13 @@ instance-of-LPO-is-subsingleton α =
 LPO-is-subsingleton : is-prop LPO
 LPO-is-subsingleton = Π-is-prop fe₀ instance-of-LPO-is-subsingleton
 
-⟨_⟩¹ᵤ_ : ℕ∞ → ℕ → 𝓤₀ ̇
-⟨ α ⟩¹ᵤ n = (Σ \(m : ℕ) → (m ≤ n) × (ι α m ≡ ₁))
+⟨_⟩₁ⁿ_ : ℕ∞ → ℕ → 𝓤₀ ̇
+⟨ α ⟩₁ⁿ n = (Σ \(m : ℕ) → (m ≤ n) × (ι α m ≡ ₁))
 
-⟨_⟩ᵤ_ : ℕ∞ → ℕ → Ω₀
-⟨ α ⟩ᵤ n = (⟨ α ⟩¹ᵤ n , i)
+⟨_⟩ⁿ_ : ℕ∞ → ℕ → Ω₀
+⟨ α ⟩ⁿ n = (⟨ α ⟩₁ⁿ n , i)
  where
-  i : is-prop (⟨ α ⟩¹ᵤ n)
+  i : is-prop (⟨ α ⟩₁ⁿ n)
   i (m , p) (k , q) = to-Σ-≡ (a , b)
    where
     a : m ≡ k
@@ -163,33 +163,33 @@ LPO-is-subsingleton = Π-is-prop fe₀ instance-of-LPO-is-subsingleton
     b : transport (λ x → (x ≤ n) × (ι α x ≡ ₁)) a p ≡ q
     b = ×-is-prop (≤-is-prop-valued k n) 𝟚-is-set _ q
 
-⟨_⟩ᵤ_-decidable : (α : ℕ∞) (n : ℕ) → decidable (⟨ α ⟩¹ᵤ n)
-⟨ α ⟩ᵤ zero -decidable = 𝟚-equality-cases a b
+⟨⟩ⁿ-decidable : (α : ℕ∞) (n : ℕ) → decidable (⟨ α ⟩₁ⁿ n)
+⟨⟩ⁿ-decidable α zero = 𝟚-equality-cases a b
  where
-  a : ι α 0 ≡ ₀ → (⟨ α ⟩¹ᵤ 0) + ¬ (⟨ α ⟩¹ᵤ 0)
+  a : ι α 0 ≡ ₀ → (⟨ α ⟩₁ⁿ 0) + ¬ (⟨ α ⟩₁ⁿ 0)
   a e = inr γ
    where
-    γ : ⟨ α ⟩¹ᵤ 0 → 𝟘
+    γ : ⟨ α ⟩₁ⁿ 0 → 𝟘
     γ (0 , _ , e') = zero-is-not-one ϕ
      where
       ϕ = ₀     ≡⟨ e ⁻¹ ⟩
           ι α 0 ≡⟨ e' ⟩
           ₁     ∎
-  b : ι α 0 ≡ ₁ → (⟨ α ⟩¹ᵤ 0) + ¬ (⟨ α ⟩¹ᵤ 0)
+  b : ι α 0 ≡ ₁ → (⟨ α ⟩₁ⁿ 0) + ¬ (⟨ α ⟩₁ⁿ 0)
   b e = inl (0 , ≤-refl 0 , e)
-⟨ α ⟩ᵤ succ n -decidable = cases u v IH
+⟨⟩ⁿ-decidable α (succ n) = cases u v IH
  where
-  IH : decidable (⟨ α ⟩¹ᵤ n)
-  IH = ⟨ α ⟩ᵤ n -decidable
-  u : ⟨ α ⟩¹ᵤ n → (⟨ α ⟩¹ᵤ succ n) + ¬ (⟨ α ⟩¹ᵤ succ n)
+  IH : decidable (⟨ α ⟩₁ⁿ n)
+  IH = ⟨⟩ⁿ-decidable α n
+  u : ⟨ α ⟩₁ⁿ n → (⟨ α ⟩₁ⁿ succ n) + ¬ (⟨ α ⟩₁ⁿ succ n)
   u (m , l , e) = inl (m , ≤-trans m n (succ n) l (≤-succ n) , e)
-  v : ¬ (⟨ α ⟩¹ᵤ n) → (⟨ α ⟩¹ᵤ succ n) + ¬ (⟨ α ⟩¹ᵤ succ n)
+  v : ¬ (⟨ α ⟩₁ⁿ n) → (⟨ α ⟩₁ⁿ succ n) + ¬ (⟨ α ⟩₁ⁿ succ n)
   v h = 𝟚-equality-cases a b
    where
-    a : ι α (succ n) ≡ ₀ → (⟨ α ⟩¹ᵤ succ n) + ¬ (⟨ α ⟩¹ᵤ succ n)
+    a : ι α (succ n) ≡ ₀ → (⟨ α ⟩₁ⁿ succ n) + ¬ (⟨ α ⟩₁ⁿ succ n)
     a e = inr γ
      where
-      γ : ⟨ α ⟩¹ᵤ succ n → 𝟘
+      γ : ⟨ α ⟩₁ⁿ succ n → 𝟘
       γ (m , l , e') = cases x y (≤-split m n l)
        where
         x : m ≤ n → 𝟘
@@ -201,39 +201,39 @@ LPO-is-subsingleton = Π-is-prop fe₀ instance-of-LPO-is-subsingleton
               ι α (succ n) ≡⟨ ap (ι α) (p ⁻¹) ⟩
               ι α m        ≡⟨ e' ⟩
               ₁            ∎
-    b : ι α (succ n) ≡ ₁ → (⟨ α ⟩¹ᵤ succ n) + ¬ (⟨ α ⟩¹ᵤ succ n)
+    b : ι α (succ n) ≡ ₁ → (⟨ α ⟩₁ⁿ succ n) + ¬ (⟨ α ⟩₁ⁿ succ n)
     b e = inl (succ n , ≤-refl (succ n) , e)
 
 ⟨⟩ᵤ-monotone : (α : ℕ∞) (m n : ℕ)
              → m ≤ n
-             → (⟨ α ⟩ᵤ m) ⊑ (⟨ α ⟩ᵤ n)
+             → (⟨ α ⟩ⁿ m) ⊑ (⟨ α ⟩ⁿ n)
 ⟨⟩ᵤ-monotone α m n h (k , l , e) = (k , ≤-trans k m n l h , e)
 
 ⟨⟩ᵤ-directed-order : (α : ℕ∞) (m n : ℕ)
-                   → ∃ \(k : ℕ) → (⟨ α ⟩ᵤ m) ⊑ (⟨ α ⟩ᵤ k) × (⟨ α ⟩ᵤ n) ⊑ (⟨ α ⟩ᵤ k)
+                   → ∃ \(k : ℕ) → (⟨ α ⟩ⁿ m) ⊑ (⟨ α ⟩ⁿ k) × (⟨ α ⟩ⁿ n) ⊑ (⟨ α ⟩ⁿ k)
 ⟨⟩ᵤ-directed-order α m n = ∣ (m +' n , u , v) ∣
  where
-  u : (⟨ α ⟩ᵤ m) ⊑ (⟨ α ⟩ᵤ (m +' n))
+  u : (⟨ α ⟩ⁿ m) ⊑ (⟨ α ⟩ⁿ (m +' n))
   u = ⟨⟩ᵤ-monotone α m (m +' n) (≤-+ m n)
-  v : (⟨ α ⟩ᵤ n) ⊑ (⟨ α ⟩ᵤ (m +' n))
+  v : (⟨ α ⟩ⁿ n) ⊑ (⟨ α ⟩ⁿ (m +' n))
   v = ⟨⟩ᵤ-monotone α n (m +' n) (≤-+' m n)
 
 ⟨α⟩-compact-implies-LPO-instance : (α : ℕ∞) → is-compact ⟨ α ⟩ → LPO-instance α
 ⟨α⟩-compact-implies-LPO-instance α c = ∥∥-rec (instance-of-LPO-is-subsingleton α) γ h
  where
   q : ℕ → Ω₀
-  q n = ⟨ α ⟩ᵤ n
+  q n = ⟨ α ⟩ⁿ n
   h : ∃ \n → ⟨ α ⟩ ⊑ q n
   h = c ℕ q (∣ zero ∣ , ⟨⟩ᵤ-directed-order α) t
    where
     t : ⟨ α ⟩ ⊑ ∐ q
     t (n , e) = ∣ (n , n , ≤-refl n , e) ∣
   γ : (Σ \n → ⟨ α ⟩ ⊑ q n) → LPO-instance α
-  γ (n , l) = cases a b ⟨ α ⟩ᵤ n -decidable
+  γ (n , l) = cases a b (⟨⟩ⁿ-decidable α n)
    where
-    a : ⟨ α ⟩¹ᵤ n → LPO-instance α
+    a : ⟨ α ⟩₁ⁿ n → LPO-instance α
     a (m , _ , e) = inl (m , e)
-    b : ¬ (⟨ α ⟩¹ᵤ n) → LPO-instance α
+    b : ¬ (⟨ α ⟩₁ⁿ n) → LPO-instance α
     b h = inr (h ∘ l)
 
 everything-compact-implies-LPO : ((p : Ω₀) → is-compact p) → LPO

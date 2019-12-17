@@ -26,6 +26,9 @@ open import UF-FunExt
 is-isolated : {X : 𝓤 ̇ } → X → 𝓤 ̇
 is-isolated x = ∀ y → decidable(x ≡ y)
 
+is-perfect : 𝓤 ̇ → 𝓤 ̇
+is-perfect X = ¬ Σ \(x : X) → is-isolated x
+
 is-isolated' : {X : 𝓤 ̇ } → X → 𝓤 ̇
 is-isolated' x = ∀ y → decidable(y ≡ x)
 
@@ -56,21 +59,21 @@ Standard examples:
 \begin{code}
 
 𝟘-is-discrete : is-discrete (𝟘 {𝓤})
-𝟘-is-discrete ()
+𝟘-is-discrete x y = 𝟘-elim x
 
 𝟙-is-discrete : is-discrete (𝟙 {𝓤})
 𝟙-is-discrete * * = inl refl
 
 𝟚-is-discrete : is-discrete 𝟚
 𝟚-is-discrete ₀ ₀ = inl refl
-𝟚-is-discrete ₀ ₁ = inr(λ ())
-𝟚-is-discrete ₁ ₀ = inr(λ ())
+𝟚-is-discrete ₀ ₁ = inr (λ (p : ₀ ≡ ₁) → 𝟘-elim (zero-is-not-one p))
+𝟚-is-discrete ₁ ₀ = inr (λ (p : ₁ ≡ ₀) → 𝟘-elim (zero-is-not-one (p ⁻¹)))
 𝟚-is-discrete ₁ ₁ = inl refl
 
 ℕ-is-discrete : is-discrete ℕ
 ℕ-is-discrete 0 0 = inl refl
-ℕ-is-discrete 0 (succ n) = inr (λ())
-ℕ-is-discrete (succ m) 0 = inr (λ())
+ℕ-is-discrete 0 (succ n) = inr (λ (p : zero ≡ succ n) → positive-not-zero n (p ⁻¹))
+ℕ-is-discrete (succ m) 0 = inr (λ (p : succ m ≡ zero) → positive-not-zero m p)
 ℕ-is-discrete (succ m) (succ n) =  step(ℕ-is-discrete m n)
   where
    step : (m ≡ n) + (m ≢ n) → (succ m ≡ succ n) + (succ m ≢ succ n)
@@ -301,16 +304,17 @@ qinvs-preserve-isolatedness {𝓤} {𝓥} {X} {Y} f (g , ε , η) x i y = h (i (
   h (inl p) = inl (ap f p ∙ η y)
   h (inr u) = inr (contrapositive (λ (q : f x ≡ y) → (ε x)⁻¹ ∙ ap g q) u)
 
-equivalences-preserve-isolatedness : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) → is-equiv f
-                                   → (x : X) → is-isolated x → is-isolated (f x)
-equivalences-preserve-isolatedness f e = qinvs-preserve-isolatedness f (equivs-are-qinvs f e)
+equivs-preserve-isolatedness : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) → is-equiv f
+                             → (x : X) → is-isolated x → is-isolated (f x)
+equivs-preserve-isolatedness f e = qinvs-preserve-isolatedness f (equivs-are-qinvs f e)
 
 new-point-is-isolated : {X : 𝓤 ̇ } → is-isolated {𝓤 ⊔ 𝓥} {X + 𝟙 {𝓥}} (inr *)
 new-point-is-isolated {𝓤} {𝓥} {X} = h
  where
   h :  (y : X + 𝟙) → decidable (inr * ≡ y)
-  h (inl x) = inr (λ ())
+  h (inl x) = inr +disjoint'
   h (inr *) = inl refl
+
 \end{code}
 
 Back to old stuff:

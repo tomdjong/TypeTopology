@@ -57,10 +57,7 @@ is-embedding-etofun = pr₂
 
 equiv-embedding : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
                 → X ≃ Y → X ↪ Y
-equiv-embedding e = eqtofun e ,
-                    equivs-are-embeddings
-                     (eqtofun e)
-                     (eqtofun-is-an-equiv e)
+equiv-embedding e = ⌜ e ⌝ , equivs-are-embeddings ⌜ e ⌝ (⌜⌝-is-equiv e)
 
 embedding-lc : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
              → is-embedding f → left-cancellable f
@@ -99,21 +96,21 @@ embedding'-embedding {𝓤} {𝓥} {X} {Y} f ise = g
             (pr₁ (fiber-lemma f y))
             (section-lc _ (pr₂ (pr₂ (fiber-lemma f y)))) (g' y)
 
-pr₁-embedding : {X : 𝓤 ̇ } {Y : X → 𝓥 ̇ }
-              → ((x : X) → is-prop(Y x))
-              → is-embedding (pr₁ {𝓤} {𝓥} {X} {Y})
-pr₁-embedding f x ((.x , y') , refl) ((.x , y'') , refl) = g
+pr₁-is-embedding : {X : 𝓤 ̇ } {Y : X → 𝓥 ̇ }
+                 → ((x : X) → is-prop(Y x))
+                 → is-embedding (pr₁ {𝓤} {𝓥} {X} {Y})
+pr₁-is-embedding f x ((.x , y') , refl) ((.x , y'') , refl) = g
  where
   g : (x , y') , refl ≡ (x , y'') , refl
   g = ap (λ - → (x , -) , refl) (f x y' y'')
 
 pr₁-lc-bis : {X : 𝓤 ̇ } {Y : X → 𝓥 ̇ } → ({x : X} → is-prop(Y x)) → left-cancellable pr₁
-pr₁-lc-bis f {u} {v} r = embedding-lc pr₁ (pr₁-embedding (λ x → f {x})) r
+pr₁-lc-bis f {u} {v} r = embedding-lc pr₁ (pr₁-is-embedding (λ x → f {x})) r
 
-pr₁-embedding-converse : {X : 𝓤 ̇ } {Y : X → 𝓥 ̇ }
-                       → is-embedding (pr₁ {𝓤} {𝓥} {X} {Y})
-                       → ((x : X) → is-prop(Y x))
-pr₁-embedding-converse {𝓤} {𝓥} {X} {Y} ie x = h
+pr₁-is-embedding-converse : {X : 𝓤 ̇ } {Y : X → 𝓥 ̇ }
+                          → is-embedding (pr₁ {𝓤} {𝓥} {X} {Y})
+                          → ((x : X) → is-prop(Y x))
+pr₁-is-embedding-converse {𝓤} {𝓥} {X} {Y} ie x = h
   where
     e : Σ Y → X
     e = pr₁ {𝓤} {𝓥} {X} {Y}
@@ -152,12 +149,12 @@ lc-maps-are-embeddings-with-K {𝓤} {𝓥} {X} {Y} f f-lc k =
 id-is-embedding : {X : 𝓤 ̇ } → is-embedding (id {𝓤} {X})
 id-is-embedding = singleton-types'-are-props
 
-comp-embedding : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ }
-                {f : X → Y} {g : Y → Z}
+∘-is-embedding : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ }
+                 {f : X → Y} {g : Y → Z}
                → is-embedding f
                → is-embedding g
                → is-embedding (g ∘ f)
-comp-embedding {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {f} {g} e d = h
+∘-is-embedding {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {f} {g} e d = h
  where
   T : (z : Z) → 𝓤 ⊔ 𝓥 ⊔ 𝓦 ̇
   T z = Σ \(w : fiber g z) → fiber f (pr₁ w)
@@ -292,13 +289,9 @@ module _ {𝓤 𝓥} {X : 𝓤 ̇ } {Y : 𝓥 ̇ } where
  is-equiv-is-dense f e = retraction-is-dense f (equivs-have-sections f e)
 
  equiv-dense-embedding : X ≃ Y → X ↪ᵈ Y
- equiv-dense-embedding e = eqtofun e ,
-                            equivs-are-embeddings
-                              (eqtofun e)
-                              (eqtofun-is-an-equiv e),
-                            is-equiv-is-dense
-                              (eqtofun e)
-                              (eqtofun-is-an-equiv e)
+ equiv-dense-embedding e = ⌜ e ⌝ ,
+                           equivs-are-embeddings ⌜ e ⌝ (⌜⌝-is-equiv e),
+                           is-equiv-is-dense     ⌜ e ⌝ (⌜⌝-is-equiv e)
 
  detofun : (X ↪ᵈ Y) → X → Y
  detofun = pr₁
@@ -357,15 +350,15 @@ module _ {𝓤 𝓥 𝓦 𝓣}
        l : ¬ fiber (g x) b
        l (a , refl) = n ((x , a) , refl)
 
-inl-embedding : (X : 𝓤 ̇ ) (Y : 𝓥 ̇ )
-              → is-embedding (inl {𝓤} {𝓥} {X} {Y})
-inl-embedding {𝓤} {𝓥} X Y (inl a) (.a , refl) (.a , refl) = refl
-inl-embedding {𝓤} {𝓥} X Y (inr b) (x , p) (x' , p') = 𝟘-elim (+disjoint p)
+inl-is-embedding : (X : 𝓤 ̇ ) (Y : 𝓥 ̇ )
+                 → is-embedding (inl {𝓤} {𝓥} {X} {Y})
+inl-is-embedding {𝓤} {𝓥} X Y (inl a) (.a , refl) (.a , refl) = refl
+inl-is-embedding {𝓤} {𝓥} X Y (inr b) (x , p) (x' , p') = 𝟘-elim (+disjoint p)
 
-inr-embedding : (X : 𝓤 ̇ ) (Y : 𝓥 ̇ )
-              → is-embedding (inr {𝓤} {𝓥} {X} {Y})
-inr-embedding {𝓤} {𝓥} X Y (inl b) (x , p) (x' , p') = 𝟘-elim (+disjoint' p)
-inr-embedding {𝓤} {𝓥} X Y (inr a) (.a , refl) (.a , refl) = refl
+inr-is-embedding : (X : 𝓤 ̇ ) (Y : 𝓥 ̇ )
+                 → is-embedding (inr {𝓤} {𝓥} {X} {Y})
+inr-is-embedding {𝓤} {𝓥} X Y (inl b) (x , p) (x' , p') = 𝟘-elim (+disjoint' p)
+inr-is-embedding {𝓤} {𝓥} X Y (inr a) (.a , refl) (.a , refl) = refl
 
 maps-of-props-are-embeddings : {P : 𝓤 ̇ } {Q : 𝓥 ̇ } (f : P → Q)
                              → is-prop P → is-prop Q → is-embedding f

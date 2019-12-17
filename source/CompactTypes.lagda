@@ -1,4 +1,4 @@
-Martin Escardo 2011, reorganized and expanded 2018.
+Martin Escardo 2011, reorganized and expanded 2018,2019.
 
 Compact types. We shall call a type compact if it is exhaustibly
 searchable. But there are many closely related, but different, notions
@@ -24,7 +24,7 @@ We can also ask whether the statements
   ∃ \(x : X) → p x ≡ ₀   and   Π \(x : X) → p x ≡ ₀
 
 are decidable for every p, and in these cases we say that X is
-∃-compact and Π-compact respectively. We have
+is ∃-compact and is Π-compact respectively. We have
 
   Σ-compact X → ∃-compact X → Π-compact X.
 
@@ -81,7 +81,7 @@ open import Two-Prop-Density
 open import Plus-Properties
 open import AlternativePlus
 open import DiscreteAndSeparated
-open import DecidableAndDetachable
+open import DecidableAndDetachable public
 open import UF-Subsingletons
 open import UF-FunExt
 open import UF-Retracts
@@ -504,7 +504,7 @@ module _ (pt : propositional-truncations-exist) where
 
  surjection-compact∙ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
                      → is-surjection f → compact∙ X → compact∙ Y
- surjection-compact∙ {𝓤} {𝓥} {X} {Y} f su ε q = (y₀ , h)
+ surjection-compact∙ {𝓤} {𝓥} {X} {Y} f i ε q = (y₀ , h)
   where
    p : X → 𝟚
    p = q ∘ f
@@ -517,7 +517,7 @@ module _ (pt : propositional-truncations-exist) where
    isp : (y : Y) → is-prop (q y ≡ ₁)
    isp y = 𝟚-is-set
    h : q y₀ ≡ ₁ → (y : Y) → q y ≡ ₁
-   h r = surjection-induction f su (λ y → q y ≡ ₁) isp (g r)
+   h r = surjection-induction f i (λ y → q y ≡ ₁) isp (g r)
 
  image-compact∙ : ∀ {X Y : 𝓤₀ ̇ } (f : X → Y)
                 → compact∙ X → compact∙ (image f)
@@ -529,7 +529,7 @@ module _ (pt : propositional-truncations-exist) where
 The following is from 2011 originally in the module ExhaustibleTypes,
 where "wcompact" was "exhaustible". We should remove this, or move it
 to the module WeaklyCompactTypes, as wcompact is equivalent to
-Π-compact.
+is-Π-compact.
 
 \begin{code}
 
@@ -571,5 +571,261 @@ compact-gives-wcompact {𝓤} {X} ε p = y , (lemma₀ , lemma₁)
   lemma₀ = pr₂(ε p)
   lemma₁ : ((x : X) → p x ≡ ₁) → y ≡ ₁
   lemma₁ h = h x₀
+
+\end{code}
+
+Added 8th November - December 2019. I think the following equivalent
+notion of compactness is easier to deal with, and I wish I had used it
+in the original development:
+
+\begin{code}
+
+Σ-Compact : 𝓤 ̇ → (𝓥 : Universe) → 𝓤 ⊔ (𝓥 ⁺) ̇
+Σ-Compact {𝓤} X 𝓥 = (A : X → 𝓥 ̇ ) → detachable A → decidable (Σ A)
+
+Compact : 𝓤 ̇ → (𝓥 : Universe) → 𝓤 ⊔ (𝓥 ⁺) ̇
+Compact = Σ-Compact
+
+Compactness-gives-Markov : {X : 𝓤 ̇ }
+                         → Compact X 𝓥
+                         → (A : X → 𝓥 ̇)
+                         → detachable A
+                         → ¬¬ Σ A → Σ A
+Compactness-gives-Markov {𝓤} {X} c A δ φ = γ (c A δ)
+ where
+  γ : decidable (Σ A) → Σ A
+  γ (inl σ) = σ
+  γ (inr u) = 𝟘-elim (φ u)
+
+
+compact-gives-Compact : (X : 𝓤 ̇ ) → compact X → (𝓥 : Universe) → Compact X 𝓥
+compact-gives-Compact X c 𝓥 A d = iii
+ where
+  i : Σ \(p : X → 𝟚) → (x : X) → (p x ≡ ₀ → A x) × (p x ≡ ₁ → ¬(A x))
+  i = characteristic-function d
+  p : X → 𝟚
+  p = pr₁ i
+  ii : (Σ \(x : X) → p x ≡ ₀) + (Π \(x : X) → p x ≡ ₁) → decidable (Σ A)
+  ii (inl (x , r)) = inl (x , pr₁ (pr₂ i x) r)
+  ii (inr u)       = inr φ
+   where
+    φ : ¬ Σ A
+    φ (x , a) = pr₂ (pr₂ i x) (u x) a
+  iii : decidable (Σ A)
+  iii = ii (c p)
+
+Compact-gives-compact : (X : 𝓤 ̇ ) → Σ-Compact X 𝓤₀ → Σ-compact X
+Compact-gives-compact X C p = iv
+ where
+  A : X → 𝓤₀ ̇
+  A x = p x ≡ ₀
+  i : detachable (λ x → p x ≡ ₀) → decidable (Σ \(x : X) → p x ≡ ₀)
+  i = C A
+  ii : detachable (λ x → p x ≡ ₀)
+  ii x = 𝟚-is-discrete (p x) ₀
+  iii : decidable (Σ \(x : X) → p x ≡ ₀) → (Σ \(x : X) → p x ≡ ₀) + (Π \(x : X) → p x ≡ ₁)
+  iii (inl σ) = inl σ
+  iii (inr u) = inr (λ x → different-from-₀-equal-₁ (λ r → u (x , r)))
+  iv : (Σ \(x : X) → p x ≡ ₀) + (Π \(x : X) → p x ≡ ₁)
+  iv = iii (i ii)
+
+NB-Compact : (X : 𝓤 ̇ ) → Σ-Compact X 𝓤₀ → Σ-Compact X 𝓥
+NB-Compact {𝓤} {𝓥} X C = compact-gives-Compact X (Compact-gives-compact X C) 𝓥
+
+\end{code}
+
+Exercise. Prove the converse of the previous observation, using the
+fact that any decidable type is logically equivalent to either 𝟘 or 𝟙,
+and hence to a type in the universe 𝓤₀.
+
+\begin{code}
+
+Π-Compact : 𝓤 ̇ → (𝓥 : Universe) → 𝓤 ⊔ (𝓥 ⁺) ̇
+Π-Compact {𝓤} X 𝓥 = (A : X → 𝓥 ̇ ) → detachable A → decidable (Π A)
+
+Σ-Compact-gives-Π-Compact : (X : 𝓤 ̇ ) → Σ-Compact X 𝓥 → Π-Compact X 𝓥
+Σ-Compact-gives-Π-Compact X C A d = γ (C (λ x → ¬(A x)) e)
+ where
+  e : detachable (λ x → ¬(A x))
+  e x = ¬-preserves-decidability (d x)
+  γ : decidable (Σ \(x : X) → ¬(A x)) → decidable (Π \(x : X) → A x)
+  γ (inl (x , v)) = inr (λ φ → v (φ x))
+  γ (inr u)       = inl (λ x → ¬¬-elim (d x) (λ n → u (x , n)))
+
+𝟘-Compact : Compact (𝟘 {𝓤}) 𝓥
+𝟘-Compact A δ = inr (λ (σ : Σ A) → 𝟘-elim (pr₁ σ))
+
+𝟙-Compact : Compact (𝟙 {𝓤}) 𝓥
+𝟙-Compact A δ = γ (δ *)
+ where
+  γ : A * + ¬ A * → decidable (Σ A)
+  γ (inl a) = inl (* , a)
+  γ (inr u) = inr (λ {(* , a) → u a})
+
++-Compact : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+          → Compact X 𝓦 → Compact Y 𝓦 → Compact (X + Y) 𝓦
++-Compact c d A δ = γ (c (A ∘ inl) (δ ∘ inl)) (d (A ∘ inr) (δ ∘ inr))
+ where
+  γ : decidable (Σ (A ∘ inl)) → decidable (Σ (A ∘ inr)) → decidable (Σ A)
+  γ (inl (x , a)) _            = inl (inl x , a)
+  γ (inr _)      (inl (y , a)) = inl (inr y , a)
+  γ (inr u)      (inr v)       = inr w
+   where
+    w : ¬ Σ A
+    w (inl x , a) = u (x , a)
+    w (inr y , a) = v (y , a)
+
+Σ-preserves-Compactness : {X : 𝓤 ̇ } {Y : X → 𝓥 ̇ }
+                        → Compact X (𝓥 ⊔ 𝓦)
+                        → ((x : X) → Compact (Y x) 𝓦)
+                        → Compact (Σ Y) 𝓦
+Σ-preserves-Compactness {𝓤} {𝓥} {𝓦} {X} {Y} c d A δ = γ e
+ where
+  B : X → 𝓥 ⊔ 𝓦 ̇
+  B x = Σ \(y : Y x) → A (x , y)
+  ζ : (x : X) → detachable (λ y → A (x , y))
+  ζ x y = δ (x , y)
+  ε : detachable B
+  ε x = d x (λ y → A (x , y)) (ζ x)
+  e : decidable (Σ B)
+  e = c B ε
+  γ : decidable (Σ B) → decidable (Σ A)
+  γ (inl (x , (y , a))) = inl ((x , y) , a)
+  γ (inr u)             = inr (λ {((x , y) , a) → u (x , (y , a))})
+
+\end{code}
+
+A direct proof of the following would give more general universe
+assignments:
+
+\begin{code}
+
+×-Compact : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+          → Compact X (𝓥 ⊔ 𝓦) → Compact Y 𝓦 → Compact (X × Y) 𝓦
+×-Compact c d = Σ-preserves-Compactness c (λ x → d)
+
+
+Compact-closed-under-retracts : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                              → retract Y of X
+                              → Compact X 𝓦
+                              → Compact Y 𝓦
+Compact-closed-under-retracts {𝓤} {𝓥} {𝓦} {X} {Y} (r , s , η) c A δ = γ (c B ε)
+ where
+  B : X → 𝓦 ̇
+  B = A ∘ r
+  ε : detachable B
+  ε = δ ∘ r
+  γ : decidable (Σ B) → decidable (Σ A)
+  γ (inl (x , a)) = inl (r x , a)
+  γ (inr u)       = inr λ {(y , a) → u (s y , transport A ((η y)⁻¹) a)}
+
+
+Compact-closed-under-≃ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                       → X ≃ Y
+                       → Compact X 𝓦
+                       → Compact Y 𝓦
+Compact-closed-under-≃ e = Compact-closed-under-retracts (equiv-retract-r e)
+
+module CompactTypesPT (pt : propositional-truncations-exist) where
+
+ open ImageAndSurjection pt
+
+ surjection-Compact : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
+                    → funext 𝓥 𝓤₀
+                    → is-surjection f
+                    → Compact X 𝓥
+                    → Compact Y 𝓥
+ surjection-Compact {𝓤} {𝓥} {X} {Y} f fe i c A δ = γ (c B ε)
+  where
+   B : X → 𝓥 ̇
+   B = A ∘ f
+   ε : detachable B
+   ε = δ ∘ f
+   γ : decidable (Σ B) → decidable (Σ A)
+   γ (inl (x , a)) = inl (f x , a)
+   γ (inr u)       = inr v
+    where
+     u' : (x : X) → ¬ A (f x)
+     u' x a = u (x , a)
+     v' : (y : Y) → ¬ A y
+     v' = surjection-induction f i (λ y → ¬ A y) (λ y → negations-are-props fe) u'
+     v : ¬ Σ A
+     v (y , a) = v' y a
+
+ image-Compact : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
+               → funext (𝓤 ⊔ 𝓥) 𝓤₀
+               → Compact X (𝓤 ⊔ 𝓥)
+               → Compact (image f) (𝓤 ⊔ 𝓥)
+ image-Compact f fe c = surjection-Compact (corestriction f) fe
+                           (corestriction-surjection f) c
+
+
+ open PropositionalTruncation pt
+
+ ∃-Compact : 𝓤 ̇ → (𝓥 : Universe) → 𝓤 ⊔ (𝓥 ⁺) ̇
+ ∃-Compact {𝓤} X 𝓥 = (A : X → 𝓥 ̇ ) → detachable A → decidable (∃ A)
+
+ Compactness-gives-∃-Compactness : {X : 𝓤 ̇ } → Compact X 𝓥 → ∃-Compact X 𝓥
+ Compactness-gives-∃-Compactness {𝓤} {X} c A δ = γ (c A δ)
+  where
+   γ : decidable (Σ A) → decidable (∃ A)
+   γ (inl σ) = inl ∣ σ ∣
+   γ (inr u) = inr (empty-is-uninhabited u)
+
+
+ ∃-Compactness-is-a-prop : FunExt → {X : 𝓤 ̇ } → is-prop (∃-Compact X 𝓥)
+ ∃-Compactness-is-a-prop {𝓤} {𝓥} fe {X} = Π-is-prop (fe (𝓤 ⊔ (𝓥 ⁺)) (𝓤 ⊔ 𝓥))
+                                    (λ A → Π-is-prop (fe (𝓤 ⊔ 𝓥) (𝓤 ⊔ 𝓥))
+                                    (λ δ → decidability-of-prop-is-prop
+                                            (fe (𝓤 ⊔ 𝓥) 𝓤₀) ∥∥-is-a-prop))
+
+
+ ∃-Compactness-gives-Markov : {X : 𝓤 ̇ }
+                            → ∃-Compact X 𝓥
+                            → (A : X → 𝓥 ̇ )
+                            → detachable A
+                            → ¬¬ ∃ A → ∃ A
+ ∃-Compactness-gives-Markov {𝓤} {𝓥} {X} c A δ = ¬¬-elim (c A δ)
+
+ ∥Compact∥-gives-∃-Compact : FunExt → {X : 𝓤 ̇ } → ∥ Compact X 𝓥 ∥ → ∃-Compact X 𝓥
+ ∥Compact∥-gives-∃-Compact fe = ∥∥-rec (∃-Compactness-is-a-prop fe)
+                                     Compactness-gives-∃-Compactness
+
+\end{code}
+
+Added 10th December 2019.
+
+\begin{code}
+
+Compact∙ : 𝓤 ̇ → (𝓥 : Universe) → 𝓤 ⊔ (𝓥 ⁺) ̇
+Compact∙ {𝓤} X 𝓥 = (A : X → 𝓥 ̇ ) → detachable A → Σ \(x₀ : X) → A x₀ → (x : X) → A x
+
+Compact-pointed-gives-Compact∙ : {X : 𝓤 ̇ } → Compact X 𝓥 → X → Compact∙ X 𝓥
+Compact-pointed-gives-Compact∙ {𝓤} {𝓥} {X} c x₀ A δ = γ (c A' δ')
+ where
+  A' : X → 𝓥 ̇
+  A' x = ¬(A x)
+  δ' : detachable A'
+  δ' x = ¬-preserves-decidability (δ x)
+  γ : decidable (Σ A') → Σ \(x₀ : X) → A x₀ → (x : X) → A x
+  γ (inl (x , u)) = x  , (λ (a : A x) → 𝟘-elim (u a))
+  γ (inr v)       = x₀ , (λ (a : A x₀) (x : X) → ¬¬-elim (δ x) λ (φ : ¬ A x) → v (x , φ))
+
+
+Compact∙-gives-Compact : {X : 𝓤 ̇ } → Compact∙ X 𝓥 → Compact X 𝓥
+Compact∙-gives-Compact {𝓤} {𝓥} {X} ε A δ = γ (δ x₀)
+ where
+  l : Σ \(x₀ : X) → ¬ A x₀ → (x : X) → ¬ A x
+  l = ε (λ x → ¬ A x) (λ x → ¬-preserves-decidability (δ x))
+  x₀ : X
+  x₀ = pr₁ l
+  i : ¬ A x₀ → ¬ Σ A
+  i u (x , a) = pr₂ l u x a
+  γ : decidable (A x₀) → decidable (Σ A)
+  γ (inl a) = inl (x₀ , a)
+  γ (inr u) = inr (i u)
+
+Compact∙-gives-pointed : {X : 𝓤 ̇ } → Compact∙ X 𝓥 → X
+Compact∙-gives-pointed ε = pr₁ (ε (λ x → 𝟘) (λ x → 𝟘-decidable))
 
 \end{code}

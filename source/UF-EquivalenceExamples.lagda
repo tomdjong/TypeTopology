@@ -95,7 +95,7 @@ curry-uncurry {𝓤} {𝓥} {𝓦} fe = curry-uncurry' (fe 𝓤 (𝓥 ⊔ 𝓦))
   F : Σ Y → Σ Y'
   F (x , y) = x , f x y
   G : Σ Y' → Σ Y
-  G (x , y') = x , (g x y')
+  G (x , y') = x , g x y'
   H : Σ Y' → Σ Y
   H (x , y') = x , h x y'
   FG : (w' : Σ Y') → F(G w') ≡ w'
@@ -111,6 +111,24 @@ curry-uncurry {𝓤} {𝓥} {𝓦} fe = curry-uncurry' (fe 𝓤 (𝓥 ⊔ 𝓦))
   η _ = refl
   ε : ΠΣ-distr-back ∘ ΠΣ-distr ∼ id
   ε _ = refl
+
+Σ+distr : (X : 𝓤 ̇ ) (Y : 𝓥 ̇) (A : X + Y → 𝓦 ̇ )
+        → (Σ \(x : X) → A (inl x)) + (Σ \(y : Y) → A (inr y))
+        ≃ (Σ \(z : X + Y) → A z)
+Σ+distr X Y A = qinveq f (g , η , ε)
+ where
+  f : (Σ \(x : X) → A (inl x)) + (Σ \(y : Y) → A (inr y)) → (Σ \(z : X + Y) → A z)
+  f (inl (x , a)) = inl x , a
+  f (inr (y , a)) = inr y , a
+  g : (Σ \(z : X + Y) → A z) → (Σ \(x : X) → A (inl x)) + (Σ \(y : Y) → A (inr y))
+  g (inl x , a) = inl (x , a)
+  g (inr y , a) = inr (y , a)
+  η : g ∘ f ∼ id
+  η (inl _) = refl
+  η (inr _) = refl
+  ε : f ∘ g ∼ id
+  ε (inl _ , _) = refl
+  ε (inr _ , _) = refl
 
 Π-cong : funext 𝓤 𝓥 → funext 𝓤 𝓦
        → (X : 𝓤 ̇ ) (Y : X → 𝓥 ̇ ) (Y' : X → 𝓦 ̇ )
@@ -216,10 +234,10 @@ An application of Π-cong is the following:
    f = inl
    g : X + 𝟘 → X
    g (inl x) = x
-   g (inr ())
+   g (inr y) = 𝟘-elim y
    ε : (y : X + 𝟘) → (f ∘ g) y ≡ y
    ε (inl x) = refl
-   ε (inr ())
+   ε (inr y) = 𝟘-elim y
    η : (x : X) → (g ∘ f) x ≡ x
    η x = refl
 
@@ -229,7 +247,10 @@ An application of Π-cong is the following:
 𝟘-lneutral : {X : 𝓤 ̇ } → 𝟘 {𝓥} + X ≃ X
 𝟘-lneutral {𝓤} {𝓥} {X} = (𝟘 + X) ≃⟨ +comm ⟩
                          (X + 𝟘) ≃⟨ 𝟘-rneutral' {𝓤} {𝓥} ⟩
-                          X      ■
+                         X       ■
+
+one-𝟙-only : (𝓤 𝓥 : Universe) → 𝟙 {𝓤} ≃ 𝟙 {𝓥}
+one-𝟙-only _ _ = unique-to-𝟙 , (unique-to-𝟙 , (λ {* → refl})) , (unique-to-𝟙 , (λ {* → refl}))
 
 +assoc : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } → (X + Y) + Z ≃ X + (Y + Z)
 +assoc {𝓤} {𝓥} {𝓦} {X} {Y} {Z} = qinveq f (g , η , ε)
@@ -251,24 +272,20 @@ An application of Π-cong is the following:
    η (inl (inr x)) = refl
    η (inr x)       = refl
 
-+-cong : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
-       → X ≃ A → Y ≃ B → X + Y ≃ A + B
-+-cong {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {A} {B} (f , (g , e) , (g' , d)) (φ , (γ , ε) , (γ' , δ)) =
- F , (G , E) , (G' , D)
++functor : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
+         → (X → A) → (Y → B) → X + Y → A + B
++functor f g (inl x) = inl (f x)
++functor f g (inr y) = inr (g y)
+
++cong : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
+      → X ≃ A → Y ≃ B → X + Y ≃ A + B
++cong {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {A} {B} (f , (g , e) , (g' , d)) (φ , (γ , ε) , (γ' , δ)) =
+ +functor f φ , (+functor g γ , E) , (+functor g' γ' , D)
  where
-  F : X + Y → A + B
-  F (inl x) = inl (f x)
-  F (inr y) = inr (φ y)
-  G : A + B → X + Y
-  G (inl a) = inl (g a)
-  G (inr b) = inr (γ b)
-  G' : A + B → X + Y
-  G' (inl a) = inl (g' a)
-  G' (inr b) = inr (γ' b)
-  E : (c : A + B) → F (G c) ≡ c
+  E : (c : A + B) → +functor f φ (+functor g γ c) ≡ c
   E (inl a) = ap inl (e a)
   E (inr b) = ap inr (ε b)
-  D : (z : X + Y) → G' (F z) ≡ z
+  D : (z : X + Y) → +functor g' γ' (+functor f φ z) ≡ z
   D (inl x) = ap inl (d x)
   D (inr y) = ap inr (δ y)
 
@@ -276,13 +293,13 @@ An application of Π-cong is the following:
 ×𝟘 {𝓤} {𝓥} {𝓦} {X} = qinveq f (g , η , ε)
  where
    f : 𝟘 → X × 𝟘
-   f ()
+   f = unique-from-𝟘
    g : X × 𝟘 → 𝟘
-   g (x , ())
+   g (x , y) = 𝟘-elim y
    ε : (t : X × 𝟘) → (f ∘ g) t ≡ t
-   ε (x , ())
+   ε (x , y) = 𝟘-elim y
    η : (u : 𝟘) → (g ∘ f) u ≡ u
-   η ()
+   η = 𝟘-induction
 
 𝟙distr : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → X × Y + X ≃ X × (Y + 𝟙 {𝓦})
 𝟙distr {𝓤} {𝓥} {𝓦} {X} {Y} = f , (g , ε) , (g , η)
@@ -331,20 +348,18 @@ Ap+ {𝓤} {𝓥} {𝓦} {X} {Y} Z (f , (g , ε) , (h , η)) = f' , (g' , ε') ,
    η : (u : X × Y) → (g ∘ f) u ≡ u
    η (x , y) = refl
 
-×-cong : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
+×functor : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
+         → (X → A) → (Y → B) → X × Y → A × B
+×functor f g (x , y) = f x , g y
+
+×cong : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
       → X ≃ A → Y ≃ B → X × Y ≃ A × B
-×-cong {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {A} {B} (f , (g , e) , (g' , d)) (φ , (γ , ε) , (γ' , δ)) =
- F , (G , E) , (G' , D)
+×cong {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {A} {B} (f , (g , e) , (g' , d)) (φ , (γ , ε) , (γ' , δ)) =
+ ×functor f φ , (×functor g γ , E) , (×functor g' γ' , D)
  where
-  F : X × Y → A × B
-  F (x , y) = f x , φ y
-  G : A × B → X × Y
-  G (a , b) = g a , γ b
-  G' : A × B → X × Y
-  G' (a , b) = g' a , γ' b
-  E : (c : A × B) → F (G c) ≡ c
+  E : (c : A × B) → ×functor f φ (×functor g γ c) ≡ c
   E (a , b) = to-×-≡ (e a) (ε b)
-  D : (z : X × Y) → G' (F z) ≡ z
+  D : (z : X × Y) → ×functor g' γ' (×functor f φ z) ≡ z
   D (x , y) = to-×-≡ (d x) (δ y)
 
 𝟘→ : {X : 𝓤 ̇ } → funext 𝓦 𝓤
@@ -352,7 +367,7 @@ Ap+ {𝓤} {𝓥} {𝓦} {X} {Y} Z (f , (g , ε) , (h , η)) = f' , (g' , ε') ,
 𝟘→ {𝓤} {𝓥} {𝓦} {X} fe = qinveq f (g , ε , η)
  where
   f : 𝟙 → 𝟘 → X
-  f * ()
+  f * y = 𝟘-elim y
   g : (𝟘 → X) → 𝟙
   g h = *
   η : (h : 𝟘 → X) → f (g h) ≡ h
@@ -389,25 +404,33 @@ Ap+ {𝓤} {𝓥} {𝓦} {X} {Y} Z (f , (g , ε) , (h , η)) = f' , (g' , ε') ,
   η : (t : 𝟙) → * ≡ t
   η = 𝟙-is-prop *
 
-+→ : ∀ {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } → funext (𝓤 ⊔ 𝓥) 𝓦
-   → ((X + Y) → Z) ≃ (X → Z) × (Y → Z)
-+→ {𝓤} {𝓥} {𝓦} {X} {Y} {Z} fe = qinveq f (g , ε , η)
+
+Π×+ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : X + Y → 𝓦 ̇ } → funext (𝓤 ⊔ 𝓥) 𝓦
+    → (Π \(x : X) → A (inl x)) × (Π \(y : Y) → A (inr y))
+    ≃ (Π \(z : X + Y) → A z)
+
+Π×+ {𝓤} {𝓥} {𝓦} {X} {Y} {A} fe = qinveq f (g , ε , η)
  where
-  f : (X + Y → Z) → (X → Z) × (Y → Z)
-  f h = h ∘ inl , h ∘ inr
-  g : (X → Z) × (Y → Z) → X + Y → Z
-  g (l , r) (inl x) = l x
-  g (l , r) (inr y) = r y
-  η : (w : (X → Z) × (Y → Z)) → f (g w) ≡ w
-  η (l , r) = refl
-  ε : (h : X + Y → Z) → g (f h) ≡ h
-  ε h = dfunext fe γ
+  f : (Π \(x : X) → A (inl x)) × (Π \(y : Y) → A (inr y)) → (Π \(z : X + Y) → A z)
+  f (l , r) (inl x) = l x
+  f (l , r) (inr y) = r y
+  g : (Π \(z : X + Y) → A z) → (Π \(x : X) → A (inl x)) × (Π \(y : Y) → A (inr y))
+  g h = h ∘ inl , h ∘ inr
+  η : f ∘ g ∼ id
+  η h = dfunext fe γ
    where
-    γ : (t : X + Y) → g (f h) t ≡ h t
+    γ : (z : X + Y) → (f ∘ g) h z ≡ h z
     γ (inl x) = refl
     γ (inr y) = refl
+  ε : g ∘ f ∼ id
+  ε (l , r) = refl
 
-→× : ∀ {A : 𝓤 ̇ } {X : A → 𝓥 ̇ } {Y : A → 𝓦 ̇ }
+
++→ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } → funext (𝓤 ⊔ 𝓥) 𝓦
+   → ((X + Y) → Z) ≃ (X → Z) × (Y → Z)
++→ fe = ≃-sym (Π×+ fe)
+
+→× : {A : 𝓤 ̇ } {X : A → 𝓥 ̇ } {Y : A → 𝓦 ̇ }
    → ((a : A) → X a × Y a)  ≃ Π X × Π Y
 →× {𝓤} {𝓥} {𝓦} {A} {X} {Y} = qinveq f (g , ε , η)
  where
@@ -420,10 +443,10 @@ Ap+ {𝓤} {𝓥} {𝓦} {X} {Y} Z (f , (g , ε) , (h , η)) = f' , (g' , ε') ,
   η : (α : Π X × Π Y) → f (g α) ≡ α
   η (γ , δ) = refl
 
-→-cong : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
-       → funext 𝓦 𝓣 → funext 𝓤 𝓥
-       → X ≃ A → Y ≃ B → (X → Y) ≃ (A → B)
-→-cong {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {A} {B} fe fe' (f , i) (φ , j) =
+→cong : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } {B : 𝓣 ̇ }
+      → funext 𝓦 𝓣 → funext 𝓤 𝓥
+      → X ≃ A → Y ≃ B → (X → Y) ≃ (A → B)
+→cong {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {A} {B} fe fe' (f , i) (φ , j) =
  H (equivs-are-qinvs f i) (equivs-are-qinvs φ j)
  where
   H : qinv f → qinv φ → (X → Y) ≃ (A → B)
@@ -438,10 +461,10 @@ Ap+ {𝓤} {𝓥} {𝓦} {X} {Y} Z (f , (g , ε) , (h , η)) = f' , (g' , ε') ,
     D : (h : X → Y) → G (F h) ≡ h
     D h = dfunext fe' (λ x → ε (h (g (f x))) ∙ ap h (e x))
 
-→-cong' : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {B : 𝓣 ̇ }
+→cong' : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {B : 𝓣 ̇ }
        → funext 𝓤 𝓣 → funext 𝓤 𝓥
        → Y ≃ B → (X → Y) ≃ (X → B)
-→-cong' {𝓤} {𝓥} {𝓣} {X} {Y} {B} fe fe' = →-cong fe fe' (≃-refl X)
+→cong' {𝓤} {𝓥} {𝓣} {X} {Y} {B} fe fe' = →cong fe fe' (≃-refl X)
 
 pr₁-equivalence : (X : 𝓤 ̇ ) (A : X → 𝓥 ̇ )
                 → ((x : X) → is-singleton (A x))
@@ -660,7 +683,7 @@ warrant their place here.
 
 precomposition-with-equiv-does-not-change-fibers : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ }
                                                    (e : Z ≃ X) (f : X → Y) (y : Y)
-                                                 → fiber (f ∘ eqtofun e) y ≃ fiber f y
+                                                 → fiber (f ∘ ⌜ e ⌝) y ≃ fiber f y
 precomposition-with-equiv-does-not-change-fibers (g , i) f y =
  Σ-change-of-variables (λ x → f x ≡ y) g i
 

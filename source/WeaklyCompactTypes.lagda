@@ -38,12 +38,12 @@ open import DecidableAndDetachable
 ∃-compactness-is-a-prop {𝓤} {X} = Π-is-prop (fe 𝓤 𝓤)
                                 (λ _ → decidability-of-prop-is-prop (fe 𝓤 𝓤₀) ∥∥-is-a-prop)
 
-∃-compact-Markov : {X : 𝓤 ̇ }
-                 → ∃-compact X
-                 → (p : X → 𝟚)
-                 → ¬¬(∃ \(x : X) → p x ≡ ₀)
-                 → ∃ \(x : X) → p x ≡ ₀
-∃-compact-Markov {𝓤} {X} c p φ = g (c p)
+∃-compactness-gives-Markov : {X : 𝓤 ̇ }
+                           → ∃-compact X
+                           → (p : X → 𝟚)
+                           → ¬¬(∃ \(x : X) → p x ≡ ₀)
+                           → ∃ \(x : X) → p x ≡ ₀
+∃-compactness-gives-Markov {𝓤} {X} c p φ = g (c p)
  where
   g : decidable (∃ \(x : X) → p x ≡ ₀) → ∃ \(x : X) → p x ≡ ₀
   g (inl e) = e
@@ -93,6 +93,10 @@ compact-gives-∃-compact {𝓤} {X} φ p = g (φ p)
   g : ((Σ \(x : X) → p x ≡ ₀) + ((x : X) → p x ≡ ₁)) → decidable (∃ \(x : X) → p x ≡ ₀)
   g (inl (x , r)) = inl ∣ x , r ∣
   g (inr α) = inr (forall₁-implies-not-exists₀ pt p α)
+
+∥Compact∥-gives-∃-compact : {X : 𝓤 ̇ } → ∥ Compact X 𝓤₀ ∥ → ∃-compact X
+∥Compact∥-gives-∃-compact {𝓤} {X} = ∥∥-rec ∃-compactness-is-a-prop
+                                     (compact-gives-∃-compact ∘ Compact-gives-compact X)
 
 \end{code}
 
@@ -523,7 +527,7 @@ detachable-subset-retract {𝓤} {X} {A} (x₀ , e₀) = r , pr₁ , rs
     s : (b : 𝟚) → b ≡ ₀ → 𝟚-equality-cases (λ(_ : b ≡ ₀) → (x , e))
                                              (λ(_ : b ≡ ₁) → (x₀ , e₀)) ≡ (x , e)
     s ₀ refl = refl
-    s ₁ ()
+    s ₁ r = 𝟘-elim (one-is-not-zero r)
     t : 𝟚-equality-cases (λ(_ : A x ≡ ₀) → x , e) (λ (_ : A x ≡ ₁) → x₀ , e₀) ≡ (x , e)
     t = s (A x) e
     u : (λ e' → x , e') ≡ (λ _ → x , e)
@@ -574,7 +578,7 @@ detachable-subset-Π-compact {𝓤} {X} A c q = g (c p)
     s : (b : 𝟚) → b ≡ ₀ → (f₁ : b ≡ ₁ → 𝟚)
       → 𝟚-equality-cases (λ (_ : b ≡ ₀) → ₁) f₁ ≡ ₁
     s ₀ refl = λ f₁ → refl
-    s ₁ ()
+    s ₁ r = 𝟘-elim (one-is-not-zero r)
   p-spec₁ : (x : X) (e : A x ≡ ₁) → p x ≡ q (x , e)
   p-spec₁ x e = u ∙ t
    where
@@ -584,7 +588,7 @@ detachable-subset-Π-compact {𝓤} {X} A c q = g (c p)
     r = (dfunext (fe 𝓤₀ 𝓤₀)) (λ e' → ap (p₁ x) (𝟚-is-set e' e))
     s : (b : 𝟚) → b ≡ ₁
       → 𝟚-equality-cases (λ (_ : b ≡ ₀) → ₁) (λ (_ : b ≡ ₁) → q (x , e)) ≡ q (x , e)
-    s ₀ ()
+    s ₀ r = 𝟘-elim (zero-is-not-one r)
     s ₁ refl = refl
     t : 𝟚-equality-cases (p₀ x) y ≡ q (x , e)
     t = s (A x) e
@@ -844,7 +848,7 @@ Right adjoints to Κ are characterized as follows:
   g γ n p = (g₀ n refl , g₁ n refl)
    where
     g₀ : ∀ m → m ≡ n → Κ m ≤̇ p → m ≤₂ A p
-    g₀ ₀ r l ()
+    g₀ ₀ r l q = 𝟘-elim (zero-is-not-one q)
     g₀ ₁ refl l refl = pr₂ (γ p) l₁
      where
       l₀ : (x : X) → p x ≡ ₁
@@ -852,7 +856,7 @@ Right adjoints to Κ are characterized as follows:
       l₁ : p ≡ (λ x → ₁)
       l₁ = dfunext (fe 𝓤 𝓤₀) l₀
     g₁ : ∀ m → m ≡ n → m ≤₂ A p → Κ m ≤̇ p
-    g₁ ₀ r l x ()
+    g₁ ₀ r l x q = 𝟘-elim (zero-is-not-one q)
     g₁ ₁ refl l x refl = l₀ x
      where
       l₁ : p ≡ (λ x → ₁)

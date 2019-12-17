@@ -11,15 +11,25 @@ open import Universes
 open import Negation
 open import Id
 open import Empty
+open import One
+open import One-Properties
 
 +-commutative : {A : 𝓤 ̇ } {B : 𝓥 ̇ } → A + B → B + A
 +-commutative = cases inr inl
 
 +disjoint : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {x : X} {y : Y} → ¬(inl x ≡ inr y)
-+disjoint ()
++disjoint {𝓤} {𝓥} {X} {Y} p = 𝟙-is-not-𝟘 q
+ where
+  f : X + Y → 𝓤₀ ̇
+  f (inl x) = 𝟙
+  f (inr y) = 𝟘
+
+  q : 𝟙 ≡ 𝟘
+  q = ap f p
+
 
 +disjoint' : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {x : X} {y : Y} → ¬(inr y ≡ inl x)
-+disjoint' ()
++disjoint' p = +disjoint (p ⁻¹)
 
 inl-lc : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {x x' : X} → inl {𝓤} {𝓥} {X} {Y} x ≡ inl x' → x ≡ x'
 inl-lc refl = refl
@@ -28,7 +38,7 @@ inr-lc : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {y y' : Y} → inr {𝓤} {𝓥} {X} {Y} 
 inr-lc refl = refl
 
 equality-cases : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {A : 𝓦 ̇ } (z : X + Y)
-              → ((x : X) → z ≡ inl x → A) → ((y : Y) → z ≡ inr y → A) → A
+               → ((x : X) → z ≡ inl x → A) → ((y : Y) → z ≡ inr y → A) → A
 equality-cases (inl x) f g = f x refl
 equality-cases (inr y) f g = g y refl
 
@@ -47,5 +57,22 @@ Left-fails-then-right-holds (inr q) u = q
 Right-fails-then-left-holds : {P : 𝓤 ̇ } {Q : 𝓥 ̇ } → P + Q → ¬ Q → P
 Right-fails-then-left-holds (inl p) u = p
 Right-fails-then-left-holds (inr q) u = 𝟘-elim (u q)
+
+open import One
+open import Sigma
+open import GeneralNotation
+
+inl-preservation : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X + 𝟙 {𝓦}  → Y + 𝟙 {𝓣})
+                 → f (inr *) ≡ inr *
+                 → left-cancellable f
+                 → (x : X) → Σ \(y : Y) → f (inl x) ≡ inl y
+inl-preservation {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} f p l x = γ x (f (inl x)) refl
+ where
+  γ : (x : X) (z : Y + 𝟙) → f (inl x) ≡ z → Σ \(y : Y) → z ≡ inl y
+  γ x (inl y) q = y , refl
+  γ x (inr *) q = 𝟘-elim (+disjoint (l r))
+   where
+    r : f (inl x) ≡ f (inr *)
+    r = q ∙ p ⁻¹
 
 \end{code}

@@ -44,6 +44,9 @@ equivs-are-lc f e = sections-are-lc f (equivs-are-sections f e)
 _≃_ : 𝓤 ̇ → 𝓥 ̇ → 𝓤 ⊔ 𝓥 ̇
 X ≃ Y = Σ \(f : X → Y) → is-equiv f
 
+Aut : 𝓤 ̇ → 𝓤 ̇
+Aut X = (X ≃ X)
+
 id-is-an-equiv : (X : 𝓤 ̇ ) → is-equiv (id {𝓤} {X})
 id-is-an-equiv X = (id , λ x → refl) , (id , λ x → refl)
 
@@ -52,13 +55,32 @@ id-is-an-equiv X = (id , λ x → refl) , (id , λ x → refl)
 
 ∘-is-equiv : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } {f : X → Y} {f' : Y → Z}
            → is-equiv f → is-equiv f' → is-equiv (f' ∘ f)
-∘-is-equiv {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {f} {f'} ((g , fg) , (h , hf)) ((g' , fg') , (h' , hf'))  =
-  (g ∘ g' , fg'') , (h ∘ h' , hf'')
+∘-is-equiv {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {f} {f'} ((g , fg) , (h , hf)) ((g' , fg') , (h' , hf')) =
+ (g ∘ g' , fg'') , (h ∘ h' , hf'')
  where
   fg'' : (z : Z) → f' (f (g (g' z))) ≡ z
   fg'' z =  ap f' (fg (g' z)) ∙ fg' z
   hf'' : (x : X) → h(h'(f'(f x))) ≡ x
   hf'' x = ap h (hf' (f x)) ∙ hf x
+
+\end{code}
+
+For type-checking efficiency reasons:
+
+\begin{code}
+
+∘-is-equiv-abstract : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } {f : X → Y} {f' : Y → Z}
+                    → is-equiv f → is-equiv f' → is-equiv (f' ∘ f)
+∘-is-equiv-abstract {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {f} {f'} = γ
+ where
+  abstract
+   γ : is-equiv f → is-equiv f' → is-equiv (f' ∘ f)
+   γ ((g , fg) , (h , hf)) ((g' , fg') , (h' , hf')) = (g ∘ g' , fg'') , (h ∘ h' , hf'')
+    where
+     fg'' : (z : Z) → f' (f (g (g' z))) ≡ z
+     fg'' z =  ap f' (fg (g' z)) ∙ fg' z
+     hf'' : (x : X) → h(h'(f'(f x))) ≡ x
+     hf'' x = ap h (hf' (f x)) ∙ hf x
 
 ≃-comp : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } → X ≃ Y → Y ≃ Z → X ≃ Z
 ≃-comp {𝓤} {𝓥} {𝓦} {X} {Y} {Z} (f , d) (f' , e) = f' ∘ f , ∘-is-equiv d e
@@ -78,11 +100,13 @@ Eq = _≃_
 Eqtofun : (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) → X ≃ Y → X → Y
 Eqtofun X Y (f , _) = f
 
-eqtofun : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → X ≃ Y → X → Y
-eqtofun (f , _) = f
+eqtofun ⌜_⌝ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → X ≃ Y → X → Y
+eqtofun = Eqtofun _ _
+⌜_⌝     = eqtofun
 
-eqtofun-is-an-equiv : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (e : X ≃ Y) → is-equiv (eqtofun e)
+eqtofun-is-an-equiv ⌜⌝-is-equiv : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (e : X ≃ Y) → is-equiv ⌜ e ⌝
 eqtofun-is-an-equiv = pr₂
+⌜⌝-is-equiv         = eqtofun-is-an-equiv
 
 back-eqtofun : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → X ≃ Y → Y → X
 back-eqtofun e = pr₁ (pr₁ (pr₂ e))
@@ -106,7 +130,7 @@ eqtoeq-agreement : (X Y : 𝓤 ̇ ) (p : X ≡ Y)
 eqtoeq-agreement {𝓤} X _ refl = refl
 
 idtofun : (X Y : 𝓤 ̇ ) → X ≡ Y → X → Y
-idtofun X Y p = eqtofun (idtoeq X Y p)
+idtofun X Y p = ⌜ idtoeq X Y p ⌝
 
 idtofun-agreement : (X Y : 𝓤 ̇ ) (p : X ≡ Y) → idtofun X Y p ≡ Idtofun p
 idtofun-agreement X Y refl = refl
@@ -455,6 +479,11 @@ pr₁-is-vv-equiv {𝓤} {𝓥} X Y iss x = g
   g : is-singleton (fiber pr₁ x)
   g = c , f
 
+pr₁-is-equiv : (X : 𝓤 ̇ ) (Y : X → 𝓥 ̇ )
+             → ((x : X) → is-singleton (Y x))
+             → is-equiv (pr₁ {𝓤} {𝓥} {X} {Y})
+pr₁-is-equiv {𝓤} {𝓥} X Y iss = vv-equivs-are-equivs pr₁ (pr₁-is-vv-equiv X Y iss)
+
 pr₁-is-vv-equiv-converse : {X : 𝓤 ̇ } {A : X → 𝓥 ̇ }
                       → is-vv-equiv (pr₁ {𝓤} {𝓥} {X} {A})
                       → ((x : X) → is-singleton(A x))
@@ -475,9 +504,7 @@ logically-equivalent-props-are-equivalent i j f g = qinveq f (g , (λ p → i (g
                                                                   (λ q → j (f (g q)) q))
 
 equiv-to-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → X ≃ Y → is-set Y → is-set X
-equiv-to-set e = subtypes-of-sets-are-sets
-                   (eqtofun e)
-                   (equivs-are-lc (eqtofun e) (eqtofun-is-an-equiv e))
+equiv-to-set e = subtypes-of-sets-are-sets ⌜ e ⌝ (equivs-are-lc ⌜ e ⌝ (⌜⌝-is-equiv e))
 \end{code}
 
 5th March 2019. A more direct proof the quasi-invertible maps
@@ -509,13 +536,54 @@ qinv-is-vv-equiv {𝓤} {𝓥} {X} {Y} f (g , η , ε) y₀ = γ
 
 \end{code}
 
+Added 1st December 2019.
+
+Sometimes it is is convenient to reason with quasi-equivalences
+directly, in particular if we want to avoid function extensionality,
+and we introduce some machinery for this.
+
+\begin{code}
+
+_≅_ : 𝓤 ̇ → 𝓥 ̇ → 𝓤 ⊔ 𝓥 ̇
+X ≅ Y = Σ \(f : X → Y) → qinv f
+
+id-qinv : (X : 𝓤 ̇ ) → qinv (id {𝓤} {X})
+id-qinv X = id , (λ x → refl) , (λ x → refl)
+
+≅-refl : (X : 𝓤 ̇ ) → X ≅ X
+≅-refl X = id , (id-qinv X)
+
+∘-qinv : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } {f : X → Y} {f' : Y → Z}
+       → qinv f → qinv f' → qinv (f' ∘ f)
+∘-qinv {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {f} {f'} = γ
+ where
+   γ : qinv f → qinv f' → qinv (f' ∘ f)
+   γ (g , gf , fg) (g' , gf' , fg') = (g ∘ g' , gf'' , fg'' )
+    where
+     fg'' : (z : Z) → f' (f (g (g' z))) ≡ z
+     fg'' z =  ap f' (fg (g' z)) ∙ fg' z
+     gf'' : (x : X) → g(g'(f'(f x))) ≡ x
+     gf'' x = ap g (gf' (f x)) ∙ gf x
+
+≅-comp : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } → X ≅ Y → Y ≅ Z → X ≅ Z
+≅-comp {𝓤} {𝓥} {𝓦} {X} {Y} {Z} (f , d) (f' , e) = f' ∘ f , ∘-qinv d e
+
+_≅⟨_⟩_ : (X : 𝓤 ̇ ) {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } → X ≅ Y → Y ≅ Z → X ≅ Z
+_ ≅⟨ d ⟩ e = ≅-comp d e
+
+_◾ : (X : 𝓤 ̇ ) → X ≅ X
+_◾ = ≅-refl
+
+\end{code}
+
 Associativities and precedences.
 
 \begin{code}
 
 infix  0 _≃_
+infix  0 _≅_
 infix  1 _■
 infixr 0 _≃⟨_⟩_
 infixl 2 _●_
-
+infix  1 ⌜_⌝
 \end{code}

@@ -205,16 +205,16 @@ local-hedberg' {𝓤} {X} x pc y p q =
   c _ refl = sym-is-inverse' (f x refl)
 
 props-are-Id-collapsible : {X : 𝓤 ̇ } → is-prop X → Id-collapsible X
-props-are-Id-collapsible h {x} {y} = ((λ p → h x y) , (λ p q → refl))
+props-are-Id-collapsible h {x} {y} = (λ p → h x y) , (λ p q → refl)
 
 props-are-sets : {X : 𝓤 ̇ } → is-prop X → is-set X
 props-are-sets h = Id-collapsibles-are-sets(props-are-Id-collapsible h)
 
 𝟘-is-collapsible : collapsible (𝟘 {𝓤})
-𝟘-is-collapsible {𝓤} = (id , (λ x → λ ()))
+𝟘-is-collapsible {𝓤} = id , (λ x y → 𝟘-elim y)
 
 pointed-types-are-collapsible : {X : 𝓤 ̇ } → X → collapsible X
-pointed-types-are-collapsible x = ((λ y → x) , λ y y' → refl)
+pointed-types-are-collapsible x = (λ y → x) , (λ y y' → refl)
 
 \end{code}
 
@@ -270,6 +270,13 @@ singleton-type' x = Σ \y → y ≡ x
           → is-prop X → is-prop Y → is-prop(X × Y)
 ×-is-prop i j = ×-prop-criterion ((λ _ → i) , (λ _ → j))
 
+to-subtype-≡ : {X : 𝓦 ̇ } {A : X → 𝓥 ̇ }
+               {x y : X} {a : A x} {b : A y}
+             → ((x : X) → is-prop (A x))
+             → x ≡ y
+             → (x , a) ≡ (y , b)
+to-subtype-≡ {𝓤} {𝓥} {X} {A} {x} {y} {a} {b} s p = to-Σ-≡ (p , s y (transport A p a) b)
+
 subtype-of-prop-is-a-prop : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (m : X → Y)
                           → left-cancellable m → is-prop Y → is-prop X
 subtype-of-prop-is-a-prop {𝓤} {𝓥} {X} m lc i x x' = lc (i (m x) (m x'))
@@ -304,15 +311,15 @@ inr-lc-is-section refl = refl
  where
   r : ap inl (inl-lc p) ≡ ap inl (inl-lc q)
   r = ap (ap inl) (i (inl-lc p) (inl-lc q))
-+-is-set X Y i j {inl x} {inr y} () q
-+-is-set X Y i j {inr y} {inl x} p ()
++-is-set X Y i j {inl x} {inr y} p q = 𝟘-elim (+disjoint  p)
++-is-set X Y i j {inr y} {inl x} p q = 𝟘-elim (+disjoint' p)
 +-is-set X Y i j {inr y} {inr y'} p q = inr-lc-is-section p ∙ r ∙ (inr-lc-is-section q)⁻¹
  where
   r : ap inr (inr-lc p) ≡ ap inr (inr-lc q)
   r = ap (ap inr) (j (inr-lc p) (inr-lc q))
 
 ×-is-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → is-set X → is-set Y → is-set (X × Y)
-×-is-set i j {(x , y)} {(x' , y')} p q = 
+×-is-set i j {(x , y)} {(x' , y')} p q =
  p            ≡⟨ tofrom-×-≡ p ⟩
  to-×-≡ p₀ p₁ ≡⟨ ap₂ (λ -₀ -₁ → to-×-≡ -₀ -₁) (i p₀ q₀) (j p₁ q₁) ⟩
  to-×-≡ q₀ q₁ ≡⟨ (tofrom-×-≡ q)⁻¹ ⟩
@@ -324,7 +331,7 @@ inr-lc-is-section refl = refl
   q₀ : x ≡ x'
   q₀ = pr₁ (from-×-≡' q)
   q₁ : y ≡ y'
-  q₁ = pr₂ (from-×-≡' q) 
+  q₁ = pr₂ (from-×-≡' q)
 
 \end{code}
 

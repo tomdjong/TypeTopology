@@ -260,9 +260,9 @@ ordinal-equiv-gives-bisimilarity α β (f , p , e , q) =
  (g , order-equivs-are-simulations β α g (q , d , p))
  where
   g : ⟨ β ⟩ → ⟨ α ⟩
-  g = eqtofun (≃-sym (f , e))
+  g = ⌜ ≃-sym (f , e) ⌝
   d : is-equiv g
-  d = eqtofun-is-an-equiv (≃-sym (f , e))
+  d = ⌜⌝-is-equiv (≃-sym (f , e))
 
 bisimilarity-gives-ordinal-equiv : (α β : Ordinal 𝓤)
                                  → α ⊴ β → β ⊴ α → α ≃ₒ β
@@ -290,7 +290,7 @@ eqtoidₒ {𝓤} ua α β (f , p , e , q) = JEq ua ⟨ α ⟩ A a ⟨ β ⟩ (f 
  where
   A : (Y : 𝓤 ̇ ) → ⟨ α ⟩ ≃ Y → 𝓤 ⁺ ̇
   A Y e = (σ : OrdinalStructure Y)
-        → is-order-preserving α (Y , σ) (eqtofun e)
+        → is-order-preserving α (Y , σ) ⌜ e ⌝
         → is-order-preserving (Y , σ) α (back-eqtofun e)
         → α ≡ (Y , σ)
   a : A ⟨ α ⟩ (≃-refl ⟨ α ⟩)
@@ -718,8 +718,8 @@ module example where
    p : (x y : ⟨ ℕₒ +ₒ 𝟙ₒ ⟩) → x ≺⟨ ℕₒ +ₒ 𝟙ₒ ⟩ y → under𝟙 x ≺⟨ ℕ∞ₒ ⟩ under𝟙 y
    p (inl n) (inl m) l = under-order-preserving n m l
    p (inl n) (inr *) * = ∞-≺-maximal n
-   p (inr *) (inl m) ()
-   p (inr *) (inr *) ()
+   p (inr *) (inl m) l = 𝟘-elim l
+   p (inr *) (inr *) l = 𝟘-elim l
 
  converse-fails-constructively : ℕ∞ₒ ⊴ (ℕₒ +ₒ 𝟙ₒ) → LPO
  converse-fails-constructively l = has-section-under𝟙-gives-LPO (equivs-have-sections under𝟙 e)
@@ -744,12 +744,12 @@ module example where
      → Σ \(x' : ℕ∞) → (x' ≺⟨ ℕ∞ₒ ⟩ x) × (under𝟙-inverse x' (lpo x') ≡ y)
    i .(under n) (inl (n , refl)) (inl m) l =
      under m , under-order-preserving m n l , under𝟙-inverse-inl (under m) (lpo (under m)) m refl
-   i .(under n) (inl (n , refl)) (inr *) ()
+   i .(under n) (inl (n , refl)) (inr *) l = 𝟘-elim l
    i x (inr g) (inl n) * =
      under n ,
      transport (underlying-order ℕ∞ₒ (under n)) ((not-finite-is-∞ (fe 𝓤₀ 𝓤₀) (curry g)) ⁻¹) (∞-≺-maximal n) ,
      under𝟙-inverse-inl (under n) (lpo (under n)) n refl
-   i x (inr g) (inr *) ()
+   i x (inr g) (inr *) l = 𝟘-elim l
 
    p : (x y : ℕ∞)  (d : decidable(Σ \(n : ℕ) → x ≡ under n)) (e : decidable(Σ \(m : ℕ) → y ≡ under m))
      →  x ≺⟨ ℕ∞ₒ ⟩ y → under𝟙-inverse x d ≺⟨ ℕₒ +ₒ 𝟙ₒ ⟩ under𝟙-inverse y e

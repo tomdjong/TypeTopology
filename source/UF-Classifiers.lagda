@@ -93,7 +93,7 @@ module subtype-classifier
  χ (X , f , i) y = fiber f y , i y
 
  T : (Y → Ω 𝓤) → Σ \(X : 𝓤 ̇ ) → X ↪ Y
- T P = (Σ \(y : Y) → P y holds) , pr₁ , pr₁-embedding (λ y → holds-is-prop (P y))
+ T P = (Σ \(y : Y) → P y holds) , pr₁ , pr₁-is-embedding (λ y → holds-is-prop (P y))
 
  χT : (P : Y → Ω 𝓤) → χ(T P) ≡ P
  χT P = dfunext fe' γ
@@ -107,7 +107,7 @@ module subtype-classifier
 
  transport-embedding : {X X' Y : 𝓤 ̇ } (e : X ≃ X') (g : X → Y) (i : is-embedding g)
                     → transport (λ - → - ↪ Y) (eqtoid ua X X' e) (g , i)
-                    ≡ g ∘ eqtofun (≃-sym e) , comp-embedding
+                    ≡ g ∘ eqtofun (≃-sym e) , ∘-is-embedding
                                                  (equivs-are-embeddings (eqtofun (≃-sym e))
                                                                         (eqtofun-is-an-equiv (≃-sym e))) i
  transport-embedding {X} {X'} {Y} e g i = τ (eqtoid ua X X' e) refl
@@ -115,7 +115,7 @@ module subtype-classifier
    τ : (p : X ≡ X')
      → p ≡ eqtoid ua X X' e
      → transport (λ - → - ↪ Y) p (g , i)
-     ≡ g ∘ eqtofun (≃-sym e) , comp-embedding
+     ≡ g ∘ eqtofun (≃-sym e) , ∘-is-embedding
                                   (equivs-are-embeddings (eqtofun (≃-sym e))
                                                          (eqtofun-is-an-equiv (≃-sym e))) i
    τ refl q = to-Σ-≡ (ap (λ h → g ∘ h) s ,
@@ -128,7 +128,7 @@ module subtype-classifier
 
  Tχ : (σ : Σ \(X : 𝓤 ̇ ) → X ↪ Y) → T(χ σ) ≡ σ
  Tχ (X , f , i) = to-Σ-≡ (eqtoid ua _ _ (graph-domain-equiv f) ,
-                          (transport-embedding (graph-domain-equiv f) pr₁ (pr₁-embedding i)
+                          (transport-embedding (graph-domain-equiv f) pr₁ (pr₁-is-embedding i)
                          ∙ to-Σ-≡' (being-embedding-is-a-prop fe fe f _ _)))
 
  χ-is-equivalence : is-equiv χ
@@ -389,7 +389,7 @@ module type-classifier-bis
                                      dfunext (funext-from-univalence ua)
                                       (λ y → 𝟙-is-prop * (g y))))
    ψ : (Y → Green) ≃ (Y → 𝓤 ̇ )
-   ψ = →-cong fe' fe' (≃-refl Y) γ
+   ψ = →cong fe' fe' (≃-refl Y) γ
     where
      γ : Green ≃ 𝓤 ̇
      γ = qinveq pr₁ ((λ X → (X , * )) , c , λ x → refl)
@@ -437,15 +437,15 @@ module singleton-classifier
    where
     fe : funext 𝓤 𝓤
     fe = funext-from-univalence ua
-    
+
     i   = Σ-cong (λ (X : 𝓤 ̇ ) → Σ-cong (λ (f : X → Y) →
            logically-equivalent-props-are-equivalent
             (being-equiv-is-a-prop'' fe f)
             (Π-is-prop fe (λ y → being-a-singleton-is-a-prop fe))
             (equivs-are-vv-equivs f)
-            (vv-equivs-are-equivs f)))    
+            (vv-equivs-are-equivs f)))
     ii  = classification-equivalence
-    iii = →-cong fe fe' (≃-refl Y) ψ
+    iii = →cong fe fe' (≃-refl Y) ψ
      where
       ψ : Σ (λ X → is-singleton X) ≃ 𝟙
       ψ = qinveq unique-to-𝟙 ((λ _ → 𝟙 , 𝟙-is-singleton) , (a , 𝟙-is-prop *))

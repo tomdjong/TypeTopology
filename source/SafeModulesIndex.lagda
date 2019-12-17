@@ -28,7 +28,7 @@ import LawvereFPT
 import PartialElements
 import UF
 import Types2019
-import ScottModelOfPCF -- by Tom de Jong
+import PCFModules -- by Tom de Jong
 \end{code}
 
 The last module (univalent foundations) has been developed, on demand,
@@ -59,6 +59,7 @@ import Dominance
 import DummettDisjunction
 import Empty
 import ExtendedSumCompact
+import Fin
 import FailureOfTotalSeparatedness
 import GeneralNotation
 import GenericConvergentSequence
@@ -121,11 +122,13 @@ import SliceMonad
 import SpartanMLTT
 import SquashedCantor
 import SquashedSum
+import Swap
 import TheTopologyOfTheUniverse
 import TotallySeparated
 import Two
 import Two-Prop-Density
 import Two-Properties
+import UF
 import UF-Base
 import UF-Choice
 import UF-Classifiers
@@ -134,6 +137,7 @@ import UF-EquivalenceExamples
 import UF-Equiv-FunExt
 import UF-Equiv
 import UF-ExcludedMiddle
+import UF-Factorial
 import UF-FunExt-from-Naive-FunExt-alternate
 import UF-FunExt-from-Naive-FunExt
 import UF-FunExt
@@ -142,7 +146,6 @@ import UF-IdEmbedding
 import UF-ImageAndSurjection
 import UF-Knapp-UA
 import UF-KrausLemma
-import UF
 import UF-LeftCancellable
 import UF-Miscelanea
 import UF-PropIndexedPiSigma

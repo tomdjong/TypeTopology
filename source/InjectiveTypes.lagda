@@ -730,13 +730,13 @@ module /-extension-is-embedding-special-case
  ψ = pr₁
 
  ψ-is-embedding : is-embedding ψ
- ψ-is-embedding = pr₁-embedding (λ X → being-equiv-is-a-prop fe (κ X))
+ ψ-is-embedding = pr₁-is-embedding (λ X → being-equiv-is-a-prop fe (κ X))
 
  s-is-comp : s ≡ ψ ∘ φ
  s-is-comp = refl
 
  s-is-embedding : is-embedding s
- s-is-embedding = comp-embedding φ-is-embedding ψ-is-embedding
+ s-is-embedding = ∘-is-embedding φ-is-embedding ψ-is-embedding
 
 \end{code}
 
@@ -802,13 +802,13 @@ module ∖-extension-is-embedding-special-case
  ψ = pr₁
 
  ψ-is-embedding : is-embedding ψ
- ψ-is-embedding = pr₁-embedding (λ X → being-equiv-is-a-prop fe (κ X))
+ ψ-is-embedding = pr₁-is-embedding (λ X → being-equiv-is-a-prop fe (κ X))
 
  s-is-comp : s ≡ ψ ∘ φ
  s-is-comp = refl
 
  s-is-embedding : is-embedding s
- s-is-embedding = comp-embedding φ-is-embedding ψ-is-embedding
+ s-is-embedding = ∘-is-embedding φ-is-embedding ψ-is-embedding
 
 \end{code}
 
@@ -896,13 +896,13 @@ module /-extension-is-embedding
  ψ = pr₁
 
  ψ-is-embedding : is-embedding ψ
- ψ-is-embedding = pr₁-embedding (λ g → Π-is-prop feuu (λ y → being-equiv-is-a-prop'' feuu (κ g y)))
+ ψ-is-embedding = pr₁-is-embedding (λ g → Π-is-prop feuu (λ y → being-equiv-is-a-prop'' feuu (κ g y)))
 
  s-is-comp : s ≡ ψ ∘ φ
  s-is-comp = refl
 
  s-is-embedding : is-embedding s
- s-is-embedding = comp-embedding φ-is-embedding ψ-is-embedding
+ s-is-embedding = ∘-is-embedding φ-is-embedding ψ-is-embedding
 
 \end{code}
 
@@ -990,13 +990,13 @@ module ∖-extension-is-embedding
  ψ = pr₁
 
  ψ-is-embedding : is-embedding ψ
- ψ-is-embedding = pr₁-embedding (λ g → Π-is-prop feuu (λ y → being-equiv-is-a-prop'' feuu (κ g y)))
+ ψ-is-embedding = pr₁-is-embedding (λ g → Π-is-prop feuu (λ y → being-equiv-is-a-prop'' feuu (κ g y)))
 
  s-is-comp : s ≡ ψ ∘ φ
  s-is-comp = refl
 
  s-is-embedding : is-embedding s
- s-is-embedding = comp-embedding φ-is-embedding ψ-is-embedding
+ s-is-embedding = ∘-is-embedding φ-is-embedding ψ-is-embedding
 
 \end{code}
 
@@ -1462,19 +1462,19 @@ The reason is that the embedding Id : D → (D → 𝓤) factors through
  set-injectivity-in-terms-of-ainjectivity {𝓤} (Ω₀ , e₀) pe D i = γ , ∥ainjective∥-gives-injective D
   where
    down-≃ : (D → Ω 𝓤) ≃ (D → Ω₀)
-   down-≃ = →-cong' (fe 𝓤 𝓤₀) (fe 𝓤 (𝓤 ⁺)) (≃-sym e₀)
+   down-≃ = →cong' (fe 𝓤 𝓤₀) (fe 𝓤 (𝓤 ⁺)) (≃-sym e₀)
 
    down : (D → Ω 𝓤) → (D → Ω₀)
-   down = eqtofun down-≃
+   down = ⌜ down-≃ ⌝
 
    down-is-embedding : is-embedding down
-   down-is-embedding = equivs-are-embeddings down (eqtofun-is-an-equiv down-≃)
+   down-is-embedding = equivs-are-embeddings down (⌜⌝-is-equiv down-≃)
 
    Id-set₀ : D → (D → Ω₀)
    Id-set₀ = down ∘ Id-set i
 
    Id-set₀-is-embedding : is-embedding Id-set₀
-   Id-set₀-is-embedding = comp-embedding
+   Id-set₀-is-embedding = ∘-is-embedding
                            (Id-set-is-embedding (fe 𝓤 𝓤) (fe 𝓤 (𝓤 ⁺)) (pe 𝓤) i)
                            down-is-embedding
 
@@ -1512,16 +1512,16 @@ Added 8th Feb. Solves a problem formulated above.
    e = ≃-sym(pr₂ (𝓛-resizing ω₀ D))
 
    down : 𝓛 D → L
-   down = eqtofun e
+   down = ⌜ e ⌝
 
    down-is-embedding : is-embedding down
-   down-is-embedding = equivs-are-embeddings down (eqtofun-is-an-equiv e)
+   down-is-embedding = equivs-are-embeddings down (⌜⌝-is-equiv e)
 
    ε : D → L
    ε = down ∘ η
 
    ε-is-embedding : is-embedding ε
-   ε-is-embedding = comp-embedding (η-is-embedding' 𝓤 D ua (fe 𝓤 𝓤)) down-is-embedding
+   ε-is-embedding = ∘-is-embedding (η-is-embedding' 𝓤 D ua (fe 𝓤 𝓤)) down-is-embedding
 
    injective-retract-of-L : injective-type D 𝓤 𝓤 → ∥ retract D of L ∥
    injective-retract-of-L = embedding-∥retract∥ D L ε ε-is-embedding

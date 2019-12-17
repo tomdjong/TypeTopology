@@ -510,13 +510,13 @@ embedding are themselves embeddings.
   ψ = pr₁
 
   ψ-is-embedding : is-embedding ψ
-  ψ-is-embedding = pr₁-embedding (λ g → Π-is-prop (fe 𝓥 (𝓤 ⊔ 𝓥)) (λ y → being-equiv-is-a-prop'' (fe (𝓤 ⊔ 𝓥) (𝓤 ⊔ 𝓥)) (κ g y)))
+  ψ-is-embedding = pr₁-is-embedding (λ g → Π-is-prop (fe 𝓥 (𝓤 ⊔ 𝓥)) (λ y → being-equiv-is-a-prop'' (fe (𝓤 ⊔ 𝓥) (𝓤 ⊔ 𝓥)) (κ g y)))
 
   s-is-comp : s ≡ ψ ∘ φ
   s-is-comp = refl
 
   s-is-embedding : is-embedding s
-  s-is-embedding = comp-embedding φ-is-embedding ψ-is-embedding
+  s-is-embedding = ∘-is-embedding φ-is-embedding ψ-is-embedding
 
 
 ↑-extension-is-embedding : (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (j : X → Y) → is-embedding j → is-embedding (_↑ j)
@@ -586,13 +586,13 @@ embedding are themselves embeddings.
   ψ = pr₁
 
   ψ-is-embedding : is-embedding ψ
-  ψ-is-embedding = pr₁-embedding (λ g → Π-is-prop (fe 𝓥 (𝓤 ⊔ 𝓥)) (λ y → being-equiv-is-a-prop'' (fe (𝓤 ⊔ 𝓥) (𝓤 ⊔ 𝓥)) (κ g y)))
+  ψ-is-embedding = pr₁-is-embedding (λ g → Π-is-prop (fe 𝓥 (𝓤 ⊔ 𝓥)) (λ y → being-equiv-is-a-prop'' (fe (𝓤 ⊔ 𝓥) (𝓤 ⊔ 𝓥)) (κ g y)))
 
   s-is-comp : s ≡ ψ ∘ φ
   s-is-comp = refl
 
   s-is-embedding : is-embedding s
-  s-is-embedding = comp-embedding φ-is-embedding ψ-is-embedding
+  s-is-embedding = ∘-is-embedding φ-is-embedding ψ-is-embedding
 
 \end{code}
 
@@ -1140,7 +1140,7 @@ reflective-subuniverse-Σ {𝓤} {𝓣} R A φ α κ = ainjective-retract-of-sub
   j : Σ A → 𝓤 ̇
   j = pr₁
   e : is-embedding j
-  e = pr₁-embedding φ
+  e = pr₁-is-embedding φ
 
 reflective-subuniverse-Π : Propositional-resizing
                          → (A : 𝓤 ̇ → 𝓣 ̇ )
@@ -1155,7 +1155,7 @@ reflective-subuniverse-Π {𝓤} {𝓣} R A φ α κ = ainjective-retract-of-sub
   j : Σ A → 𝓤 ̇
   j = pr₁
   e : is-embedding j
-  e = pr₁-embedding φ
+  e = pr₁-is-embedding φ
 
 \end{code}
 
@@ -1236,7 +1236,7 @@ ainjective-retract-sub {𝓤} {𝓣} R A φ X β i = ainjective-retract-of-subty
   j : Σ A → 𝓤 ̇
   j = pr₁
   a : is-embedding j
-  a = pr₁-embedding φ
+  a = pr₁-is-embedding φ
   k : (X → Σ A) → (X → 𝓤 ̇ )
   k = j ∘_
   b : is-embedding k
@@ -1521,16 +1521,16 @@ injectivity-in-terms-of-ainjectivity {𝓤} ω D = γ , ∥ainjective∥-gives-i
   e = ≃-sym(pr₂ (𝓛-resizing ω D))
 
   down : 𝓛 D → L
-  down = eqtofun e
+  down = ⌜ e ⌝
 
   down-is-embedding : is-embedding down
-  down-is-embedding = equivs-are-embeddings down (eqtofun-is-an-equiv e)
+  down-is-embedding = equivs-are-embeddings down (⌜⌝-is-equiv e)
 
   ε : D → L
   ε = down ∘ 𝓛-unit D
 
   ε-is-embedding : is-embedding ε
-  ε-is-embedding = comp-embedding (𝓛-unit-is-embedding D) down-is-embedding
+  ε-is-embedding = ∘-is-embedding (𝓛-unit-is-embedding D) down-is-embedding
 
   injective-retract-of-L : injective-type D 𝓤 𝓤 → ∥ retract D of L ∥
   injective-retract-of-L i = embedding-∥retract∥ D i L ε ε-is-embedding

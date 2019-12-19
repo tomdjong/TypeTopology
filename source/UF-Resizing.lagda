@@ -502,7 +502,7 @@ universe-retract-Σ-shrinks : (ua : Univalence)
                              {𝓤 𝓥 : Universe}
                              (Y : 𝓤 ⊔ 𝓥 ̇ )
                              → (universe-retract-Σ ua R 𝓤 𝓥 Y) ↪ Y
-universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding ρ-emb σ-emb)
+universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (∘-is-embedding ρ-emb σ-emb)
   where
    s : 𝓤 ̇ → 𝓤 ⊔ 𝓥 ̇
    s = lift 𝓥
@@ -594,7 +594,7 @@ universe-retract-Σ-shrinks ua R {𝓤} {𝓥} Y = σ ∘ ρ , (comp-embedding �
            ii  = Σ-cong (λ w → ≃-sym
                    (ap inl ,
                     embedding-embedding' inl
-                      (inl-embedding (pr₁ (pr₁ w)) 𝟘)
+                      (inl-is-embedding (pr₁ (pr₁ w)) 𝟘)
                       (pr₂ w) (ϕ (pr₁ w) x)))
            iii = Σ-cong (λ X' →
                    Σ-cong (λ e' →

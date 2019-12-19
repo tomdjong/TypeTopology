@@ -13,7 +13,7 @@ module AlgebraicLattice
         (pt : propositional-truncations-exist)
        where
 
-open PropositionalTruncation pt
+open PropositionalTruncation pt hiding (_∨_)
 
 open import UF-Subsingletons -- hiding (⊥)
 open import UF-Subsingletons-FunExt
@@ -94,6 +94,67 @@ decidable-implies-compact p (inr y) I q δ l = ∥∥-functor γ (is-directed-in
 
 ⊥-is-compact : is-compact ⊥
 ⊥-is-compact = decidable-implies-compact ⊥ (inr 𝟘-elim)
+
+_∨_ : Ω₀ → Ω₀ → Ω₀
+P ∨ Q = (∥ P holds + Q holds ∥ , ∥∥-is-a-prop)
+
+∨-left : (P Q : Ω₀) → P ⊑ (P ∨ Q)
+∨-left P Q p = ∣ inl p ∣
+
+∨-right : (P Q : Ω₀) → Q ⊑ (P ∨ Q)
+∨-right P Q q = ∣ inr q ∣
+
+∨-is-join : (P Q R : Ω₀)
+          → P ⊑ R
+          → Q ⊑ R
+          → (P ∨ Q) ⊑ R
+∨-is-join P Q R l m = ∥∥-rec (holds-is-prop R) γ
+ where
+  γ : P holds + Q holds → R holds
+  γ (inl p) = l p
+  γ (inr q) = m q
+
+⊑-trans : (P Q R : Ω₀) → P ⊑ Q → Q ⊑ R → P ⊑ R
+⊑-trans P Q R l m = m ∘ l
+
+∨-is-compact : (P Q : Ω₀)
+             → is-compact P
+             → is-compact Q
+             → is-compact (P ∨ Q)
+∨-is-compact P Q cP cQ I S δ l = do
+  (i , a) ← cP I S δ lP
+  (j , b) ← cQ I S δ lQ
+  (k , u , v) ← is-directed-order S δ i j
+  return (k , ∨-is-join P Q (S k)
+              (⊑-trans P (S i) (S k) a u)
+              (⊑-trans Q (S j) (S k) b v))
+ where
+  lP : P ⊑ ∐ S
+  lP = ⊑-trans P (P ∨ Q) (∐ S) (∨-left P Q) l
+  lQ : Q ⊑ ∐ S
+  lQ = ⊑-trans Q (P ∨ Q) (∐ S) (∨-right P Q) l
+
+{-
+∥∥-rec ∥∥-is-a-prop γ (cP I S δ lP)
+ where
+  lP : P ⊑ ∐ S
+  lP = ⊑-trans P (P ∨ Q) (∐ S) (∨-left P Q) l
+  γ : (Σ \i → P ⊑ S i) → (∃ \i → (P ∨ Q) ⊑ S i)
+  γ (i , a) = ∥∥-rec ∥∥-is-a-prop ϕ (cQ I S δ lQ)
+   where
+    lQ : Q ⊑ ∐ S
+    lQ = ⊑-trans Q (P ∨ Q) (∐ S) (∨-right P Q) l
+    ϕ : (Σ \j → Q ⊑ S j) → (∃ \j → (P ∨ Q) ⊑ S j)
+    ϕ (j , b) = ∥∥-functor ψ (is-directed-order S δ i j)
+     where
+      ψ : (Σ \k → (S i ⊑ S k) × (S j ⊑ S k)) → (Σ \k → (P ∨ Q) ⊑ S k)
+      ψ (k , u , v) = k , ∨-is-join P Q (S k) σ τ
+       where
+        σ : P ⊑ S k
+        σ = ⊑-trans P (S i) (S k) a u
+        τ : Q ⊑ S k
+        τ = ⊑-trans Q (S j) (S k) b v
+-}
 
 {-
 ⊤-is-compact : is-compact ⊤

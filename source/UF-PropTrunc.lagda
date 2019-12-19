@@ -88,6 +88,27 @@ module PropositionalTruncation (pt : propositional-truncations-exist) where
  binary-choice : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → ∥ X ∥ → ∥ Y ∥ → ∥ X × Y ∥
  binary-choice s t = ∥∥-rec ∥∥-is-a-prop (λ x → ∥∥-rec ∥∥-is-a-prop (λ y → ∣ x , y ∣) t) s
 
+ _>>=_ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → ∥ X ∥ → (X → ∥ Y ∥) → ∥ Y ∥
+ s >>= f = ∥∥-rec ∥∥-is-a-prop f s
+
+ law₁ : {X : 𝓤 ̇ } (x : X) (f : X → ∥ X ∥) → ∣ x ∣ >>= f ≡ f x
+ law₁ x f = ∥∥-is-a-prop (∣ x ∣ >>= f) (f x)
+
+ law₂ : {X : 𝓤 ̇ } (s : ∥ X ∥) → s >>= ∣_∣ ≡ s
+ law₂ s = ∥∥-is-a-prop (s >>= ∣_∣) s
+
+ law₃ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ }
+      → (s : ∥ X ∥)
+      → (f : X → ∥ Y ∥)
+      → (g : Y → ∥ Z ∥)
+      → s >>= (\x → f x >>= g) ≡ (s >>= f) >>= g
+ law₃ s f g = ∥∥-is-a-prop (s >>= (λ x → f x >>= g)) ((s >>= f) >>= g)
+
+ return = ∣_∣
+
+ -- bind = _>>=_
+ -- syntax bind e₁ (λ x → e₂) = x ← e₁ ؛ e₂
+
  infixr 0 _∨_
 
 \end{code}

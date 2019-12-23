@@ -390,6 +390,9 @@ Fin-prime-is-equiv n = qinvs-are-equivs (Fin-prime n) ((Fin-unprime n) , εFin n
 ≃-Fin : (n : ℕ) → Fin n ≃ Fin' n
 ≃-Fin n = Fin-prime n , Fin-prime-is-equiv n
 
+Fin'-Compact : (n : ℕ) → Compact (Fin' n) 𝓤
+Fin'-Compact n = Compact-closed-under-≃ (≃-Fin n) (Fin-Compact n)
+
 \end{code}
 
 Added 10th Dec 2019. We define the natural order of Fin n by reduction

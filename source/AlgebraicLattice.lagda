@@ -13,7 +13,10 @@ module AlgebraicLattice
         (pt : propositional-truncations-exist)
        where
 
-open PropositionalTruncation pt hiding (_∨_)
+-- open PropositionalTruncation pt hiding (_∨_)
+
+open import Fin -- renaming (_∷_ to _,_)
+open finiteness pt hiding (_∨_)
 
 open import UF-Subsingletons -- hiding (⊥)
 open import UF-Subsingletons-FunExt
@@ -209,6 +212,32 @@ instance-of-LPO-is-subsingleton α =
 
 LPO-is-subsingleton : is-prop LPO
 LPO-is-subsingleton = Π-is-prop fe₀ instance-of-LPO-is-subsingleton
+
+⟨_⟩'₁ⁿ_ : ℕ∞ → ℕ → 𝓤₀ ̇
+⟨ α ⟩'₁ⁿ n = Σ \(x : Fin' n) → ι α (pr₁ x) ≡ ₁
+
+⟨_⟩'ⁿ_ : ℕ∞ → ℕ → Ω₀
+⟨ α ⟩'ⁿ n = ((⟨ α ⟩'₁ⁿ n) , i)
+ where
+  i : is-prop (⟨ α ⟩'₁ⁿ n)
+  i ((m , l) , p) ((m' , l') , p') = to-Σ-≡ (a , b)
+   where
+    a : (m , l) ≡ (m' , l')
+    a = to-Σ-≡ (u , v)
+     where
+      u : m ≡ m'
+      u = ℕ∞-at-most-one-₁ α m m' p p'
+      v : transport (λ v → v < n) u l ≡ l'
+      v = <-is-prop-valued _ n _ l'
+    b : transport (λ x → ι α (pr₁ x) ≡ ₁) a p ≡ p'
+    b = 𝟚-is-set _ p'
+
+open import CompactTypes
+open import DiscreteAndSeparated
+
+⟨⟩'ⁿ-decidable : (α : ℕ∞) (n : ℕ) → decidable (⟨ α ⟩'₁ⁿ n)
+⟨⟩'ⁿ-decidable α n =
+ Fin'-Compact n (λ x → ι α (pr₁ x) ≡ ₁) (λ x → 𝟚-is-discrete (ι α (pr₁ x)) ₁)
 
 ⟨_⟩₁ⁿ_ : ℕ∞ → ℕ → 𝓤₀ ̇
 ⟨ α ⟩₁ⁿ n = (Σ \(m : ℕ) → (m ≤ n) × (ι α m ≡ ₁))

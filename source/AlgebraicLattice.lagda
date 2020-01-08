@@ -92,6 +92,31 @@ decidable-implies-compact p (inr y) I q δ l = ∥∥-functor γ (is-directed-in
   γ : I → Σ \i → p ⊑ q i
   γ i = (i , λ (x : p holds) → 𝟘-elim (y x))
 
+compact-implies-decidable : (P : Ω₀)
+                          → is-compact P
+                          → decidable (P holds)
+compact-implies-decidable P c = ∥∥-rec (decidability-of-prop-is-prop fe₀ (holds-is-prop P)) γ h
+ where
+  χ : 𝟙 + (P holds) → Ω₀
+  χ (inl *) = ⊥
+  χ (inr p) = ⊤
+  γ : (Σ \i → P ⊑ χ i) → decidable (P holds)
+  γ (inl * , l) = inr l
+  γ (inr p , l) = inl p
+  h : ∃ \i → P ⊑ (χ i)
+  h = c (𝟙 + (P holds)) χ δ g
+   where
+    g : P ⊑ (∐ χ)
+    g p = ∣ (inr p) , * ∣
+    δ : is-directed χ
+    δ = (∣ inl * ∣ , ε)
+     where
+      ε : (i j : 𝟙 + (P holds)) →
+            (∃ \k → (pr₁ (χ i) → pr₁ (χ k)) × (pr₁ (χ j) → pr₁ (χ k)))
+      ε (inl *) (inl *) = ∣ (inl *) , (id , id) ∣
+      ε (inl *) (inr p) = ∣ (inr p) , ((λ _ → *) , id) ∣
+      ε (inr p) j = ∣ inr p , (id , λ _ → *) ∣
+
 ⊤-is-compact : is-compact ⊤
 ⊤-is-compact = decidable-implies-compact ⊤ (inl *)
 

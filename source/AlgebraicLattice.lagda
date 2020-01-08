@@ -357,16 +357,26 @@ everything-compact-implies-LPO C α =
 
 is-algebraic : 𝓤₁ ̇
 is-algebraic = (p : Ω₀) → ∥ (Σ \(I : 𝓤₀ ̇ ) → Σ \(q : I → Ω₀)
-             → ((i : I) → is-compact (q i)) × ((i : I) → q i ⊑ p) × (p holds ≡ ∐ q holds)) ∥
+             → is-directed q
+             × ((i : I) → is-compact (q i))
+             × ((i : I) → q i ⊑ p) × (p holds ≡ ∐ q holds)) ∥
 
 Ω₀-algebraic : propext 𝓤₀ → is-algebraic
-Ω₀-algebraic pe P = ∣ I , κ , c , l , e ∣
+Ω₀-algebraic pe P = ∣ I , κ , δ , c , l , e ∣
  where
   I : 𝓤₀ ̇
   I = 𝟙 + (P holds)
   κ : 𝟙 + (P holds) → Ω₀
   κ (inl *) = ⊥
   κ (inr p) = ⊤
+  δ : is-directed κ
+  δ = (∣ inl * ∣ , ε)
+   where
+    ε : (i j : 𝟙 + (P holds)) →
+          (∃ \k → (pr₁ (κ i) → pr₁ (κ k)) × (pr₁ (κ j) → pr₁ (κ k)))
+    ε (inl *) (inl *) = ∣ (inl *) , (id , id) ∣
+    ε (inl *) (inr p) = ∣ (inr p) , ((λ _ → *) , id) ∣
+    ε (inr p) j = ∣ inr p , (id , λ _ → *) ∣
   c : (i : I) → is-compact (κ i)
   c (inl *) = decidable-implies-compact ⊥ (inr id)
   c (inr p) = decidable-implies-compact ⊤ (inl *)

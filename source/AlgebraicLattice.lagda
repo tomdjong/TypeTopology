@@ -356,8 +356,34 @@ everything-compact-implies-LPO C α =
  ⟨α⟩-compact-implies-LPO-instance α (C ⟨ α ⟩)
 
 is-algebraic : 𝓤₁ ̇
-is-algebraic = ((p : Ω₀) → ∃ \(I : 𝓤₀ ̇ ) → ∃ \(q : I → Ω₀)
-             → ((i : I) → is-compact (q i)) × ((i : I) → q i ⊑ p) × (p holds ≡ ∐ q holds))
+is-algebraic = (p : Ω₀) → ∥ (Σ \(I : 𝓤₀ ̇ ) → Σ \(q : I → Ω₀)
+             → ((i : I) → is-compact (q i)) × ((i : I) → q i ⊑ p) × (p holds ≡ ∐ q holds)) ∥
+
+Ω₀-algebraic : propext 𝓤₀ → is-algebraic
+Ω₀-algebraic pe P = ∣ I , κ , c , l , e ∣
+ where
+  I : 𝓤₀ ̇
+  I = 𝟙 + (P holds)
+  κ : 𝟙 + (P holds) → Ω₀
+  κ (inl *) = ⊥
+  κ (inr p) = ⊤
+  c : (i : I) → is-compact (κ i)
+  c (inl *) = decidable-implies-compact ⊥ (inr id)
+  c (inr p) = decidable-implies-compact ⊤ (inl *)
+  l : (i : I) → κ i ⊑ P
+  l (inl *) = 𝟘-induction
+  l (inr p) = λ _ → p
+  e : P holds ≡ ∐ κ holds
+  e = pe (holds-is-prop P) ∥∥-is-a-prop f g
+   where
+    f : P holds → ∐ κ holds
+    f p = ∣ (inr p) , * ∣
+    g : ∐ κ holds → P holds
+    g s = ∥∥-rec (holds-is-prop P) h s
+     where
+      h : (Σ \i → (κ i) holds) → P holds
+      h (inl * , k) = 𝟘-induction k
+      h (inr p , k) = p
 
 {-
 algebraic-implies-LPO : is-algebraic → LPO

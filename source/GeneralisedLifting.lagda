@@ -7,9 +7,9 @@ open import UF-PropTrunc hiding (⊥)
 
 module GeneralisedLifting
         (𝓥 : Universe) -- universe for index types for directed families
-        (𝓣 : Universe) -- universe of propositions
+--        (𝓣 : Universe) -- universe of propositions
         (pt : propositional-truncations-exist)
-        (pe : propext 𝓣)
+        (pe : propext 𝓥)
         (fe : ∀ {𝓦} {𝓦'} → funext 𝓦 𝓦')
        where
 
@@ -21,21 +21,21 @@ open import UF-Subsingletons-FunExt
 -- open import UF-ImageAndSurjection
 -- open ImageAndSurjection pt
 
-open import Lifting 𝓣
-open import LiftingMiscelanea 𝓣
-open import LiftingMiscelanea-PropExt-FunExt 𝓣 pe fe
+open import Lifting 𝓥
+open import LiftingMiscelanea 𝓥
+open import LiftingMiscelanea-PropExt-FunExt 𝓥 pe fe
 open import UF-Equiv
 
 -- open import LiftingMonad 𝓣
 
-open import Dcpo pt fe 𝓣
+open import Dcpo pt fe 𝓥
 
-𝓕 : DCPO {𝓤} {𝓣} → DCPO {𝓣 ⁺ ⊔ 𝓤} {𝓣}
-𝓕 {𝓤} 𝓓 = 𝓛 D , _⊑_ , 𝕤 , pv , ρ , τ , σ , c
+𝓕 : DCPO {𝓤} {𝓦} → DCPO {𝓥 ⁺ ⊔ 𝓤 } {𝓥 ⊔ 𝓦}
+𝓕 {𝓤} {𝓦} 𝓓 = 𝓛 D , _⊑_ , 𝕤 , pv , ρ , τ , σ , c
  where
   D : 𝓤 ̇
   D = ⟨ 𝓓 ⟩
-  _⊑_ : 𝓛 D → 𝓛 D → 𝓣 ̇
+  _⊑_ : 𝓛 D → 𝓛 D → 𝓥 ⊔ 𝓦 ̇
   (P , ϕ , _) ⊑ (Q , ψ , _) = (P → Q) × ((p : P) (q : Q) → ϕ p ⊑⟨ 𝓓 ⟩ ψ q )
   𝕤 : is-set (𝓛 D)
   𝕤 = lifting-of-set-is-a-set (sethood 𝓓)
@@ -69,14 +69,14 @@ open import Dcpo pt fe 𝓣
     γ = logically-equivalent-props-are-equivalent i j u₁ v₁
     h : (p : P) → ϕ p ≡ ψ (⌜ γ ⌝ p)
     h p = antisymmetry 𝓓 (ϕ p) (ψ (⌜ γ ⌝ p)) (u₂ p (⌜ γ ⌝ p)) (v₂ (⌜ γ ⌝ p) p)
-  c : (I : 𝓣 ̇) (α : I → 𝓛 ⟨ 𝓓 ⟩) → is-directed _⊑_ α → has-sup _⊑_ α
+  c : (I : 𝓥 ̇) (α : I → 𝓛 ⟨ 𝓓 ⟩) → is-directed _⊑_ α → has-sup _⊑_ α
   c I α δ = ∐α , u , l
    where
-    Q : I → 𝓣 ̇
+    Q : I → 𝓥 ̇
     Q i = is-defined (α i)
     ψ : (i : I) → Q i → D
     ψ i q = value (α i) q
-    IQ : 𝓣 ̇
+    IQ : 𝓥 ̇
     IQ = Σ \(i : I) → Q i
     β : IQ → D
     β (i , q) = ψ i q

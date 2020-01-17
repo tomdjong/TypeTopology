@@ -17,8 +17,26 @@ open import UF-Subsingletons hiding (⊥)
 𝓛 X = Σ \(P : 𝓣 ̇ ) → (P → X) × is-prop P
 
 is-defined : {X : 𝓤 ̇ } → 𝓛 X → 𝓣 ̇
-
 is-defined (P , φ , i) = P
+
+-- size test
+
+test : {X : 𝓤 ̇ } → (α : 𝓛 X → Ω 𝓥) → 𝓣 ⁺ ⊔ 𝓤 ⊔ 𝓥 ̇
+test {𝓤} {𝓥} {X} α = Σ \(l : 𝓛 X) → ((α l) holds) × is-defined l
+
+-- test' : {X : 𝓤 ̇ } → (α : 𝓛 X → Ω 𝓥) → 𝓛 X
+-- test' {𝓤} {𝓥} {X} α = {!!} -- test , {!!}
+
+𝓟 : 𝓤 ̇ → 𝓣 ⁺ ⊔ 𝓤 ̇
+𝓟 X = X → Ω 𝓣
+
+_∈_ : {X : 𝓤 ̇ } → X → 𝓟 X → 𝓣 ̇
+x ∈ A = A x holds
+
+test'' : {X : 𝓤 ̇ } → (α : 𝓟 X → Ω 𝓥) → X → 𝓣 ⁺ ⊔ 𝓤 ⊔ 𝓥 ̇
+test'' {𝓤} {𝓥} {X} α x = Σ \(A : 𝓟 X) → (x ∈ A) × ((α A) holds)
+
+--
 
 being-defined-is-a-prop : {X : 𝓤 ̇ } (l : 𝓛  X) → is-prop (is-defined l)
 being-defined-is-a-prop (P , φ , i) = i

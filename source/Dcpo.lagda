@@ -222,6 +222,45 @@ module _ {𝓤 𝓣 : Universe} where
                                 → ((u : ⟨ 𝓓 ⟩) → ((i : I) → α i ⊑⟨ 𝓓 ⟩ u) → ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ u)
  ∐-is-lowerbound-of-upperbounds 𝓓 δ = pr₂ (∐-is-sup 𝓓 δ)
 
+ is-weakly-directed : (𝓓 : DCPO⊥) {I : 𝓥 ̇ } (α : I → ⟨ ⟪ 𝓓 ⟫ ⟩) → 𝓥 ⊔ 𝓣 ̇
+ is-weakly-directed 𝓓 {I} α = (i j : I)
+                               → ∃ (\(k : I) → (α i ⊑⟨ ⟪ 𝓓 ⟫ ⟩ α k) ×
+                                               (α j ⊑⟨ ⟪ 𝓓 ⟫ ⟩ α k))
+
+ strongly-directed-complete : (𝓓 : DCPO⊥) {I : 𝓥 ̇ } {α : I → ⟨ ⟪ 𝓓 ⟫ ⟩}
+                            → is-weakly-directed 𝓓 α
+                            → has-sup (underlying-order ⟪ 𝓓 ⟫) α
+ strongly-directed-complete 𝓓 {I} {α} ε = s , u , v
+  where
+   _⊑_ : ⟨ ⟪ 𝓓 ⟫ ⟩ → ⟨ ⟪ 𝓓 ⟫ ⟩ → 𝓣 ̇
+   _⊑_ = underlying-order ⟪ 𝓓 ⟫
+   K : 𝓥 ̇
+   K = 𝟙{𝓥} + I
+   β : K → ⟨ ⟪ 𝓓 ⟫ ⟩
+   β (inl *) = the-least 𝓓
+   β (inr i) = α i
+   δ : is-directed _⊑_ β
+   δ = (∣ inl * ∣ , κ)
+    where
+     κ : (a b : K) → ∃ \c → (β a ⊑ β c) × (β b ⊑ β c)
+     κ (inl *) b = ∣ b , least-property 𝓓 (β b) , reflexivity ⟪ 𝓓 ⟫ (β b) ∣
+     κ (inr i) (inl *) = ∣ (inr i) , reflexivity ⟪ 𝓓 ⟫ (α i) , least-property 𝓓 (α i) ∣
+     κ (inr i) (inr j) = ∥∥-functor γ (ε i j)
+      where
+       γ : (Σ \(k : I) → (α i) ⊑ (α k) × (α j) ⊑ (α k))
+         → Σ \(c : K) → (β (inr i) ⊑ β c) × (β (inr j) ⊑ β c)
+       γ (k , l) = (inr k , l)
+   s : ⟨ ⟪ 𝓓 ⟫ ⟩
+   s = ∐ ⟪ 𝓓 ⟫ δ
+   u : is-upperbound _⊑_ s α
+   u i = ∐-is-upperbound ⟪ 𝓓 ⟫ δ (inr i)
+   v : ((t : ⟨ ⟪ 𝓓 ⟫ ⟩) → is-upperbound _⊑_ t α → s ⊑ t)
+   v t l = ∐-is-lowerbound-of-upperbounds ⟪ 𝓓 ⟫ δ t h
+    where
+     h : (k : K) → (β k) ⊑ t
+     h (inl *) = least-property 𝓓 t
+     h (inr i) = l i
+
 is-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) → (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → 𝓤 ⊔ 𝓣 ⊔ 𝓣' ̇
 is-monotone 𝓓 𝓔 f = (x y : ⟨ 𝓓 ⟩) → x ⊑⟨ 𝓓 ⟩ y → f x ⊑⟨ 𝓔 ⟩ f y
 

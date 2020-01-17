@@ -9,11 +9,10 @@ module UF-SetTrunc where
 
 open import SpartanMLTT
 
-open import Plus-Properties
-open import UF-Base public
-open import UF-Equiv public
-open import UF-Subsingletons public
-open import UF-FunExt public
+open import UF-Base
+open import UF-Equiv
+open import UF-Subsingletons
+open import UF-FunExt
 
 -- open import UF-Subsingletons-FunExt public
 

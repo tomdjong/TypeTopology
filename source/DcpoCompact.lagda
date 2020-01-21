@@ -38,7 +38,7 @@ syntax approximates 𝓓 x y = x ≪⟨ 𝓓 ⟩ y
   g = a 𝟙 α δ (∐-is-upperbound 𝓓 δ *)
    where
     δ : is-Directed 𝓓 α
-    δ = ∣ * ∣ , ε
+    δ = (∣ * ∣ , ε)
      where
       ε : (i j : 𝟙)
         → ∃ \(k : 𝟙) →  α i ⊑⟨ 𝓓 ⟩ α k × α j ⊑⟨ 𝓓 ⟩ α k
@@ -56,9 +56,17 @@ syntax approximates 𝓓 x y = x ≪⟨ 𝓓 ⟩ y
    where
     g : (Σ \(i : I) → x ⊑⟨ 𝓓 ⟩ α i)
       → (Σ \(i : I) → x' ⊑⟨ 𝓓 ⟩ α i)
-    g (i , l) = i , (transitivity 𝓓 x' x (α i) u l)
+    g (i , l) = (i , t)
+     where
+      t = x'  ⊑⟨ 𝓓 ⟩[ u ]
+          x   ⊑⟨ 𝓓 ⟩[ l ]
+          α i □⟨ 𝓓 ⟩
     h : ∃ \(i : I) → x ⊑⟨ 𝓓 ⟩ α i
-    h = a I α δ (transitivity 𝓓 y y' (∐ 𝓓 δ) v w)
+    h = a I α δ s
+     where
+      s = y     ⊑⟨ 𝓓 ⟩[ v ]
+          y'    ⊑⟨ 𝓓 ⟩[ w ]
+          ∐ 𝓓 δ □⟨ 𝓓 ⟩
 
 compact : (𝓓 : DCPO {𝓤} {𝓣}) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 compact 𝓓 x = x ≪⟨ 𝓓 ⟩ x
@@ -90,9 +98,16 @@ algebraicity-implies-continuity 𝓓 a x = ∥∥-functor γ (a x)
           → Σ \(α : I → ⟨ 𝓓 ⟩)
           → ((i : I) → approximates 𝓓 (α i) x)
           × Σ (λ δ → ∐ 𝓓 δ ≡ x)
-  γ (I , α , c , δ , refl) = I , α , h , δ , refl
+  γ (I , α , c , δ , refl) = (I , α , h , δ , refl)
    where
     h : (i : I) → α i ≪⟨ 𝓓 ⟩ x
-    h i = ⊑-≪-⊑ 𝓓 (reflexivity 𝓓 (α i)) (c i) (∐-is-upperbound 𝓓 δ i)
+    h i = ⊑-≪-⊑ 𝓓 u v w
+     where
+      u : α i ⊑⟨ 𝓓 ⟩ α i
+      u = reflexivity 𝓓 (α i)
+      v : α i ≪⟨ 𝓓 ⟩ α i
+      v = c i
+      w : α i ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+      w = ∐-is-upperbound 𝓓 δ i
 
 \end{code}

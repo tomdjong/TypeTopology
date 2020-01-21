@@ -222,6 +222,30 @@ module _ {𝓤 𝓣 : Universe} where
                                 → ((u : ⟨ 𝓓 ⟩) → ((i : I) → α i ⊑⟨ 𝓓 ⟩ u) → ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ u)
  ∐-is-lowerbound-of-upperbounds 𝓓 δ = pr₂ (∐-is-sup 𝓓 δ)
 
+\end{code}
+
+\begin{code}
+
+ transitivity' : (𝓓 : DCPO) (x : ⟨ 𝓓 ⟩) {y z : ⟨ 𝓓 ⟩}
+               → x ⊑⟨ 𝓓 ⟩ y → y ⊑⟨ 𝓓 ⟩ z → x ⊑⟨ 𝓓 ⟩ z
+ transitivity' 𝓓 x {y} {z} u v = transitivity 𝓓 x y z u v
+
+ syntax transitivity' 𝓓 x u v = x ⊑⟨ 𝓓 ⟩[ u ] v
+ infixr 0 transitivity'
+
+ syntax reflexivity 𝓓 x = x □⟨ 𝓓 ⟩
+ infix 1 reflexivity
+
+{-
+_⊑[_]_ : {𝓓 : DCPO} (x : ⟨ 𝓓 ⟩) {y z : ⟨ 𝓓 ⟩}
+        → x ⊑⟨ 𝓓 ⟩ y → y ⊑⟨ 𝓓 ⟩ z → x ⊑⟨ 𝓓 ⟩ z
+ {𝓓} x ⊑[ u ] v = transitivity {!!} {!!} {!!} {!!} {!!} {!!}
+-}
+
+\end{code}
+
+\begin{code}
+
  is-weakly-directed : (𝓓 : DCPO⊥) {I : 𝓥 ̇ } (α : I → ⟨ ⟪ 𝓓 ⟫ ⟩) → 𝓥 ⊔ 𝓣 ̇
  is-weakly-directed 𝓓 {I} α = (i j : I)
                                → ∃ (\(k : I) → (α i ⊑⟨ ⟪ 𝓓 ⟫ ⟩ α k) ×

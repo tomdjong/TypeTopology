@@ -224,6 +224,30 @@ module _ {𝓤 𝓣 : Universe} where
 
 \end{code}
 
+We introduce pretty syntax for chain reasoning with inequalities.
+(Cf. ≡⟨_⟩ and ∎ in Id.lagda, ≃⟨_⟩ and ■ in UF-Equiv.lagda)
+
+For example, given (a b c d : ⟨ 𝓓 ⟩) and
+u : a ⊑⟨ 𝓓 ⟩ b
+v : b ⊑⟨ 𝓓 ⟩ c
+w : c ⊑⟨ 𝓓 ⟩ d
+
+this will allow us to write
+
+z : a ⊑⟨ 𝓓 ⟩ d
+z = a ⊑⟨ 𝓓 ⟩[ u ]
+    b ⊑⟨ 𝓓 ⟩[ v ]
+    c ⊑⟨ 𝓓 ⟩[ w ]
+    d ∎⟨ 𝓓 ⟩
+
+rather than the hard(er) to read
+
+z : a ⊑⟨ 𝓓 ⟩ d
+z = transitivity 𝓓 a c d z' w
+ where
+  z' : a ⊑⟨ 𝓓 ⟩ c
+  z' = transitivity 𝓓 a b c u v
+
 \begin{code}
 
  transitivity' : (𝓓 : DCPO) (x : ⟨ 𝓓 ⟩) {y z : ⟨ 𝓓 ⟩}
@@ -235,12 +259,6 @@ module _ {𝓤 𝓣 : Universe} where
 
  syntax reflexivity 𝓓 x = x ∎⟨ 𝓓 ⟩
  infix 1 reflexivity
-
-{-
-_⊑[_]_ : {𝓓 : DCPO} (x : ⟨ 𝓓 ⟩) {y z : ⟨ 𝓓 ⟩}
-        → x ⊑⟨ 𝓓 ⟩ y → y ⊑⟨ 𝓓 ⟩ z → x ⊑⟨ 𝓓 ⟩ z
- {𝓓} x ⊑[ u ] v = transitivity {!!} {!!} {!!} {!!} {!!} {!!}
--}
 
 \end{code}
 
@@ -284,6 +302,12 @@ _⊑[_]_ : {𝓓 : DCPO} (x : ⟨ 𝓓 ⟩) {y z : ⟨ 𝓓 ⟩}
      h : (k : K) → (β k) ⊑ t
      h (inl *) = least-property 𝓓 t
      h (inr i) = l i
+
+\end{code}
+
+Next, we define continuous maps between dcpos.
+
+\begin{code}
 
 is-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) → (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → 𝓤 ⊔ 𝓣 ⊔ 𝓣' ̇
 is-monotone 𝓓 𝓔 f = (x y : ⟨ 𝓓 ⟩) → x ⊑⟨ 𝓓 ⟩ y → f x ⊑⟨ 𝓔 ⟩ f y

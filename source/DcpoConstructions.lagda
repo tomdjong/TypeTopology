@@ -80,16 +80,12 @@ module DcpoConstructionsGeneral
       u j = ∐-is-lowerbound-of-upperbounds 𝓔 (ε (γ j)) (f (∐ 𝓓 φ)) r
        where
         r : (i : I) → underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 φ)
-        r i = transitivity 𝓔
-              (underlying-function 𝓓 𝓔 (α i) (γ j))
-              (underlying-function 𝓓 𝓔 (α i) (∐ 𝓓 φ))
-              (f (∐ 𝓓 φ)) p q
+        r i = underlying-function 𝓓 𝓔 (α i) (γ j)   ⊑⟨ 𝓔 ⟩[ p ]
+              underlying-function 𝓓 𝓔 (α i) (∐ 𝓓 φ) ⊑⟨ 𝓔 ⟩[ q ]
+              f (∐ 𝓓 φ)                             ∎⟨ 𝓔 ⟩
          where
-          p : underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩
-              underlying-function 𝓓 𝓔 (α i) (∐ 𝓓 φ)
           p = continuous-functions-are-monotone 𝓓 𝓔 (α i) (γ j) (∐ 𝓓 φ)
               (∐-is-upperbound 𝓓 φ j)
-          q : underlying-function 𝓓 𝓔 (α i) (∐ 𝓓 φ) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 φ)
           q = ∐-is-upperbound 𝓔 (ε (∐ 𝓓 φ)) i
       v : (y : ⟨ 𝓔 ⟩)
         → ((j : J) → f (γ j) ⊑⟨ 𝓔 ⟩ y)
@@ -97,25 +93,16 @@ module DcpoConstructionsGeneral
       v y l = ∐-is-lowerbound-of-upperbounds 𝓔 (ε (∐ 𝓓 φ)) y r
        where
         r : (i : I) → β (∐ 𝓓 φ) i ⊑⟨ 𝓔 ⟩ y
-        r i = transitivity 𝓔 (β (∐ 𝓓 φ) i) (f (∐ 𝓓 φ)) y p q
+        r i = is-sup-gives-is-lowerbound-of-upperbounds (underlying-order 𝓔)
+               (continuity-of-function 𝓓 𝓔 (α i) J γ φ) y m
          where
-          p : β (∐ 𝓓 φ) i ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 φ)
-          p = ∐-is-upperbound 𝓔 (ε (∐ 𝓓 φ)) i
-          q : f (∐ 𝓓 φ) ⊑⟨ 𝓔 ⟩ y
-          q = ∐-is-lowerbound-of-upperbounds 𝓔 (ε (∐ 𝓓 φ)) y h
+          m : (j : J) → underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩ y
+          m j = underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩[ m₁ ]
+                f (γ j)                             ⊑⟨ 𝓔 ⟩[ m₂ ]
+                y                                   ∎⟨ 𝓔 ⟩
            where
-            h : (i' : I) → β (∐ 𝓓 φ) i' ⊑⟨ 𝓔 ⟩ y
-            h i' = is-sup-gives-is-lowerbound-of-upperbounds (underlying-order 𝓔)
-                   (continuity-of-function 𝓓 𝓔 (α i') J γ φ) y m
-             where
-              m : (j : J) → underlying-function 𝓓 𝓔 (α i') (γ j) ⊑⟨ 𝓔 ⟩ y
-              m j = transitivity 𝓔
-                    (underlying-function 𝓓 𝓔 (α i') (γ j)) (f (γ j)) y m₁ m₂
-               where
-                m₁ : underlying-function 𝓓 𝓔 (α i') (γ j) ⊑⟨ 𝓔 ⟩ (f (γ j))
-                m₁ = ∐-is-upperbound 𝓔 (ε (γ j)) i'
-                m₂ : f (γ j) ⊑⟨ 𝓔 ⟩ y
-                m₂ = l j
+            m₁ = ∐-is-upperbound 𝓔 (ε (γ j)) i
+            m₂ = l j
 
  infixr 20 _⟹ᵈᶜᵖᵒ_
 

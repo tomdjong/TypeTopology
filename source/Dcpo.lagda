@@ -233,7 +233,7 @@ module _ {𝓤 𝓣 : Universe} where
  syntax transitivity' 𝓓 x u v = x ⊑⟨ 𝓓 ⟩[ u ] v
  infixr 0 transitivity'
 
- syntax reflexivity 𝓓 x = x □⟨ 𝓓 ⟩
+ syntax reflexivity 𝓓 x = x ∎⟨ 𝓓 ⟩
  infix 1 reflexivity
 
 {-

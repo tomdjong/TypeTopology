@@ -141,58 +141,68 @@ TO DO
 
 \begin{code}
 
- strongly-directed-complete : (𝓓 : DCPO⊥) {I : 𝓥 ̇ } {α : I → ⟨ ⟪ 𝓓 ⟫ ⟩}
-                            → is-weakly-directed (underlying-order ⟪ 𝓓 ⟫) α
-                            → has-sup (underlying-order ⟪ 𝓓 ⟫) α
- strongly-directed-complete 𝓓 {I} {α} ε = s , u , v
-  where
-   _⊑_ : ⟨ ⟪ 𝓓 ⟫ ⟩ → ⟨ ⟪ 𝓓 ⟫ ⟩ → 𝓣 ̇
-   _⊑_ = underlying-order ⟪ 𝓓 ⟫
-   K : 𝓥 ̇
-   K = 𝟙{𝓥} + I
-   β : K → ⟨ ⟪ 𝓓 ⟫ ⟩
-   β (inl *) = the-least 𝓓
-   β (inr i) = α i
-   δ : is-directed _⊑_ β
-   δ = (∣ inl * ∣ , κ)
-    where
-     κ : (a b : K) → ∃ \c → (β a ⊑ β c) × (β b ⊑ β c)
-     κ (inl *) b = ∣ b , least-property 𝓓 (β b) , reflexivity ⟪ 𝓓 ⟫ (β b) ∣
-     κ (inr i) (inl *) = ∣ (inr i) , reflexivity ⟪ 𝓓 ⟫ (α i) , least-property 𝓓 (α i) ∣
-     κ (inr i) (inr j) = ∥∥-functor γ (ε i j)
-      where
-       γ : (Σ \(k : I) → (α i) ⊑ (α k) × (α j) ⊑ (α k))
-         → Σ \(c : K) → (β (inr i) ⊑ β c) × (β (inr j) ⊑ β c)
-       γ (k , l) = (inr k , l)
-   s : ⟨ ⟪ 𝓓 ⟫ ⟩
-   s = ∐ ⟪ 𝓓 ⟫ δ
-   u : is-upperbound _⊑_ s α
-   u i = ∐-is-upperbound ⟪ 𝓓 ⟫ δ (inr i)
-   v : ((t : ⟨ ⟪ 𝓓 ⟫ ⟩) → is-upperbound _⊑_ t α → s ⊑ t)
-   v t l = ∐-is-lowerbound-of-upperbounds ⟪ 𝓓 ⟫ δ t h
-    where
-     h : (k : K) → (β k) ⊑ t
-     h (inl *) = least-property 𝓓 t
-     h (inr i) = l i
-
- double-∐-swap : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
-                      → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))
-                      → (δⱼ : (j : J) → is-Directed 𝓓 (λ (i : I) → γ (i , j)))
-                      → (ε₁ : is-Directed 𝓓 (λ (j : J) → ∐ 𝓓 (δⱼ j)))
-                      → (ε₂ : is-Directed 𝓓 (λ (i : I) → ∐ 𝓓 (δᵢ i)))
-                      → ∐ 𝓓 ε₁ ≡ ∐ 𝓓 ε₂
- double-∐-swap {I} {J} 𝓓 {γ} δᵢ δⱼ ε₁ ε₂ =
-  antisymmetry 𝓓 (∐ 𝓓 ε₁) (∐ 𝓓 ε₂) u {!v!}
+strongly-directed-complete : (𝓓 : DCPO⊥ {𝓤} {𝓣}) {I : 𝓥 ̇ } {α : I → ⟪ 𝓓 ⟫}
+                           → is-weakly-directed (underlying-order (𝓓 ⁻)) α
+                           → has-sup (underlying-order (𝓓 ⁻)) α
+strongly-directed-complete {𝓤} {𝓣} 𝓓 {I} {α} ε = s , u , v
+ where
+  _⊑_ : ⟪ 𝓓 ⟫ → ⟪ 𝓓 ⟫ → 𝓣 ̇
+  _⊑_ = underlying-order (𝓓 ⁻)
+  J : 𝓥 ̇
+  J = 𝟙{𝓥} + I
+  β : J → ⟪ 𝓓 ⟫
+  β (inl *) = ⊥ 𝓓
+  β (inr i) = α i
+  δ : is-directed _⊑_ β
+  δ = (∣ inl * ∣ , κ)
    where
-    u : ∐ 𝓓 ε₁ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
-    u = ∐-is-lowerbound-of-upperbounds 𝓓 ε₁ (∐ 𝓓 ε₂) w
+    κ : (a b : J) → ∃ \c → (β a ⊑ β c) × (β b ⊑ β c)
+    κ (inl *) b = ∣ b , ⊥-is-least 𝓓 (β b) , reflexivity (𝓓 ⁻) (β b) ∣
+    κ (inr i) (inl *) = ∣ (inr i) , reflexivity (𝓓 ⁻) (α i) , ⊥-is-least 𝓓 (α i) ∣
+    κ (inr i) (inr j) = ∥∥-functor γ (ε i j)
      where
-      w : (j : J) → ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
-      w j = ∐-is-lowerbound-of-upperbounds 𝓓 (δⱼ j) (∐ 𝓓 ε₂) z
-       where
-        z : (i : I) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
-        z i = {!!}
-    v : {!!}
-    v = {!!}
+      γ : (Σ \(k : I) → (α i) ⊑ (α k) × (α j) ⊑ (α k))
+        → Σ \(c : J) → (β (inr i) ⊑ β c) × (β (inr j) ⊑ β c)
+      γ (k , l) = (inr k , l)
+  s : ⟪ 𝓓 ⟫
+  s = ∐ (𝓓 ⁻) δ
+  u : is-upperbound _⊑_ s α
+  u i = ∐-is-upperbound (𝓓 ⁻) δ (inr i)
+  v : ((t : ⟪ 𝓓 ⟫) → is-upperbound _⊑_ t α → s ⊑ t)
+  v t l = ∐-is-lowerbound-of-upperbounds (𝓓 ⁻) δ t h
+   where
+    h : (k : J) → (β k) ⊑ t
+    h (inl *) = ⊥-is-least 𝓓 t
+    h (inr i) = l i
+
+double-∐-swap : {I J : 𝓥 ̇ } (𝓓 : DCPO {𝓤} {𝓣}) {γ : I × J → ⟨ 𝓓 ⟩}
+              → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))
+              → (δⱼ : (j : J) → is-Directed 𝓓 (λ (i : I) → γ (i , j)))
+              → (ε₁ : is-Directed 𝓓 (λ (j : J) → ∐ 𝓓 (δⱼ j)))
+              → (ε₂ : is-Directed 𝓓 (λ (i : I) → ∐ 𝓓 (δᵢ i)))
+              → ∐ 𝓓 ε₁ ≡ ∐ 𝓓 ε₂
+double-∐-swap {𝓤} {𝓣} {I} {J} 𝓓 {γ} δᵢ δⱼ ε₁ ε₂ =
+ antisymmetry 𝓓 (∐ 𝓓 ε₁) (∐ 𝓓 ε₂) u v
+  where
+   u : ∐ 𝓓 ε₁ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
+   u = ∐-is-lowerbound-of-upperbounds 𝓓 ε₁ (∐ 𝓓 ε₂) w
+    where
+     w : (j : J) → ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
+     w j = ∐-is-lowerbound-of-upperbounds 𝓓 (δⱼ j) (∐ 𝓓 ε₂) z
+      where
+       z : (i : I) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
+       z i = γ (i , j)  ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (δᵢ i) j ]
+             ∐ 𝓓 (δᵢ i) ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε₂ i ]
+             ∐ 𝓓 ε₂     ∎⟨ 𝓓 ⟩
+   v : ∐ 𝓓 ε₂ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₁
+   v = ∐-is-lowerbound-of-upperbounds 𝓓 ε₂ (∐ 𝓓 ε₁) w
+    where
+     w : (i : I) → ∐ 𝓓 (δᵢ i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₁
+     w i = ∐-is-lowerbound-of-upperbounds 𝓓 (δᵢ i) (∐ 𝓓 ε₁) z
+      where
+       z : (j : J) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₁
+       z j = γ (i , j)  ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (δⱼ j) i ]
+             ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε₁ j ]
+             ∐ 𝓓 ε₁     ∎⟨ 𝓓 ⟩
 
 \end{code}

@@ -9,7 +9,7 @@ Tom de Jong, 27 May 2019.
 
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-open import SpartanMLTT
+open import SpartanMLTT hiding (J)
 open import UF-PropTrunc hiding (⊥)
 
 module DcpoConstructions

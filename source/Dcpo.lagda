@@ -8,7 +8,7 @@ Tom de Jong & Martin Escardo, 20 May 2019.
 
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-open import SpartanMLTT
+open import SpartanMLTT hiding (J)
 open import UF-PropTrunc
 
 module Dcpo
@@ -302,6 +302,74 @@ z = transitivity 𝓓 a c d z' w
      h : (k : K) → (β k) ⊑ t
      h (inl *) = least-property 𝓓 t
      h (inr i) = l i
+
+ double-∐-swap : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
+                      → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))
+                      → (δⱼ : (j : J) → is-Directed 𝓓 (λ (i : I) → γ (i , j)))
+                      → (ε₁ : is-Directed 𝓓 (λ (j : J) → ∐ 𝓓 (δⱼ j)))
+                      → (ε₂ : is-Directed 𝓓 (λ (i : I) → ∐ 𝓓 (δᵢ i)))
+                      → ∐ 𝓓 ε₁ ≡ ∐ 𝓓 ε₂
+ double-∐-swap {I} {J} 𝓓 {γ} δᵢ δⱼ ε₁ ε₂ =
+  antisymmetry 𝓓 (∐ 𝓓 ε₁) (∐ 𝓓 ε₂) u {!v!}
+   where
+    u : ∐ 𝓓 ε₁ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
+    u = ∐-is-lowerbound-of-upperbounds 𝓓 ε₁ (∐ 𝓓 ε₂) w
+     where
+      w : (j : J) → ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
+      w j = ∐-is-lowerbound-of-upperbounds 𝓓 (δⱼ j) (∐ 𝓓 ε₂) z
+       where
+        z : (i : I) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
+        z i = {!!}
+    v : {!!}
+    v = {!!}
+
+ doubly-indexed-lemma₁ : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
+                      → (δ : is-Directed 𝓓 γ)
+                      → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))
+                      → (ε : is-Directed 𝓓 (λ (i : I) → ∐ 𝓓 (δᵢ i)))
+                      → ∐ 𝓓 ε ≡ ∐ 𝓓 δ
+ doubly-indexed-lemma₁ {I} {J} 𝓓 {γ} δ δᵢ ε =
+  antisymmetry 𝓓 (∐ 𝓓 ε) (∐ 𝓓 δ) u v
+   where
+    u : ∐ 𝓓 ε ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+    u = ∐-is-lowerbound-of-upperbounds 𝓓 ε (∐ 𝓓 δ) w
+     where
+      w : (i : I) → ∐ 𝓓 (δᵢ i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+      w i = ∐-is-lowerbound-of-upperbounds 𝓓 (δᵢ i) (∐ 𝓓 δ) z
+       where
+        z : (j : J) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+        z j = ∐-is-upperbound 𝓓 δ (i , j)
+    v : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+    v = ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) w
+     where
+      w : (k : I × J) → γ k ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+      w (i , j) = γ (i , j)  ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (δᵢ i) j ]
+                  ∐ 𝓓 (δᵢ i) ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε i ]
+                  ∐ 𝓓 ε      ∎⟨ 𝓓 ⟩
+
+ doubly-indexed-lemma₂ : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
+                      → (δ : is-Directed 𝓓 γ)
+                      → (δⱼ : (j : J) → is-Directed 𝓓 (λ (i : I) → γ (i , j)))
+                      → (ε : is-Directed 𝓓 (λ (j : J) → ∐ 𝓓 (δⱼ j)))
+                      → ∐ 𝓓 δ ≡ ∐ 𝓓 ε
+ doubly-indexed-lemma₂ {I} {J} 𝓓 {γ} δ δⱼ ε =
+  antisymmetry 𝓓 (∐ 𝓓 δ) (∐ 𝓓 ε) u v
+   where
+    u : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+    u = ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) w
+     where
+      w : (k : I × J) → γ k ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+      w (i , j) = γ (i , j)  ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (δⱼ j) i ]
+                  ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε j ]
+                  ∐ 𝓓 ε      ∎⟨ 𝓓 ⟩
+    v : ∐ 𝓓 ε ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+    v = ∐-is-lowerbound-of-upperbounds 𝓓 ε (∐ 𝓓 δ) w
+     where
+      w : (j : J) → ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+      w j = ∐-is-lowerbound-of-upperbounds 𝓓 (δⱼ j) (∐ 𝓓 δ) z
+       where
+        z : (i : I) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+        z i = ∐-is-upperbound 𝓓 δ (i , j)
 
 \end{code}
 

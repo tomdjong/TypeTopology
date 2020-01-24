@@ -8,8 +8,8 @@ Tom de Jong & Martin Escardo, 20 May 2019.
 
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-open import SpartanMLTT hiding (J)
-open import UF-PropTrunc
+open import SpartanMLTT
+open import UF-PropTrunc hiding (⊥)
 
 module Dcpo
         (pt : propositional-truncations-exist)
@@ -19,7 +19,7 @@ module Dcpo
 
 open PropositionalTruncation pt
 
-open import UF-Subsingletons
+open import UF-Subsingletons hiding (⊥)
 open import UF-Subsingletons-FunExt
 
 module _ {𝓤 𝓣 : Universe}
@@ -48,20 +48,22 @@ module _ {𝓤 𝓣 : Universe}
  is-upperbound : {I : 𝓥 ̇ } (u : D) (α : I → D) → 𝓥 ⊔ 𝓣 ̇
  is-upperbound u α = (i : domain α) → α i ⊑ u
 
+ is-lowerbound-of-upperbounds : {I : 𝓥 ̇ } (u : D) (α : I → D) → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
+ is-lowerbound-of-upperbounds u α = (v : D) → is-upperbound v α → u ⊑ v
+
  is-sup : {I : 𝓥 ̇ } → D → (I → D) → 𝓤 ⊔ 𝓥 ⊔ 𝓣 ̇
- is-sup s α = (is-upperbound s α)
-            × ((u : D) → is-upperbound u α → s ⊑ u)
+ is-sup s α = (is-upperbound s α) × (is-lowerbound-of-upperbounds s α)
 
- is-sup-gives-is-upperbound : {I : 𝓥 ̇ } {s : D} {α : I → D}
-                            → is-sup s α
-                            → is-upperbound s α
- is-sup-gives-is-upperbound i = pr₁ i
+ sup-is-upperbound : {I : 𝓥 ̇ } {s : D} {α : I → D}
+                   → is-sup s α
+                   → is-upperbound s α
+ sup-is-upperbound i = pr₁ i
 
- is-sup-gives-is-lowerbound-of-upperbounds : {I : 𝓥 ̇ } {s : D} {α : I → D}
-                                           → is-sup s α
-                                           → (u : D)
-                                           → is-upperbound u α → s ⊑ u
- is-sup-gives-is-lowerbound-of-upperbounds i = pr₂ i
+ sup-is-lowerbound-of-upperbounds : {I : 𝓥 ̇ } {s : D} {α : I → D}
+                                  → is-sup s α
+                                  → (u : D)
+                                  → is-upperbound u α → s ⊑ u
+ sup-is-lowerbound-of-upperbounds i = pr₂ i
 
  has-sup : {I : 𝓥 ̇ } → (I → D) → 𝓤 ⊔ 𝓥 ⊔ 𝓣 ̇
  has-sup α = Σ \(s : D) → is-sup s α
@@ -72,80 +74,118 @@ module _ {𝓤 𝓣 : Universe}
  sup-property : {I : 𝓥 ̇ } {α : I → D} (h : has-sup α) → is-sup (the-sup h) α
  sup-property (s , i) = i
 
- is-directed : {I : 𝓥 ̇ } → (I → D) → 𝓥 ⊔ 𝓣 ̇
- is-directed {I} α = ∥ I ∥ × ((i j : I) → ∃ \(k : I) → (α i ⊑ α k) × (α j ⊑ α k))
+ is-inhabited : (I : 𝓥 ̇ ) → 𝓥 ̇
+ is-inhabited = ∥_∥
 
- is-directed-gives-inhabited : {I : 𝓥 ̇} (α : I → D) → is-directed α → ∥ I ∥
- is-directed-gives-inhabited α = pr₁
+ being-inhabited-is-a-prop : {I : 𝓥 ̇ } → is-prop (is-inhabited I)
+ being-inhabited-is-a-prop = ∥∥-is-a-prop
 
- is-directed-order : {I : 𝓥 ̇} (α : I → D) → is-directed α
-                   → (i j : I) → ∃ (\(k : I) → (α i ⊑ α k) × (α j ⊑ α k))
- is-directed-order α = pr₂
+ is-weakly-directed : {I : 𝓥 ̇ } (α : I → D) → 𝓥 ⊔ 𝓣 ̇
+ is-weakly-directed {I} α = (i j : I) → ∃ \(k : I) → α i ⊑ α k × α j ⊑ α k
 
- being-directed-is-a-prop : {I : 𝓥 ̇ } (α : I → D) → is-prop (is-directed α)
- being-directed-is-a-prop α = ×-is-prop ∥∥-is-a-prop
-                            (Π-is-prop fe
-                               (λ i → Π-is-prop fe
-                                       (λ j → ∥∥-is-a-prop )))
+ being-weakly-directed-is-a-prop : {I : 𝓥 ̇ } {α : I → D}
+                                 → is-prop (is-weakly-directed α)
+ being-weakly-directed-is-a-prop = Π-is-prop fe
+                                   (λ i → Π-is-prop fe
+                                   (λ j → ∥∥-is-a-prop))
+
+ is-directed : {I : 𝓥 ̇ } (α : I → D) → 𝓥 ⊔ 𝓣 ̇
+ is-directed α = is-inhabited (domain α) × is-weakly-directed α
+
+ being-directed-is-a-prop : {I : 𝓥 ̇ } {α : I → D} → is-prop (is-directed α)
+ being-directed-is-a-prop =
+  ×-is-prop being-inhabited-is-a-prop being-weakly-directed-is-a-prop
+
+ directed-implies-inhabited : {I : 𝓥 ̇ } {α : I → D}
+                            → is-directed α
+                            → is-inhabited I
+ directed-implies-inhabited = pr₁
+
+ directed-implies-weakly-directed : {I : 𝓥 ̇ } {α : I → D}
+                                  → is-directed α
+                                  → is-weakly-directed α
+ directed-implies-weakly-directed = pr₂
+
+ poset-axioms : 𝓤 ⊔ 𝓣 ̇
+ poset-axioms = is-set D
+              × is-prop-valued
+              × is-reflexive
+              × is-transitive
+              × is-antisymmetric
+
+ poset-axioms-is-a-prop : is-prop (poset-axioms)
+ poset-axioms-is-a-prop = iprops-are-props γ
+  where
+   γ : poset-axioms → is-prop poset-axioms
+   γ (s , p , r , t , a) = ×-is-prop (being-set-is-a-prop fe)
+                           (×-is-prop
+                             (Π-is-prop fe
+                               (λ x → Π-is-prop fe
+                               (λ y → being-a-prop-is-a-prop fe)))
+                           (×-is-prop
+                             (Π-is-prop fe
+                               (λ x → p x x))
+                           (×-is-prop
+                             (Π-is-prop fe
+                               (λ x → Π-is-prop fe
+                               (λ y → Π-is-prop fe
+                               (λ z → Π-is-prop fe
+                               (λ u → Π-is-prop fe
+                               (λ v → p x z))))))
+                           (Π-is-prop fe
+                             (λ x → Π-is-prop fe
+                             (λ y → Π-is-prop fe
+                             (λ u → Π-is-prop fe
+                             (λ v → s))))))))
 
  is-directed-complete : 𝓤 ⊔ (𝓥 ⁺) ⊔ 𝓣  ̇
  is-directed-complete = (I : 𝓥 ̇ ) (α : I → D) → is-directed α → has-sup α
 
  dcpo-axioms : 𝓤 ⊔ (𝓥 ⁺) ⊔ 𝓣 ̇
- dcpo-axioms = is-set D
-             × is-prop-valued
-             × is-reflexive
-             × is-transitive
-             × is-antisymmetric
-             × is-directed-complete
+ dcpo-axioms = poset-axioms × is-directed-complete
 
  is-sup-is-a-prop : dcpo-axioms → {I : 𝓥 ̇ } (d : D) (α : I → D)
                   → is-prop (is-sup d α)
- is-sup-is-a-prop (s , p , r , t , a , c) {I} d α = γ
+ is-sup-is-a-prop ((s , p , r , t , a) , c) d α = γ
   where
    γ : is-prop (is-sup d α)
-   γ = ×-is-prop (Π-is-prop fe (λ (i : I) → p (α i) d))
-                 (Π-is-prop fe (λ (x : D) → Π-is-prop fe (λ l → p d x)))
+   γ = ×-is-prop
+         (Π-is-prop fe
+           (λ i → p (α i) d))
+         (Π-is-prop fe
+           (λ x → Π-is-prop fe
+           (λ l → p d x)))
 
  having-sup-is-a-prop : dcpo-axioms → {I : 𝓥 ̇ } (α : I → D)
                       → is-prop (has-sup α)
- having-sup-is-a-prop (s , p , r , t , a , c) {I} α = γ
+ having-sup-is-a-prop ((s , p , r , t , a) , c) α = γ
   where
    γ : is-prop (has-sup α)
-   γ (j , (u , l)) (j' , (u' , l')) =
-     to-Σ-≡ (q , is-sup-is-a-prop (s , p , r , t , a , c) j' α _ _)
-    where
-     q : j ≡ j'
-     q = a j j' (l j' u') (l' j u)
+   γ (x , u , l) (y , u' , l') =
+    to-Σ-≡ (e , is-sup-is-a-prop ((s , p , r , t , a ) , c) y α _ (u' , l'))
+     where
+      e : x ≡ y
+      e = a x y (l y u') (l' x u)
 
  being-directed-complete-is-a-prop : dcpo-axioms → is-prop is-directed-complete
- being-directed-complete-is-a-prop a =
-  Π-is-prop fe
-   (λ I → Π-is-prop fe
-             (λ α → Π-is-prop fe (λ d → having-sup-is-a-prop a α)))
+ being-directed-complete-is-a-prop a = Π-is-prop fe
+                                         (λ I → Π-is-prop fe
+                                         (λ α → Π-is-prop fe
+                                         (λ δ → having-sup-is-a-prop a α)))
 
  dcpo-axioms-is-a-prop : is-prop dcpo-axioms
  dcpo-axioms-is-a-prop = iprops-are-props γ
   where
    γ : dcpo-axioms → is-prop dcpo-axioms
-   γ (s , p , r , t , a , c) =
-    ×-is-prop  (being-set-is-a-prop fe)
-    (×-is-prop (Π-is-prop fe
-                 (λ (x : D) → Π-is-prop fe
-                                (λ (y : D) → being-a-prop-is-a-prop fe)))
-    (×-is-prop (Π-is-prop fe (λ (x : D) → p x x))
-    (×-is-prop (Π-is-prop fe
-                 (λ (x : D) → Π-is-prop fe
-                               (λ (y : D) → Π-is-prop fe
-                                             (λ (z : D) → Π-is-prop fe
-                                                           (λ (l : x ⊑ y) → Π-is-prop fe
-                                                                             (λ (m : y ⊑ z) → p x z))))))
-    (×-is-prop (Π-is-prop fe
-                 (λ (x : D) → Π-is-prop fe
-                               (λ y → Π-is-prop fe
-                                       (λ (l : x ⊑ y) → Π-is-prop fe
-                                                         λ (m : y ⊑ x) → s))))
-              (being-directed-complete-is-a-prop (s , p , r , t , a , c))))))
+   γ a = ×-is-prop
+           poset-axioms-is-a-prop
+           (being-directed-complete-is-a-prop a)
+
+\end{code}
+
+We proceed by defining the type of dcpos and convenient projection functions.
+
+\begin{code}
 
 module _ {𝓤 𝓣 : Universe} where
 
@@ -163,64 +203,49 @@ module _ {𝓤 𝓣 : Universe} where
 
  syntax underlying-order 𝓓 x y = x ⊑⟨ 𝓓 ⟩ y
 
- DCPO⊥ : (𝓥 ⁺) ⊔ (𝓤 ⁺) ⊔ (𝓣 ⁺) ̇
- DCPO⊥ = Σ \(𝓓 : DCPO) → has-least (underlying-order 𝓓)
-
- ⟪_⟫ : DCPO⊥ → DCPO
- ⟪ 𝓓 , x , p ⟫  = 𝓓
-
- the-least : (𝓓 : DCPO⊥) → ⟨ ⟪ 𝓓 ⟫ ⟩
- the-least (𝓓 , x , p) = x
-
- least-property : (𝓓 : DCPO⊥) → is-least (underlying-order ⟪ 𝓓 ⟫) (the-least 𝓓)
- least-property (𝓓 , x , p) = p
-
  axioms-of-dcpo : (𝓓 : DCPO) → dcpo-axioms (underlying-order 𝓓)
  axioms-of-dcpo (D , _⊑_ , d) = d
 
  sethood : (𝓓 : DCPO) → is-set ⟨ 𝓓 ⟩
- sethood (D , _⊑_ , (s  , p  , r  , t  , a  , c )) = s
+ sethood (D , _⊑_ , (s  , p  , r  , t  , a)  , c ) = s
 
  prop-valuedness : (𝓓 : DCPO) → is-prop-valued (underlying-order 𝓓 )
- prop-valuedness (D , _⊑_ , (s  , p  , r  , t  , a  , c )) = p
+ prop-valuedness (D , _⊑_ , (s  , p  , r  , t  , a)  , c ) = p
 
  reflexivity : (𝓓 : DCPO) → is-reflexive (underlying-order 𝓓)
- reflexivity (D , _⊑_ , (s  , p  , r  , t  , a  , c )) = r
+ reflexivity (D , _⊑_ , (s  , p  , r  , t  , a)  , c ) = r
 
  transitivity : (𝓓 : DCPO) → is-transitive (underlying-order 𝓓)
- transitivity (D , _⊑_ , (s  , p  , r  , t  , a  , c )) = t
+ transitivity (D , _⊑_ , (s  , p  , r  , t  , a)  , c ) = t
 
  antisymmetry : (𝓓 : DCPO) → is-antisymmetric (underlying-order 𝓓)
- antisymmetry (D , _⊑_ , (s  , p  , r  , t  , a  , c )) = a
+ antisymmetry (D , _⊑_ , (s  , p  , r  , t  , a)  , c ) = a
 
- directed-completeness : (𝓓 : DCPO) → is-directed-complete (underlying-order 𝓓)
- directed-completeness (D , _⊑_ , (s  , p  , r  , t  , a  , c )) = c
+\end{code}
 
- is-Directed : (𝓓 : DCPO) {I : 𝓥 ̇ } (α : I → ⟨ 𝓓 ⟩) → 𝓥 ⊔ 𝓣 ̇
- is-Directed 𝓓 α = is-directed (underlying-order 𝓓) α
+We also consider dcpos with a least element.
 
- is-Directed-gives-inhabited : (𝓓 : DCPO) {I : 𝓥 ̇} (α : I → ⟨ 𝓓 ⟩) → is-Directed 𝓓 α → ∥ I ∥
- is-Directed-gives-inhabited 𝓓 α = pr₁
+\begin{code}
 
- is-Directed-order : (𝓓 : DCPO) {I : 𝓥 ̇} (α : I → ⟨ 𝓓 ⟩) → is-Directed 𝓓 α
-                   → (i j : I) → ∃ (\(k : I) → (α i ⊑⟨ 𝓓 ⟩ α k) × (α j ⊑⟨ 𝓓 ⟩ α k))
- is-Directed-order 𝓓 α = pr₂
+ DCPO⊥ : (𝓥 ⁺) ⊔ (𝓤 ⁺) ⊔ (𝓣 ⁺) ̇
+ DCPO⊥ = Σ \(𝓓 : DCPO) → has-least (underlying-order 𝓓)
 
- ∐ : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} → is-Directed 𝓓 α → ⟨ 𝓓 ⟩
- ∐ 𝓓 {I} {α} δ = pr₁ (directed-completeness 𝓓 I α δ)
+ _⁻ : DCPO⊥ → DCPO
+ _⁻ = pr₁
 
- ∐-is-sup : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} (δ : is-Directed 𝓓 α)
-          → ((i : I) → α i ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ)
-          × ((u : ⟨ 𝓓 ⟩) → ((i : I) → α i ⊑⟨ 𝓓 ⟩ u) → ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ u)
- ∐-is-sup 𝓓 {I} {α} δ = pr₂ (directed-completeness 𝓓 I α δ)
+ ⟪_⟫ : DCPO⊥ → 𝓤 ̇
+ ⟪ 𝓓 ⟫ = ⟨ 𝓓 ⁻ ⟩
 
- ∐-is-upperbound : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} (δ : is-Directed 𝓓 α)
-                 → ((i : I) → α i ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ)
- ∐-is-upperbound 𝓓 δ = pr₁ (∐-is-sup 𝓓 δ)
+ underlying-order⊥ : (𝓓 : DCPO⊥) → ⟪ 𝓓 ⟫ → ⟪ 𝓓 ⟫ → 𝓣 ̇
+ underlying-order⊥ 𝓓 = underlying-order (𝓓 ⁻)
 
- ∐-is-lowerbound-of-upperbounds : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} (δ : is-Directed 𝓓 α)
-                                → ((u : ⟨ 𝓓 ⟩) → ((i : I) → α i ⊑⟨ 𝓓 ⟩ u) → ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ u)
- ∐-is-lowerbound-of-upperbounds 𝓓 δ = pr₂ (∐-is-sup 𝓓 δ)
+ syntax underlying-order⊥ 𝓓 x y = x ⊑⟪ 𝓓 ⟫ y
+
+ ⊥ : (𝓓 : DCPO⊥) → ⟨ 𝓓 ⁻ ⟩
+ ⊥ (𝓓 , x , p) = x
+
+ ⊥-is-least : (𝓓 : DCPO⊥) → is-least (underlying-order (𝓓 ⁻)) (⊥ 𝓓)
+ ⊥-is-least (𝓓 , x , p) = p
 
 \end{code}
 
@@ -262,227 +287,79 @@ z = transitivity 𝓓 a c d z' w
 
 \end{code}
 
+Next, we introduce ∐-notation for the supremum of a directed family in a dcpo.
+
 \begin{code}
 
- is-weakly-directed : (𝓓 : DCPO⊥) {I : 𝓥 ̇ } (α : I → ⟨ ⟪ 𝓓 ⟫ ⟩) → 𝓥 ⊔ 𝓣 ̇
- is-weakly-directed 𝓓 {I} α = (i j : I)
-                               → ∃ (\(k : I) → (α i ⊑⟨ ⟪ 𝓓 ⟫ ⟩ α k) ×
-                                               (α j ⊑⟨ ⟪ 𝓓 ⟫ ⟩ α k))
+ directed-completeness : (𝓓 : DCPO) → is-directed-complete (underlying-order 𝓓)
+ directed-completeness (D , _⊑_ , (s  , p  , r  , t  , a)  , c ) = c
 
- strongly-directed-complete : (𝓓 : DCPO⊥) {I : 𝓥 ̇ } {α : I → ⟨ ⟪ 𝓓 ⟫ ⟩}
-                            → is-weakly-directed 𝓓 α
-                            → has-sup (underlying-order ⟪ 𝓓 ⟫) α
- strongly-directed-complete 𝓓 {I} {α} ε = s , u , v
-  where
-   _⊑_ : ⟨ ⟪ 𝓓 ⟫ ⟩ → ⟨ ⟪ 𝓓 ⟫ ⟩ → 𝓣 ̇
-   _⊑_ = underlying-order ⟪ 𝓓 ⟫
-   K : 𝓥 ̇
-   K = 𝟙{𝓥} + I
-   β : K → ⟨ ⟪ 𝓓 ⟫ ⟩
-   β (inl *) = the-least 𝓓
-   β (inr i) = α i
-   δ : is-directed _⊑_ β
-   δ = (∣ inl * ∣ , κ)
-    where
-     κ : (a b : K) → ∃ \c → (β a ⊑ β c) × (β b ⊑ β c)
-     κ (inl *) b = ∣ b , least-property 𝓓 (β b) , reflexivity ⟪ 𝓓 ⟫ (β b) ∣
-     κ (inr i) (inl *) = ∣ (inr i) , reflexivity ⟪ 𝓓 ⟫ (α i) , least-property 𝓓 (α i) ∣
-     κ (inr i) (inr j) = ∥∥-functor γ (ε i j)
-      where
-       γ : (Σ \(k : I) → (α i) ⊑ (α k) × (α j) ⊑ (α k))
-         → Σ \(c : K) → (β (inr i) ⊑ β c) × (β (inr j) ⊑ β c)
-       γ (k , l) = (inr k , l)
-   s : ⟨ ⟪ 𝓓 ⟫ ⟩
-   s = ∐ ⟪ 𝓓 ⟫ δ
-   u : is-upperbound _⊑_ s α
-   u i = ∐-is-upperbound ⟪ 𝓓 ⟫ δ (inr i)
-   v : ((t : ⟨ ⟪ 𝓓 ⟫ ⟩) → is-upperbound _⊑_ t α → s ⊑ t)
-   v t l = ∐-is-lowerbound-of-upperbounds ⟪ 𝓓 ⟫ δ t h
-    where
-     h : (k : K) → (β k) ⊑ t
-     h (inl *) = least-property 𝓓 t
-     h (inr i) = l i
+ is-Directed : (𝓓 : DCPO) {I : 𝓥 ̇ } (α : I → ⟨ 𝓓 ⟩) → 𝓥 ⊔ 𝓣 ̇
+ is-Directed 𝓓 α = is-directed (underlying-order 𝓓) α
 
- double-∐-swap : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
-                      → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))
-                      → (δⱼ : (j : J) → is-Directed 𝓓 (λ (i : I) → γ (i , j)))
-                      → (ε₁ : is-Directed 𝓓 (λ (j : J) → ∐ 𝓓 (δⱼ j)))
-                      → (ε₂ : is-Directed 𝓓 (λ (i : I) → ∐ 𝓓 (δᵢ i)))
-                      → ∐ 𝓓 ε₁ ≡ ∐ 𝓓 ε₂
- double-∐-swap {I} {J} 𝓓 {γ} δᵢ δⱼ ε₁ ε₂ =
-  antisymmetry 𝓓 (∐ 𝓓 ε₁) (∐ 𝓓 ε₂) u {!v!}
-   where
-    u : ∐ 𝓓 ε₁ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
-    u = ∐-is-lowerbound-of-upperbounds 𝓓 ε₁ (∐ 𝓓 ε₂) w
-     where
-      w : (j : J) → ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
-      w j = ∐-is-lowerbound-of-upperbounds 𝓓 (δⱼ j) (∐ 𝓓 ε₂) z
-       where
-        z : (i : I) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε₂
-        z i = {!!}
-    v : {!!}
-    v = {!!}
+ Directed-implies-inhabited : (𝓓 : DCPO) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
+                            → is-Directed 𝓓 α
+                            → ∥ I ∥
+ Directed-implies-inhabited 𝓓 = pr₁
 
- doubly-indexed-lemma₁ : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
-                      → (δ : is-Directed 𝓓 γ)
-                      → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))
-                      → (ε : is-Directed 𝓓 (λ (i : I) → ∐ 𝓓 (δᵢ i)))
-                      → ∐ 𝓓 ε ≡ ∐ 𝓓 δ
- doubly-indexed-lemma₁ {I} {J} 𝓓 {γ} δ δᵢ ε =
-  antisymmetry 𝓓 (∐ 𝓓 ε) (∐ 𝓓 δ) u v
-   where
-    u : ∐ 𝓓 ε ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-    u = ∐-is-lowerbound-of-upperbounds 𝓓 ε (∐ 𝓓 δ) w
-     where
-      w : (i : I) → ∐ 𝓓 (δᵢ i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-      w i = ∐-is-lowerbound-of-upperbounds 𝓓 (δᵢ i) (∐ 𝓓 δ) z
-       where
-        z : (j : J) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-        z j = ∐-is-upperbound 𝓓 δ (i , j)
-    v : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
-    v = ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) w
-     where
-      w : (k : I × J) → γ k ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
-      w (i , j) = γ (i , j)  ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (δᵢ i) j ]
-                  ∐ 𝓓 (δᵢ i) ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε i ]
-                  ∐ 𝓓 ε      ∎⟨ 𝓓 ⟩
+ Directed-implies-weakly-directed : (𝓓 : DCPO) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
+                                  → is-Directed 𝓓 α
+                                  → is-weakly-directed (underlying-order 𝓓) α
+ Directed-implies-weakly-directed 𝓓 = pr₂
 
- doubly-indexed-lemma₂ : {I J : 𝓥 ̇ } (𝓓 : DCPO) {γ : I × J → ⟨ 𝓓 ⟩}
-                      → (δ : is-Directed 𝓓 γ)
-                      → (δⱼ : (j : J) → is-Directed 𝓓 (λ (i : I) → γ (i , j)))
-                      → (ε : is-Directed 𝓓 (λ (j : J) → ∐ 𝓓 (δⱼ j)))
-                      → ∐ 𝓓 δ ≡ ∐ 𝓓 ε
- doubly-indexed-lemma₂ {I} {J} 𝓓 {γ} δ δⱼ ε =
-  antisymmetry 𝓓 (∐ 𝓓 δ) (∐ 𝓓 ε) u v
-   where
-    u : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
-    u = ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) w
-     where
-      w : (k : I × J) → γ k ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
-      w (i , j) = γ (i , j)  ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (δⱼ j) i ]
-                  ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε j ]
-                  ∐ 𝓓 ε      ∎⟨ 𝓓 ⟩
-    v : ∐ 𝓓 ε ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-    v = ∐-is-lowerbound-of-upperbounds 𝓓 ε (∐ 𝓓 δ) w
-     where
-      w : (j : J) → ∐ 𝓓 (δⱼ j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-      w j = ∐-is-lowerbound-of-upperbounds 𝓓 (δⱼ j) (∐ 𝓓 δ) z
-       where
-        z : (i : I) → γ (i , j) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-        z i = ∐-is-upperbound 𝓓 δ (i , j)
+ ∐ : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} → is-Directed 𝓓 α → ⟨ 𝓓 ⟩
+ ∐ 𝓓 {I} {α} δ = pr₁ (directed-completeness 𝓓 I α δ)
+
+ ∐-is-sup : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} (δ : is-Directed 𝓓 α)
+          → is-sup (underlying-order 𝓓) (∐ 𝓓 δ) α
+ ∐-is-sup 𝓓 {I} {α} δ = pr₂ (directed-completeness 𝓓 I α δ)
+
+ ∐-is-upperbound : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩} (δ : is-Directed 𝓓 α)
+                 → is-upperbound (underlying-order 𝓓) (∐ 𝓓 δ) α
+ ∐-is-upperbound 𝓓 δ = pr₁ (∐-is-sup 𝓓 δ)
+
+ ∐-is-lowerbound-of-upperbounds : (𝓓 : DCPO) {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩}
+                                  (δ : is-Directed 𝓓 α)
+                                → is-lowerbound-of-upperbounds
+                                    (underlying-order 𝓓) (∐ 𝓓 δ) α
+ ∐-is-lowerbound-of-upperbounds 𝓓 δ = pr₂ (∐-is-sup 𝓓 δ)
 
 \end{code}
 
-Next, we define continuous maps between dcpos.
+We continue by defining continuous maps between dcpos.
 
 \begin{code}
-
-is-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) → (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → 𝓤 ⊔ 𝓣 ⊔ 𝓣' ̇
-is-monotone 𝓓 𝓔 f = (x y : ⟨ 𝓓 ⟩) → x ⊑⟨ 𝓓 ⟩ y → f x ⊑⟨ 𝓔 ⟩ f y
 
 is-continuous : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
               → (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩)
               → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
 is-continuous 𝓓 𝓔 f = (I : 𝓥 ̇) (α : I → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
-                     → is-sup (underlying-order 𝓔) (f (∐ 𝓓 δ)) (f ∘ α)
+                      → is-sup (underlying-order 𝓔) (f (∐ 𝓓 δ)) (f ∘ α)
 
-being-continuous-is-a-prop : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) (f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩)
+being-continuous-is-a-prop : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
+                             (f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩)
                            → is-prop (is-continuous 𝓓 𝓔 f)
 being-continuous-is-a-prop 𝓓 𝓔 f =
-   Π-is-prop fe
-    (λ I → Π-is-prop fe
-            (λ α → Π-is-prop fe
-                     (λ δ → is-sup-is-a-prop (underlying-order 𝓔)
-                            (axioms-of-dcpo 𝓔) (f (∐ 𝓓 δ)) (f ∘ α))))
+ Π-is-prop fe
+ (λ I → Π-is-prop fe
+ (λ α → Π-is-prop fe
+ (λ δ → is-sup-is-a-prop
+          (underlying-order 𝓔) (axioms-of-dcpo 𝓔) (f (∐ 𝓓 δ)) (f ∘ α))))
 
 DCPO[_,_] : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'} → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
 DCPO[ 𝓓 , 𝓔 ] = Σ (\(f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → is-continuous 𝓓 𝓔 f)
 
-DCPO⊥[_,_] : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'} → (𝓥 ⁺) ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
-DCPO⊥[ 𝓓 , 𝓔 ] = DCPO[ ⟪ 𝓓 ⟫ , ⟪ 𝓔 ⟫ ]
+-- DCPO⊥[_,_] : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'} → (𝓥 ⁺) ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
+-- DCPO⊥[ 𝓓 , 𝓔 ] = DCPO[ 𝓓 ⁻ , 𝓔 ⁻ ]
 
 underlying-function : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                     → DCPO[ 𝓓 , 𝓔 ] → ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩
 underlying-function 𝓓 𝓔 (f , _) = f
 
+syntax underlying-function 𝓓 𝓔 f = [ 𝓓 , 𝓔 ]⟨ f ⟩
+
 continuity-of-function : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) (f : DCPO[ 𝓓 , 𝓔 ])
                        → is-continuous 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
 continuity-of-function 𝓓 𝓔 (_ , c) = c
-
-continuous-functions-are-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
-                                    (f : DCPO[ 𝓓 , 𝓔 ])
-                                  → is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
-continuous-functions-are-monotone 𝓓 𝓔 (f , cts) x y l = γ
-  where
-   α : 𝟙 {𝓥} + 𝟙 {𝓥} → ⟨ 𝓓 ⟩
-   α (inl *) = x
-   α (inr *) = y
-   δ : is-Directed 𝓓 α
-   δ = (∣ inl * ∣ , ε)
-    where
-     ε : (i j : 𝟙 + 𝟙) → ∃ (\k → α i ⊑⟨ 𝓓 ⟩ α k × α j ⊑⟨ 𝓓 ⟩ α k)
-     ε (inl *) (inl *) = ∣ inr * , l , l ∣
-     ε (inl *) (inr *) = ∣ inr * , l , reflexivity 𝓓 y ∣
-     ε (inr *) (inl *) = ∣ inr * , reflexivity 𝓓 y , l ∣
-     ε (inr *) (inr *) = ∣ inr * , reflexivity 𝓓 y , reflexivity 𝓓 y ∣
-   a : y ≡ ∐ 𝓓 δ
-   a = antisymmetry 𝓓 y (∐ 𝓓 δ)
-           (∐-is-upperbound 𝓓 δ (inr *))
-           (∐-is-lowerbound-of-upperbounds 𝓓 δ y h)
-    where
-     h : (i : 𝟙 + 𝟙) → α i ⊑⟨ 𝓓 ⟩ y
-     h (inl *) = l
-     h (inr *) = reflexivity 𝓓 y
-   b : is-sup (underlying-order 𝓔) (f y) (f ∘ α)
-   b = transport (λ - → is-sup (underlying-order 𝓔) - (f ∘ α)) (ap f (a ⁻¹))
-       (cts (𝟙 + 𝟙) α δ)
-   γ : f x ⊑⟨ 𝓔 ⟩ f y
-   γ = is-sup-gives-is-upperbound (underlying-order 𝓔) b (inl *)
-
-constant-functions-are-continuous : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
-                                    (e : ⟨ 𝓔 ⟩) → is-continuous 𝓓 𝓔 (λ d → e)
-constant-functions-are-continuous 𝓓 𝓔 e I α δ = u , v where
- u : (i : I) → e ⊑⟨ 𝓔 ⟩ e
- u i = reflexivity 𝓔 e
- v : (y : ⟨ 𝓔 ⟩) → ((i : I) → e ⊑⟨ 𝓔 ⟩ y) → e ⊑⟨ 𝓔 ⟩ y
- v y l  = ∥∥-rec (prop-valuedness 𝓔 e y) (λ (i : I) → l i)
-          (is-directed-gives-inhabited (underlying-order 𝓓) α δ)
-
-image-is-directed : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
-                    (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
-                  → is-Directed 𝓓 α
-                  → is-Directed 𝓔 ((underlying-function 𝓓 𝓔 f) ∘ α)
-image-is-directed 𝓓 𝓔 (f , c) {I} {α} δ =
- (is-Directed-gives-inhabited 𝓓 α δ) , γ
-  where
-   γ : (i j : I)
-     → ∃ (\(k : I) → f (α i) ⊑⟨ 𝓔 ⟩ f (α k) × f (α j) ⊑⟨ 𝓔 ⟩ f (α k))
-   γ i j = ∥∥-functor h (is-Directed-order 𝓓 α δ i j)
-    where
-     h : Σ (\(k : I) → (α i) ⊑⟨ 𝓓 ⟩ (α k) × (α j) ⊑⟨ 𝓓 ⟩ (α k))
-         → Σ (\(k : I) → f (α i) ⊑⟨ 𝓔 ⟩ f (α k) × f (α j) ⊑⟨ 𝓔 ⟩ f (α k))
-     h (k , l , m) =
-      k , (continuous-functions-are-monotone 𝓓 𝓔 (f , c) (α i) (α k) l ,
-      (continuous-functions-are-monotone 𝓓 𝓔 (f , c) (α j) (α k) m))
-
-continuous-function-∐-≡ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
-                          (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
-                          (δ : is-Directed 𝓓 α)
-                        → (underlying-function 𝓓 𝓔 f) (∐ 𝓓 δ) ≡
-                          ∐ 𝓔 (image-is-directed 𝓓 𝓔 f δ)
-continuous-function-∐-≡ 𝓓 𝓔 (f , c) {I} {α} δ =
- antisymmetry 𝓔 (f (∐ 𝓓 δ)) (∐ 𝓔 (image-is-directed 𝓓 𝓔 (f , c) δ)) a b
-  where
-   s : is-sup (underlying-order 𝓔) (f (∐ 𝓓 δ)) (f ∘ α)
-   s = c I α δ
-   ε : is-Directed 𝓔 (f ∘ α)
-   ε = image-is-directed 𝓓 𝓔 (f , c) δ
-   a : f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 (image-is-directed 𝓓 𝓔 (f , c) δ)
-   a = is-sup-gives-is-lowerbound-of-upperbounds (underlying-order 𝓔) s
-       (∐ 𝓔 (image-is-directed 𝓓 𝓔 (f , c) δ))
-       (∐-is-upperbound 𝓔 ε)
-   b : ∐ 𝓔 ε  ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 δ)
-   b = ∐-is-lowerbound-of-upperbounds 𝓔 ε (f (∐ 𝓓 δ))
-       (is-sup-gives-is-upperbound (underlying-order 𝓔) s)
 
 \end{code}

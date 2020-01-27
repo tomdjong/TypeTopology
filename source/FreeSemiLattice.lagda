@@ -55,6 +55,9 @@ _⊆_ {𝓤} {𝓣} {X} A B = (x : X) → x ∈ A → x ∈ B
     ϕ : x ∈ A ≡ x ∈ B
     ϕ = pe (∈-is-a-prop A x) (∈-is-a-prop B x) (i x) (j x)
 
+𝕤 : {X : 𝓤 ̇ } → is-set X → X → 𝓟 𝓣 X
+𝕤 i x = λ y → {!x ≡ y!} , {!!}
+
 open import UF-PropTrunc
 
 module KuratowskiFinite
@@ -116,5 +119,8 @@ module KuratowskiFinite
    ϕ _ = being-Kuratowski-finite-is-a-prop
    ψ : ⟨ A ⟩ ≡ ⟨ B ⟩
    ψ = ⊆-antisymmetry pe fe fe' i j
+
+ 𝕤ₖ : {X : 𝓤 ̇ } → X → 𝓚 𝓣 X
+ 𝕤ₖ x = {!!} , {!!}
 
 \end{code}

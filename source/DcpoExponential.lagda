@@ -82,7 +82,6 @@ module _ (𝓓 : DCPO {𝓤} {𝓣})
                    f (β j)                ⊑⟨ 𝓔 ⟩[ l j ]
                    e                      ∎⟨ 𝓔 ⟩
 
-
 infixr 20 _⟹ᵈᶜᵖᵒ_
 
 _⟹ᵈᶜᵖᵒ_ : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'}
@@ -95,7 +94,7 @@ _⟹ᵈᶜᵖᵒ_ : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'}
    where
     s : is-set DCPO[ 𝓓 , 𝓔 ]
     s = subsets-of-sets-are-sets (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) (is-continuous 𝓓 𝓔)
-        (Π-is-set fe (λ (x : ⟨ 𝓓 ⟩) →  sethood 𝓔))
+        (Π-is-set fe (λ (x : ⟨ 𝓓 ⟩) → sethood 𝓔))
         (λ {f} → being-continuous-is-a-prop 𝓓 𝓔 f)
     p : (f g : DCPO[ 𝓓 , 𝓔 ]) → is-prop (f ⊑ g)
     p (f , _) (g , _) = Π-is-prop fe

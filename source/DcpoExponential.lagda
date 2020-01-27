@@ -31,56 +31,57 @@ module _ (𝓓 : DCPO {𝓤} {𝓣})
                                 (d : ⟨ 𝓓 ⟩)
                               → is-directed (underlying-order 𝓔)
                                  (pointwise-family α d)
- pointwise-family-is-directed {I} α δ d =
-  (directed-implies-inhabited _hom-⊑_ {I} {α} δ) ,
-  λ (i j : I) → ∥∥-functor (h i j) ((directed-implies-weakly-directed _hom-⊑_ {I} {α} δ) i j)
-   where
-    β : ⟨ 𝓓 ⟩ → I → ⟨ 𝓔 ⟩
-    β = pointwise-family α
-    h : (i j : I) → Σ (\(k : I) → α i hom-⊑ α k × α j hom-⊑ α k)
-        → Σ (\k → (β d i) ⊑⟨ 𝓔 ⟩ (β d k) × (β d j) ⊑⟨ 𝓔 ⟩ (β d k))
-    h i j (k , l , m) = k , l d , m d
+ pointwise-family-is-directed {I} α δ d = a , b
+  where
+   a : ∥ I ∥
+   a = directed-implies-inhabited _hom-⊑_ α δ
+   b : is-weakly-directed (underlying-order 𝓔) (pointwise-family α d)
+   b i j = do
+    (k , l , m) ← directed-implies-weakly-directed _hom-⊑_ α δ i j
+    ∣ k , l d , m d ∣
 
  continuous-functions-sup : {I : 𝓥 ̇} (α : I → DCPO[ 𝓓 , 𝓔 ])
                           → is-directed _hom-⊑_ α → DCPO[ 𝓓 , 𝓔 ]
  continuous-functions-sup {I} α δ = f , c
   where
-   β : ⟨ 𝓓 ⟩ → I → ⟨ 𝓔 ⟩
-   β d = pointwise-family α d
-   ε : (d : ⟨ 𝓓 ⟩) → is-directed (underlying-order 𝓔) (β d)
+   ε : (d : ⟨ 𝓓 ⟩) → is-directed (underlying-order 𝓔) (pointwise-family α d)
    ε = pointwise-family-is-directed α δ
    f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩
-   f d = ∐ 𝓔 {I} {β d} (ε d)
+   f d = ∐ 𝓔 (ε d)
    c : is-continuous 𝓓 𝓔 f
-   c J γ φ = u , v
+   c J β φ = ub , lb-of-ubs
     where
-     u : (j : J) → f (γ j) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 φ)
-     u j = ∐-is-lowerbound-of-upperbounds 𝓔 (ε (γ j)) (f (∐ 𝓓 φ)) r
+     ub : (j : J) → f (β j) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 φ)
+     ub j = f (β j)         ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f (β j)) ]
+            ∐ 𝓔 (ε (β j))   ⊑⟨ 𝓔 ⟩[ ∐-is-monotone 𝓔 (ε (β j)) (ε (∐ 𝓓 φ)) h ]
+            ∐ 𝓔 (ε (∐ 𝓓 φ)) ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f (∐ 𝓓 φ)) ]
+            f (∐ 𝓓 φ)       ∎⟨ 𝓔 ⟩
       where
-       r : (i : I) → underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 φ)
-       r i = underlying-function 𝓓 𝓔 (α i) (γ j)   ⊑⟨ 𝓔 ⟩[ p ]
-             underlying-function 𝓓 𝓔 (α i) (∐ 𝓓 φ) ⊑⟨ 𝓔 ⟩[ q ]
-             f (∐ 𝓓 φ)                             ∎⟨ 𝓔 ⟩
-        where
-         p = continuous-implies-monotone 𝓓 𝓔 (α i) (γ j) (∐ 𝓓 φ)
-             (∐-is-upperbound 𝓓 φ j)
-         q = ∐-is-upperbound 𝓔 (ε (∐ 𝓓 φ)) i
-     v : (y : ⟨ 𝓔 ⟩)
-       → ((j : J) → f (γ j) ⊑⟨ 𝓔 ⟩ y)
-       → f (∐ 𝓓 φ) ⊑⟨ 𝓔 ⟩ y
-     v y l = ∐-is-lowerbound-of-upperbounds 𝓔 (ε (∐ 𝓓 φ)) y r
+       h : (i : I) → [ 𝓓 , 𝓔 ]⟨ α i ⟩ (β j) ⊑⟨ 𝓔 ⟩ [ 𝓓 , 𝓔 ]⟨ α i ⟩ (∐ 𝓓 φ)
+       h i = continuous-implies-monotone 𝓓 𝓔 (α i) (β j) (∐ 𝓓 φ)
+              (∐-is-upperbound 𝓓 φ j)
+     lb-of-ubs : is-lowerbound-of-upperbounds (underlying-order 𝓔) (f (∐ 𝓓 φ))
+                  (f ∘ β)
+     lb-of-ubs e l = f (∐ 𝓓 φ)       ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f (∐ 𝓓 φ)) ]
+                     ∐ 𝓔 (ε (∐ 𝓓 φ)) ⊑⟨ 𝓔 ⟩[ u ]
+                     e               ∎⟨ 𝓔 ⟩
       where
-       r : (i : I) → β (∐ 𝓓 φ) i ⊑⟨ 𝓔 ⟩ y
-       r i = sup-is-lowerbound-of-upperbounds (underlying-order 𝓔)
-              (continuity-of-function 𝓓 𝓔 (α i) J γ φ) y m
+       u = ∐-is-lowerbound-of-upperbounds 𝓔 (ε (∐ 𝓓 φ)) e v
         where
-         m : (j : J) → underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩ y
-         m j = underlying-function 𝓓 𝓔 (α i) (γ j) ⊑⟨ 𝓔 ⟩[ m₁ ]
-               f (γ j)                             ⊑⟨ 𝓔 ⟩[ m₂ ]
-               y                                   ∎⟨ 𝓔 ⟩
+         v : (i : I) → [ 𝓓 , 𝓔 ]⟨ α i ⟩ (∐ 𝓓 φ) ⊑⟨ 𝓔 ⟩ e
+         v i = [ 𝓓 , 𝓔 ]⟨ α i ⟩ (∐ 𝓓 φ)             ⊑⟨ 𝓔 ⟩[ l₁ ]
+               ∐ 𝓔 (image-is-directed' 𝓓 𝓔 (α i) φ) ⊑⟨ 𝓔 ⟩[ l₂ ]
+               e                                    ∎⟨ 𝓔 ⟩
           where
-           m₁ = ∐-is-upperbound 𝓔 (ε (γ j)) i
-           m₂ = l j
+           l₁ = continuous-∐-⊑ 𝓓 𝓔 (α i) φ
+           l₂ = ∐-is-lowerbound-of-upperbounds 𝓔 (image-is-directed' 𝓓 𝓔 (α i) φ) e w
+            where
+             w : (j : J) → [ 𝓓 , 𝓔 ]⟨ α i ⟩ (β j) ⊑⟨ 𝓔 ⟩ e
+             w j = [ 𝓓 , 𝓔 ]⟨ α i ⟩ (β j) ⊑⟨ 𝓔 ⟩[ ∐-is-upperbound 𝓔 (ε (β j)) i ]
+                   ∐ 𝓔 (ε (β j))          ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f (β j)) ]
+                   f (β j)                ⊑⟨ 𝓔 ⟩[ l j ]
+                   e                      ∎⟨ 𝓔 ⟩
+
 
 infixr 20 _⟹ᵈᶜᵖᵒ_
 

@@ -21,8 +21,17 @@ TO DO
 
 open import Dcpo pt fe 𝓥
 
-≡-to-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) → (x y : ⟨ 𝓓 ⟩) → x ≡ y → x ⊑⟨ 𝓓 ⟩ y
-≡-to-⊑ 𝓓 x x refl = reflexivity 𝓓 x
+≡-to-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩} → x ≡ y → x ⊑⟨ 𝓓 ⟩ y
+≡-to-⊑ 𝓓 {x} {x} refl = reflexivity 𝓓 x
+
+∐-independent-of-directedness-witness : (𝓓 : DCPO {𝓤} {𝓣})
+                                        {I : 𝓥 ̇ } {α : I → ⟨ 𝓓 ⟩}
+                                        (δ ε : is-Directed 𝓓 α)
+                                      → ∐ 𝓓 δ ≡ ∐ 𝓓 ε
+∐-independent-of-directedness-witness 𝓓 δ ε = ap (∐ 𝓓) p
+ where
+  p : δ ≡ ε
+  p = being-directed-is-a-prop (underlying-order 𝓓) δ ε
 
 is-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
             → (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → 𝓤 ⊔ 𝓣 ⊔ 𝓣' ̇
@@ -51,17 +60,17 @@ continuity-criterion : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                         (δ : is-Directed 𝓓 α)
                      → f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 (image-is-directed 𝓓 𝓔 m δ))
                      → is-continuous 𝓓 𝓔 f
-continuity-criterion 𝓓 𝓔 f m e I α δ = ub , lb-of-ub
+continuity-criterion 𝓓 𝓔 f m e I α δ = ub , lb-of-ubs
  where
   ub : (i : I) → f (α i) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 δ)
   ub i = m (α i) (∐ 𝓓 δ) (∐-is-upperbound 𝓓 δ i)
   ε : is-Directed 𝓔 (f ∘ α)
   ε = image-is-directed 𝓓 𝓔 m δ
-  lb-of-ub : is-lowerbound-of-upperbounds (underlying-order 𝓔)
-             (f (∐ 𝓓 δ)) (f ∘ α)
-  lb-of-ub y u = f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩[ e I α δ  ]
-                 ∐ 𝓔 ε     ⊑⟨ 𝓔 ⟩[ ∐-is-lowerbound-of-upperbounds 𝓔 ε y u ]
-                 y         ∎⟨ 𝓔 ⟩
+  lb-of-ubs : is-lowerbound-of-upperbounds (underlying-order 𝓔)
+              (f (∐ 𝓓 δ)) (f ∘ α)
+  lb-of-ubs y u = f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩[ e I α δ  ]
+                  ∐ 𝓔 ε     ⊑⟨ 𝓔 ⟩[ ∐-is-lowerbound-of-upperbounds 𝓔 ε y u ]
+                  y         ∎⟨ 𝓔 ⟩
 
 continuous-implies-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                               (f : DCPO[ 𝓓 , 𝓔 ])
@@ -103,26 +112,43 @@ image-is-directed' 𝓓 𝓔 f {I} {α} δ =
    m : is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
    m = continuous-implies-monotone 𝓓 𝓔 f
 
+continuous-∐-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
+                 (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
+                 (δ : is-Directed 𝓓 α)
+               → [ 𝓓 , 𝓔 ]⟨ f ⟩ (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 (image-is-directed' 𝓓 𝓔 f δ)
+continuous-∐-⊑ 𝓓 𝓔 (f , c) {I} {α} δ =
+ sup-is-lowerbound-of-upperbounds (underlying-order 𝓔) (c I α δ) (∐ 𝓔 ε) u
+  where
+   ε : is-Directed 𝓔 (f ∘ α)
+   ε = image-is-directed' 𝓓 𝓔 (f , c) δ
+   u : is-upperbound (underlying-order 𝓔) (∐ 𝓔 ε) (f ∘ α)
+   u = ∐-is-upperbound 𝓔 ε
+
+continuous-∐-⊒ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
+                 (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
+                 (δ : is-Directed 𝓓 α)
+               → ∐ 𝓔 (image-is-directed' 𝓓 𝓔 f δ) ⊑⟨ 𝓔 ⟩ [ 𝓓 , 𝓔 ]⟨ f ⟩ (∐ 𝓓 δ)
+continuous-∐-⊒ 𝓓 𝓔 (f , c) {I} {α} δ =
+ ∐-is-lowerbound-of-upperbounds 𝓔 ε (f (∐ 𝓓 δ)) u
+  where
+   ε : is-Directed 𝓔 (f ∘ α)
+   ε = image-is-directed' 𝓓 𝓔 (f , c) δ
+   u : (i : I) → f (α i) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 δ)
+   u i = sup-is-upperbound (underlying-order 𝓔) (c I α δ) i
+
 continuous-∐-≡ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                  (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
                  (δ : is-Directed 𝓓 α)
-               → (underlying-function 𝓓 𝓔 f) (∐ 𝓓 δ) ≡
-                 ∐ 𝓔 (image-is-directed' 𝓓 𝓔 f δ)
+               → [ 𝓓 , 𝓔 ]⟨ f ⟩ (∐ 𝓓 δ) ≡ ∐ 𝓔 (image-is-directed' 𝓓 𝓔 f δ)
 continuous-∐-≡ 𝓓 𝓔 (f , c) {I} {α} δ =
  antisymmetry 𝓔 (f (∐ 𝓓 δ)) (∐ 𝓔 ε) a b
   where
    ε : is-Directed 𝓔 (f ∘ α)
    ε = image-is-directed' 𝓓 𝓔 (f , c) δ
    a : f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 ε
-   a = sup-is-lowerbound-of-upperbounds (underlying-order 𝓔) (c I α δ) (∐ 𝓔 ε) u
-    where
-     u : is-upperbound (underlying-order 𝓔) (∐ 𝓔 ε) (f ∘ α)
-     u = ∐-is-upperbound 𝓔 ε
+   a = continuous-∐-⊑ 𝓓 𝓔 (f , c) δ
    b : ∐ 𝓔 ε ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 δ)
-   b = ∐-is-lowerbound-of-upperbounds 𝓔 ε (f (∐ 𝓓 δ)) u
-    where
-     u : (i : I) → f (α i) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 δ)
-     u i = sup-is-upperbound (underlying-order 𝓔) (c I α δ) i
+   b = continuous-∐-⊒ 𝓓 𝓔 (f , c) δ
 
 constant-functions-are-continuous : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                                     (e : ⟨ 𝓔 ⟩) → is-continuous 𝓓 𝓔 (λ d → e)
@@ -174,6 +200,18 @@ strongly-directed-complete {𝓤} {𝓣} 𝓓 {I} {α} ε = s , u , v
     h : (k : J) → (β k) ⊑ t
     h (inl *) = ⊥-is-least 𝓓 t
     h (inr i) = l i
+
+∐-is-monotone : (𝓓 : DCPO {𝓤} {𝓣}) {I : 𝓥 ̇ } {α β : I → ⟨ 𝓓 ⟩}
+                (δ : is-Directed 𝓓 α) (ε : is-Directed 𝓓 β)
+              → ((i : I) → α i ⊑⟨ 𝓓 ⟩ β i)
+              → ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+∐-is-monotone 𝓓 {I} {α} {β} δ ε l =
+ ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) γ
+  where
+   γ : (i : I) → α i ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+   γ i = α i   ⊑⟨ 𝓓 ⟩[ l i ]
+         β i   ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 ε i ]
+         ∐ 𝓓 ε ∎⟨ 𝓓 ⟩
 
 double-∐-swap : {I J : 𝓥 ̇ } (𝓓 : DCPO {𝓤} {𝓣}) {γ : I × J → ⟨ 𝓓 ⟩}
               → (δᵢ : (i : I) → is-Directed 𝓓 (λ (j : J) → γ (i , j)))

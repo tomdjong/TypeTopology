@@ -96,15 +96,15 @@ module _ {𝓤 𝓣 : Universe}
  being-directed-is-a-prop =
   ×-is-prop being-inhabited-is-a-prop being-weakly-directed-is-a-prop
 
- directed-implies-inhabited : {I : 𝓥 ̇ } {α : I → D}
+ directed-implies-inhabited : {I : 𝓥 ̇ } (α : I → D)
                             → is-directed α
                             → is-inhabited I
- directed-implies-inhabited = pr₁
+ directed-implies-inhabited α = pr₁
 
- directed-implies-weakly-directed : {I : 𝓥 ̇ } {α : I → D}
+ directed-implies-weakly-directed : {I : 𝓥 ̇ } (α : I → D)
                                   → is-directed α
                                   → is-weakly-directed α
- directed-implies-weakly-directed = pr₂
+ directed-implies-weakly-directed α = pr₂
 
  poset-axioms : 𝓤 ⊔ 𝓣 ̇
  poset-axioms = is-set D

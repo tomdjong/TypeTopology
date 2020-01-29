@@ -25,6 +25,8 @@ univalence or the existence of propositional truncations:
 
     As far as we know, (2) is a new result.
 
+NB. This file needs the Agda release candidate 2.6.1.
+
 \begin{code}
 
 {-# OPTIONS --without-K --exact-split --safe #-}
@@ -239,27 +241,34 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
     w : ¬ is-g-point x'
     w = transport (λ - → ¬ is-g-point -) q ν'
 
-  H-lc : (x x' : X) (d : decidable (is-g-point x)) (d' : decidable (is-g-point x'))
-       → H x d ≡ H x' d' → x ≡ x'
-  H-lc x x' (inl γ) (inl γ') p = x                 ≡⟨ (g⁻¹-is-rinv x γ)⁻¹ ⟩
-                                 g (g⁻¹ x γ)       ≡⟨ ap g p              ⟩
-                                 g (H x' (inl γ')) ≡⟨ g⁻¹-is-rinv x' γ'   ⟩
-                                 x'                ∎
-  H-lc x x' (inl γ) (inr ν') p = 𝟘-elim (f-g⁻¹-disjoint-images x' x  ν' γ (p ⁻¹))
-  H-lc x x' (inr ν) (inl γ') p = 𝟘-elim (f-g⁻¹-disjoint-images x  x' ν  γ' p    )
-  H-lc x x' (inr ν) (inr ν') p = embedding-lc f f-is-emb p
-
   h-lc : left-cancellable h
-  h-lc {x} {x'} = H-lc x x'
-                   (em (is-g-point x)  (being-g-point-is-a-prop x ))
-                   (em (is-g-point x') (being-g-point-is-a-prop x'))
+  h-lc {x} {x'} = l (em (is-g-point x ) (being-g-point-is-a-prop x ))
+                    (em (is-g-point x') (being-g-point-is-a-prop x'))
+   where
+    l : (d : decidable (is-g-point x)) (d' : decidable (is-g-point x'))
+      → H x d ≡ H x' d' → x ≡ x'
+
+    l (inl γ) (inl γ') = λ (p : g⁻¹ x γ ≡ g⁻¹ x' γ') →
+                              x             ≡⟨ (g⁻¹-is-rinv x γ)⁻¹ ⟩
+                              g (g⁻¹ x γ)   ≡⟨ ap g p              ⟩
+                              g (g⁻¹ x' γ') ≡⟨ g⁻¹-is-rinv x' γ'   ⟩
+                              x'            ∎
+
+    l (inl γ) (inr ν') = λ (p : g⁻¹ x γ ≡ f x') →
+                              𝟘-elim (f-g⁻¹-disjoint-images x' x  ν' γ (p ⁻¹))
+
+    l (inr ν) (inl γ') = λ (p : f x ≡ g⁻¹ x' γ') →
+                              𝟘-elim (f-g⁻¹-disjoint-images x  x' ν  γ' p    )
+
+    l (inr ν) (inr ν') = λ (p : f x ≡ f x') →
+                              embedding-lc f f-is-emb p
 
   f-point : (x : X) → 𝓤 ⊔ 𝓥 ̇
   f-point x = Σ \(x₀ : X) → (Σ \(n : ℕ) → (gf^ n) x₀ ≡ x) × ¬ fiber g x₀
 
   non-f-point-is-g-point : (x : X) → ¬ f-point x → is-g-point x
   non-f-point-is-g-point x ν x₀ σ = Cases (em (fiber g x₀) (g-is-emb x₀))
-                                     (λ (τ :    fiber g x₀) → τ)
+                                     (λ (τ  :   fiber g x₀) → τ)
                                      (λ (ν' : ¬ fiber g x₀) → 𝟘-elim (ν (x₀ , σ , ν')))
 
   β : (y : Y) → ¬ is-g-point (g y) → Σ \((x , p) : fiber f y) → ¬ is-g-point x
@@ -269,8 +278,21 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
    i = contrapositive (non-f-point-is-g-point (g y)) ν
 
    ii : f-point (g y) → Σ \((x , p) : fiber f y) → ¬ is-g-point x
-   ii (x₀ , (0      , p) , ν) = 𝟘-elim (ν (y , (p ⁻¹)))
-   ii (x₀ , (succ n , p) , ν) = ((gf^ n) x₀ , embedding-lc g g-is-emb p) , (λ γ → ν (γ x₀ (n , refl)))
+   ii (x₀ , (0 , p) , ν) = 𝟘-elim (a p)
+    where
+     a : x₀ ≢ g y
+     a p = ν (y , (p ⁻¹))
+   ii (x₀ , (succ n , p) , ν) = a , b
+    where
+     q : f ((gf^ n) x₀) ≡ y
+     q = embedding-lc g g-is-emb p
+     a : fiber f y
+     a = (gf^ n) x₀ , q
+     b : ¬ is-g-point ((gf^ n) x₀)
+     b γ = ν c
+      where
+       c : fiber g x₀
+       c = γ x₀ (n , refl)
 
    iii : ¬¬ Σ \((x , p) : fiber f y) → ¬ is-g-point x
    iii = ¬¬-functor ii i
@@ -281,16 +303,16 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
    v : Σ \((x , p) : fiber f y) → ¬ is-g-point x
    v = EM-gives-DNE em _ iv iii
 
-  H-split-surjection : (y : Y) → Σ \(x : X) → (d : decidable (is-g-point x)) → H x d ≡ y
-  H-split-surjection y = ss (em (is-g-point (g y)) (being-g-point-is-a-prop (g y)))
+  h-split-surjection : (y : Y) → Σ \(x : X) → h x ≡ y
+  h-split-surjection y = x , p
    where
-    ss : decidable (is-g-point (g y)) → Σ \(x : X) → (d : decidable (is-g-point x)) → H x d ≡ y
-    ss (inl γ) = g y , ψ
+    a : decidable (is-g-point (g y)) → Σ \(x : X) → (d : decidable (is-g-point x)) → H x d ≡ y
+    a (inl γ) = g y , ψ
      where
       ψ : (d : decidable (is-g-point (g y))) → H (g y) d ≡ y
       ψ (inl γ') = g⁻¹-is-linv y γ'
       ψ (inr ν)  = 𝟘-elim (ν γ)
-    ss (inr ν) = x , ψ
+    a (inr ν) = x , ψ
      where
       x : X
       x = pr₁ (pr₁ (β y ν))
@@ -301,13 +323,19 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
       ψ : (d : decidable (is-g-point x)) → H x d ≡ y
       ψ (inl γ) = 𝟘-elim (ν' γ)
       ψ (inr _) = p
-
-  h-split-surjection : (y : Y) → Σ \(x : X) → h x ≡ y
-  h-split-surjection y = pr₁ ss , pr₂ ss (em (is-g-point (pr₁ ss)) (being-g-point-is-a-prop (pr₁ ss)))
-   where
-    ss = H-split-surjection y
+    b : Σ \(x : X) → (d : decidable (is-g-point x)) → H x d ≡ y
+    b = a (em (is-g-point (g y)) (being-g-point-is-a-prop (g y)))
+    x : X
+    x = pr₁ b
+    p : h x ≡ y
+    p = pr₂ b (em (is-g-point x) (being-g-point-is-a-prop x))
 
   𝓱 : X ≃ Y
   𝓱 = h , lc-split-surjections-are-equivs h h-lc h-split-surjection
 
 \end{code}
+
+Added 28th January. A blog post with more information in the comments
+is available here:
+
+   https://homotopytypetheory.org/2020/01/26/the-cantor-schroder-bernstein-theorem-for-%e2%88%9e-groupoids/

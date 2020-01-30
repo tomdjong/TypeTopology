@@ -27,8 +27,8 @@ approximates 𝓓 x y = (I : 𝓥 ̇ ) (α : I → ⟨ 𝓓 ⟩) (δ : is-Direct
 
 syntax approximates 𝓓 x y = x ≪⟨ 𝓓 ⟩ y
 
-≪-implies-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩} → x ≪⟨ 𝓓 ⟩ y → x ⊑⟨ 𝓓 ⟩ y
-≪-implies-⊑ 𝓓 {x} {y} a = ∥∥-rec (prop-valuedness 𝓓 x y) γ g
+≪-to-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩} → x ≪⟨ 𝓓 ⟩ y → x ⊑⟨ 𝓓 ⟩ y
+≪-to-⊑ 𝓓 {x} {y} a = ∥∥-rec (prop-valuedness 𝓓 x y) γ g
  where
   α : 𝟙{𝓥} → ⟨ 𝓓 ⟩
   α * = y
@@ -67,6 +67,23 @@ syntax approximates 𝓓 x y = x ≪⟨ 𝓓 ⟩ y
       s = y     ⊑⟨ 𝓓 ⟩[ v ]
           y'    ⊑⟨ 𝓓 ⟩[ w ]
           ∐ 𝓓 δ ∎⟨ 𝓓 ⟩
+
+≪-is-prop-valued : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩} → is-prop (x ≪⟨ 𝓓 ⟩ y)
+≪-is-prop-valued 𝓓 = Π-is-prop fe
+                     (λ I → Π-is-prop fe
+                     (λ α → Π-is-prop fe
+                     (λ δ → Π-is-prop fe
+                     (λ u → ∥∥-is-a-prop))))
+
+≪-is-antisymmetric : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩}
+                   → x ≪⟨ 𝓓 ⟩ y → y ≪⟨ 𝓓 ⟩ x → x ≡ y
+≪-is-antisymmetric 𝓓 {x} {y} u v = antisymmetry 𝓓 x y (≪-to-⊑ 𝓓 u) (≪-to-⊑ 𝓓 v)
+
+≪-is-transitive : (𝓓 : DCPO {𝓤} {𝓣}) {x y z : ⟨ 𝓓 ⟩}
+                → x ≪⟨ 𝓓 ⟩ y → y ≪⟨ 𝓓 ⟩ z → x ≪⟨ 𝓓 ⟩ z
+≪-is-transitive 𝓓 {x} {y} {z} u v I α δ l = do
+ (i , m) ← u I α δ (transitivity 𝓓 y z (∐ 𝓓 δ) (≪-to-⊑ 𝓓 v) l)
+ ∣ i , m ∣
 
 compact : (𝓓 : DCPO {𝓤} {𝓣}) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 compact 𝓓 x = x ≪⟨ 𝓓 ⟩ x

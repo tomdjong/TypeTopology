@@ -10,7 +10,7 @@ open import UF-PropTrunc hiding (⊥)
 module DcpoCompact
         (pt : propositional-truncations-exist)
         (fe : ∀ {𝓤 𝓥} → funext 𝓤 𝓥)
-        (𝓥 : Universe) -- where the index type for directed completeness lives
+        (𝓥 : Universe) -- where the index types for directed completeness live
        where
 
 open PropositionalTruncation pt

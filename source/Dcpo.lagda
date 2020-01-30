@@ -22,28 +22,14 @@ open PropositionalTruncation pt
 open import UF-Subsingletons hiding (⊥)
 open import UF-Subsingletons-FunExt
 
+open import Poset fe
+
 module _ {𝓤 𝓣 : Universe}
          {D : 𝓤 ̇ }
          (_⊑_ : D → D → 𝓣 ̇ )
        where
 
- is-prop-valued : 𝓤 ⊔ 𝓣 ̇
- is-prop-valued = (x y : D) → is-prop(x ⊑ y)
-
- is-reflexive : 𝓤 ⊔ 𝓣 ̇
- is-reflexive = (x : D) → x ⊑ x
-
- is-transitive : 𝓤 ⊔ 𝓣 ̇
- is-transitive = (x y z : D) → x ⊑ y → y ⊑ z → x ⊑ z
-
- is-antisymmetric : 𝓤 ⊔ 𝓣 ̇
- is-antisymmetric = (x y : D) → x ⊑ y → y ⊑ x → x ≡ y
-
- is-least : D → 𝓤 ⊔ 𝓣 ̇
- is-least x = ∀ (y : D) → x ⊑ y
-
- has-least : 𝓤 ⊔ 𝓣 ̇
- has-least = Σ (\(x : D) → is-least x)
+ open PosetAxioms _⊑_
 
  is-upperbound : {I : 𝓥 ̇ } (u : D) (α : I → D) → 𝓥 ⊔ 𝓣 ̇
  is-upperbound u α = (i : domain α) → α i ⊑ u
@@ -106,38 +92,6 @@ module _ {𝓤 𝓣 : Universe}
                                   → is-weakly-directed α
  directed-implies-weakly-directed α = pr₂
 
- poset-axioms : 𝓤 ⊔ 𝓣 ̇
- poset-axioms = is-set D
-              × is-prop-valued
-              × is-reflexive
-              × is-transitive
-              × is-antisymmetric
-
- poset-axioms-is-a-prop : is-prop (poset-axioms)
- poset-axioms-is-a-prop = iprops-are-props γ
-  where
-   γ : poset-axioms → is-prop poset-axioms
-   γ (s , p , r , t , a) = ×-is-prop (being-set-is-a-prop fe)
-                           (×-is-prop
-                             (Π-is-prop fe
-                               (λ x → Π-is-prop fe
-                               (λ y → being-a-prop-is-a-prop fe)))
-                           (×-is-prop
-                             (Π-is-prop fe
-                               (λ x → p x x))
-                           (×-is-prop
-                             (Π-is-prop fe
-                               (λ x → Π-is-prop fe
-                               (λ y → Π-is-prop fe
-                               (λ z → Π-is-prop fe
-                               (λ u → Π-is-prop fe
-                               (λ v → p x z))))))
-                           (Π-is-prop fe
-                             (λ x → Π-is-prop fe
-                             (λ y → Π-is-prop fe
-                             (λ u → Π-is-prop fe
-                             (λ v → s))))))))
-
  is-directed-complete : 𝓤 ⊔ (𝓥 ⁺) ⊔ 𝓣  ̇
  is-directed-complete = (I : 𝓥 ̇ ) (α : I → D) → is-directed α → has-sup α
 
@@ -183,11 +137,26 @@ module _ {𝓤 𝓣 : Universe}
 
 \end{code}
 
+Since we will also consider dcpos with a least element, we also make the
+following definitions.
+
+\begin{code}
+
+ is-least : D → 𝓤 ⊔ 𝓣 ̇
+ is-least x = ∀ (y : D) → x ⊑ y
+
+ has-least : 𝓤 ⊔ 𝓣 ̇
+ has-least = Σ (\(x : D) → is-least x)
+
+\end{code}
+
 We proceed by defining the type of dcpos and convenient projection functions.
 
 \begin{code}
 
 module _ {𝓤 𝓣 : Universe} where
+
+ open PosetAxioms
 
  DCPO-structure : 𝓤 ̇ → 𝓤 ⊔ (𝓥 ⁺) ⊔ (𝓣 ⁺) ̇
  DCPO-structure D = Σ \(_⊑_ : D → D → 𝓣 ̇ ) → dcpo-axioms {𝓤} {𝓣} _⊑_
@@ -349,8 +318,8 @@ being-continuous-is-a-prop 𝓓 𝓔 f =
 DCPO[_,_] : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'} → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
 DCPO[ 𝓓 , 𝓔 ] = Σ (\(f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → is-continuous 𝓓 𝓔 f)
 
--- DCPO⊥[_,_] : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'} → (𝓥 ⁺) ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
--- DCPO⊥[ 𝓓 , 𝓔 ] = DCPO[ 𝓓 ⁻ , 𝓔 ⁻ ]
+DCPO⊥[_,_] : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'} → (𝓥 ⁺) ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
+DCPO⊥[ 𝓓 , 𝓔 ] = DCPO[ 𝓓 ⁻ , 𝓔 ⁻ ]
 
 underlying-function : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                     → DCPO[ 𝓓 , 𝓔 ] → ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩

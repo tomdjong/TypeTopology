@@ -86,7 +86,7 @@ X : 𝓤 ̇, and an equivalence relation _≈_ with values in 𝓥 ̇.
 
 \begin{code}
 
-module _
+module Quotient
        (pt  : propositional-truncations-exist)
        (fe  : FunExt)
        {𝓤 𝓥 : Universe}
@@ -110,7 +110,7 @@ in the next universe 𝓥 ⁺.
 
 From the relation _≈_ : X → (X → 𝓥 ̇ ) we define a relation
 X → (X → Ω 𝓥), which of course is formally a function. We then take
-the quotient X/≈ to be the image of this function.
+
 
 Of course, it is for constructing the image that we need propositional
 truncations.
@@ -217,7 +217,7 @@ universe 𝓦.
  universal-property : ∀ {𝓦} (A : 𝓦 ̇ )
                     → is-set A
                     → (f : X → A)
-                    → ({x x' : X} → x ≈ x' → f x ≡ f x')
+                    → ((x x' : X) → x ≈ x' → f x ≡ f x')
                     → ∃! \(f' : X/≈ → A) → f' ∘ η ≡ f
  universal-property {𝓦} A iss f pr = ic
   where
@@ -230,7 +230,7 @@ universe 𝓦.
         h : (Σ \x' → (η x' ≡ η x) × (f x' ≡ a))
           → (Σ \y' → (η y' ≡ η x) × (f y' ≡ b))
           → a ≡ b
-        h (x' , r , s) (y' , t , u) = s ⁻¹ ∙ pr (η-equal-equiv (r ∙ t ⁻¹)) ∙ u
+        h (x' , r , s) (y' , t , u) = s ⁻¹ ∙ pr x' y' (η-equal-equiv (r ∙ t ⁻¹)) ∙ u
 
         p : a ≡ b
         p = ∥∥-rec iss (λ σ → ∥∥-rec iss (h σ) e) d
@@ -254,7 +254,7 @@ universe 𝓦.
      g y = pr₂(k(η y))
 
      j : (y : X) → (Σ \x → (η x ≡ η y) × (f x ≡ f' (η y))) → f'(η y) ≡ f y
-     j y (x , p , q) = q ⁻¹ ∙ pr (η-equal-equiv p)
+     j y (x , p , q) = q ⁻¹ ∙ pr x y (η-equal-equiv p)
 
      h : (y : X) → f'(η y) ≡ f y
      h y = ∥∥-rec iss (j y) (g y)

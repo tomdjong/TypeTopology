@@ -191,22 +191,22 @@ Cantor-Schröder-Bernstein for arbitrary universes 𝓤 and 𝓥.
 
 EM-gives-CantorSchröderBernstein : funext 𝓤 (𝓤 ⊔ 𝓥)
                                  → funext (𝓤 ⊔ 𝓥) 𝓤₀
+                                 → funext 𝓤₀ (𝓤 ⊔ 𝓥)
                                  → EM (𝓤 ⊔ 𝓥)
                                  → CantorSchröderBernstein 𝓤 𝓥
-EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-emb) (g , g-is-emb) = 𝓱
+EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ fe₁ em {X} {Y} (f , f-is-emb) (g , g-is-emb) = 𝓱
  where
-  gf^_ : ℕ → (X → X)
-  gf^  0        = id
-  gf^ (succ n)  = λ x → g (f ((gf^ n) x))
-
   is-g-point : (x : X) → 𝓤 ⊔ 𝓥 ̇
-  is-g-point x = (x₀ : X) → (Σ \(n : ℕ) → (gf^ n) x₀ ≡ x) → fiber g x₀
+  is-g-point x = (x₀ : X) (n : ℕ) → ((g ∘ f) ^ n) x₀ ≡ x → fiber g x₀
 
   being-g-point-is-a-prop : (x : X) → is-prop (is-g-point x)
-  being-g-point-is-a-prop x = Π-is-prop fe (λ x₀ → Π-is-prop fe (λ _ → g-is-emb x₀))
+  being-g-point-is-a-prop x = Π-is-prop fe  (λ (x₀ : X                   ) →
+                              Π-is-prop fe₁ (λ (n  : ℕ                   ) →
+                              Π-is-prop fe  (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → g-is-emb x₀)))
+
 
   g-is-invertible-at-g-points : (x : X) → is-g-point x → fiber g x
-  g-is-invertible-at-g-points x γ = γ x (0 , refl)
+  g-is-invertible-at-g-points x γ = γ x 0 refl
 
   g⁻¹ : (x : X) → is-g-point x → Y
   g⁻¹ x γ = pr₁ (g-is-invertible-at-g-points x γ)
@@ -228,18 +228,18 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
   h x = H x (em (is-g-point x) (being-g-point-is-a-prop x))
 
   α : (x : X) → is-g-point (g (f x)) → is-g-point x
-  α x γ x₀ (n , p)  = γ x₀ (succ n , ap (g ∘ f) p)
+  α x γ x₀ n p = γ x₀ (succ n) (ap (g ∘ f) p)
 
   f-g⁻¹-disjoint-images : (x x' : X) → ¬ is-g-point x → (γ : is-g-point x') → f x ≢ g⁻¹ x' γ
-  f-g⁻¹-disjoint-images x x' ν γ p = w γ
+  f-g⁻¹-disjoint-images x x' ν γ p = v γ
    where
-    ν' : ¬ is-g-point (g (f x))
-    ν' = contrapositive (α x) ν
+    u : ¬ is-g-point (g (f x))
+    u = contrapositive (α x) ν
     q = g (f x)      ≡⟨ ap g p            ⟩
         g (g⁻¹ x' γ) ≡⟨ g⁻¹-is-rinv x' γ  ⟩
         x'           ∎
-    w : ¬ is-g-point x'
-    w = transport (λ - → ¬ is-g-point -) q ν'
+    v : ¬ is-g-point x'
+    v = transport (λ - → ¬ is-g-point -) q u
 
   h-lc : left-cancellable h
   h-lc {x} {x'} = l (em (is-g-point x ) (being-g-point-is-a-prop x ))
@@ -264,18 +264,18 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
                               embedding-lc f f-is-emb p
 
   f-point : (x : X) → 𝓤 ⊔ 𝓥 ̇
-  f-point x = Σ \(x₀ : X) → (Σ \(n : ℕ) → (gf^ n) x₀ ≡ x) × ¬ fiber g x₀
+  f-point x = Σ \(x₀ : X) → (Σ \(n : ℕ) → ((g ∘ f) ^ n) x₀ ≡ x) × ¬ fiber g x₀
 
   non-f-point-is-g-point : (x : X) → ¬ f-point x → is-g-point x
-  non-f-point-is-g-point x ν x₀ σ = Cases (em (fiber g x₀) (g-is-emb x₀))
-                                     (λ (τ  :   fiber g x₀) → τ)
-                                     (λ (ν' : ¬ fiber g x₀) → 𝟘-elim (ν (x₀ , σ , ν')))
+  non-f-point-is-g-point x ν x₀ n p = Cases (em (fiber g x₀) (g-is-emb x₀))
+                                       (λ (σ :   fiber g x₀) → σ)
+                                       (λ (u : ¬ fiber g x₀) → 𝟘-elim (ν (x₀ , (n , p) , u)))
 
   β : (y : Y) → ¬ is-g-point (g y) → Σ \((x , p) : fiber f y) → ¬ is-g-point x
-  β y ν = v
+  β y u = v
    where
    i : ¬¬ f-point (g y)
-   i = contrapositive (non-f-point-is-g-point (g y)) ν
+   i = contrapositive (non-f-point-is-g-point (g y)) u
 
    ii : f-point (g y) → Σ \((x , p) : fiber f y) → ¬ is-g-point x
    ii (x₀ , (0 , p) , ν) = 𝟘-elim (a p)
@@ -284,15 +284,19 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
      a p = ν (y , (p ⁻¹))
    ii (x₀ , (succ n , p) , ν) = a , b
     where
-     q : f ((gf^ n) x₀) ≡ y
+     _ : ((g ∘ f) ^ (succ n)) x₀ ≡ g y
+     _ = p
+     q : f (((g ∘ f) ^ n) x₀) ≡ y
      q = embedding-lc g g-is-emb p
      a : fiber f y
-     a = (gf^ n) x₀ , q
-     b : ¬ is-g-point ((gf^ n) x₀)
+     a = ((g ∘ f) ^ n) x₀ , q
+     _ : ¬ fiber g x₀
+     _ = ν
+     b : ¬ is-g-point (((g ∘ f) ^ n) x₀)
      b γ = ν c
       where
        c : fiber g x₀
-       c = γ x₀ (n , refl)
+       c = γ x₀ n refl
 
    iii : ¬¬ Σ \((x , p) : fiber f y) → ¬ is-g-point x
    iii = ¬¬-functor ii i
@@ -332,6 +336,12 @@ EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ em {X} {Y} (f , f-is-em
 
   𝓱 : X ≃ Y
   𝓱 = h , lc-split-surjections-are-equivs h h-lc h-split-surjection
+
+
+EM-gives-CantorSchröderBernstein₀ : funext 𝓤₀ 𝓤₀
+                                  → EM 𝓤₀
+                                  → CantorSchröderBernstein 𝓤₀ 𝓤₀
+EM-gives-CantorSchröderBernstein₀ fe = EM-gives-CantorSchröderBernstein fe fe fe
 
 \end{code}
 

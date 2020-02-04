@@ -88,7 +88,7 @@ module _
  f ≼-to-Ω g = (f ≼ g , ≼-is-prop-valued f g)
 
  ⊑-preparation : (f : 𝓕)
-               → ∃! \(f' : (F : X/≈) → Ω (𝓥 ⊔ 𝓣)) → f' ∘ η ≡ _≼-to-Ω_ f
+               → ∃! f' ꞉ (𝓕/≈ → Ω (𝓥 ⊔ 𝓣)), f' ∘ η ≡ _≼-to-Ω_ f
  ⊑-preparation f = universal-property (Ω (𝓥 ⊔ 𝓣))
                    (Ω-is-a-set fe pe) (_≼-to-Ω_ f) γ
   where

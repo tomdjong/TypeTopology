@@ -46,7 +46,7 @@ being-discrete-is-a-prop {𝓤} fe {X} = Π-is-prop (fe 𝓤 𝓤) (being-isolat
 isolated-is-h-isolated : {X : 𝓤 ̇ } (x : X) → is-isolated x → is-h-isolated x
 isolated-is-h-isolated {𝓤} {X} x i {y} = local-hedberg x (λ y → γ y (i y)) y
  where
-  γ : (y : X) → decidable (x ≡ y) → Σ \(f : x ≡ y → x ≡ y) → constant f
+  γ : (y : X) → decidable (x ≡ y) → Σ f ꞉ (x ≡ y → x ≡ y) , constant f
   γ y (inl p) = (λ _ → p) , (λ q r → refl)
   γ y (inr n) = id , (λ q r → 𝟘-elim (n r))
 
@@ -70,7 +70,7 @@ The following variation of the above doesn't required function extensionality:
 \begin{code}
 
 isolated-inr' : {X : 𝓤 ̇ }
-             → (x : X) (i : is-isolated x) (y : X) (n : x ≢ y) → Σ \(m : x ≢ y) → i y ≡ inr m
+             → (x : X) (i : is-isolated x) (y : X) (n : x ≢ y) → Σ m ꞉ x ≢ y , i y ≡ inr m
 isolated-inr' x i y n =
   equality-cases (i y)
   (λ (p : x ≡ y) (q : i y ≡ inl p) → 𝟘-elim (n p))
@@ -104,12 +104,12 @@ embeddings-reflect-isolatedness : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
                                 → is-embedding f
                                 → (x : X) → is-isolated (f x) → is-isolated x
 embeddings-reflect-isolatedness f e x i y = lc-maps-reflect-isolatedness f
-                                              (embedding-lc f e) x i y
+                                              (embeddings-are-left-cancellable f e) x i y
 
 embeddings-reflect-discreteness : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
                                 → is-embedding f
                                 → is-discrete Y → is-discrete X
-embeddings-reflect-discreteness f e = lc-maps-reflect-discreteness f (embedding-lc f e)
+embeddings-reflect-discreteness f e = lc-maps-reflect-discreteness f (embeddings-are-left-cancellable f e)
 
 Σ-is-discrete : {X : 𝓤 ̇ } → {Y : X → 𝓥 ̇ }
               → is-discrete X → ((x : X) → is-discrete(Y x)) → is-discrete(Σ Y)
@@ -187,19 +187,19 @@ Find a better home for this:
 𝟚-ℕ-embedding ₀ = 0
 𝟚-ℕ-embedding ₁ = 1
 
-𝟚-ℕ-embedding-lc : left-cancellable 𝟚-ℕ-embedding
-𝟚-ℕ-embedding-lc {₀} {₀} refl = refl
-𝟚-ℕ-embedding-lc {₀} {₁} r    = 𝟘-elim (positive-not-zero 0 (r ⁻¹))
-𝟚-ℕ-embedding-lc {₁} {₀} r    = 𝟘-elim (positive-not-zero 0 r)
-𝟚-ℕ-embedding-lc {₁} {₁} refl = refl
+𝟚-ℕ-embeddings-are-left-cancellable : left-cancellable 𝟚-ℕ-embedding
+𝟚-ℕ-embeddings-are-left-cancellable {₀} {₀} refl = refl
+𝟚-ℕ-embeddings-are-left-cancellable {₀} {₁} r    = 𝟘-elim (positive-not-zero 0 (r ⁻¹))
+𝟚-ℕ-embeddings-are-left-cancellable {₁} {₀} r    = 𝟘-elim (positive-not-zero 0 r)
+𝟚-ℕ-embeddings-are-left-cancellable {₁} {₁} refl = refl
 
 C-B-embedding : (ℕ → 𝟚) → (ℕ → ℕ)
 C-B-embedding α = 𝟚-ℕ-embedding ∘ α
 
-C-B-embedding-lc : funext 𝓤₀ 𝓤₀ → left-cancellable C-B-embedding
-C-B-embedding-lc fe {α} {β} p = dfunext fe h
+C-B-embeddings-are-left-cancellable : funext 𝓤₀ 𝓤₀ → left-cancellable C-B-embedding
+C-B-embeddings-are-left-cancellable fe {α} {β} p = dfunext fe h
  where
   h : (n : ℕ) → α n ≡ β n
-  h n = 𝟚-ℕ-embedding-lc (ap (λ - → - n) p)
+  h n = 𝟚-ℕ-embeddings-are-left-cancellable (ap (λ - → - n) p)
 
 \end{code}

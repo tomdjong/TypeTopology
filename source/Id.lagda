@@ -9,11 +9,20 @@ module Id where
 open import Universes
 open import Pi
 
-data _≡_ {𝓤} {X : 𝓤 ̇ } : X → X → 𝓤 ̇  where
+data _≡_ {𝓤} {X : 𝓤 ̇ } : X → X → 𝓤 ̇ where
   refl : {x : X} → x ≡ x
 
 refl─ : {X : 𝓤 ̇ } (x : X) → x ≡ x
 refl─ x = refl
+
+by-definition : {X : 𝓤 ̇ } {x : X} → x ≡ x
+by-definition = refl
+
+by-construction : {X : 𝓤 ̇ } {x : X} → x ≡ x
+by-construction = refl
+
+by-assumption : {X : 𝓤 ̇ } {x : X} → x ≡ x
+by-assumption = refl
 
 lhs : {X : 𝓤 ̇ } {x y : X} → x ≡ y → X
 lhs {𝓤} {X} {x} {y} p = x

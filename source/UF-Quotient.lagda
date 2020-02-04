@@ -218,7 +218,7 @@ universe 𝓦.
                     → is-set A
                     → (f : X → A)
                     → ((x x' : X) → x ≈ x' → f x ≡ f x')
-                    → ∃! \(f' : X/≈ → A) → f' ∘ η ≡ f
+                    → ∃! f' ꞉ (X/≈ → A), f' ∘ η ≡ f
  universal-property {𝓦} A iss f pr = ic
   where
    φ : (x' : X/≈) → is-prop (Σ \a → ∃ \x → (η x ≡ x') × (f x ≡ a))

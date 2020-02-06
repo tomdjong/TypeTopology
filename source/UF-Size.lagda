@@ -949,3 +949,31 @@ has-size-idempotent-≡ ua 𝓤 𝓥 Y i =
     (has-size-idempotent-≃ ua 𝓤 𝓥 Y i)
 
 \end{code}
+
+Added 6 February 2020 by Tom de Jong.
+
+Can we prove this for all types Y (i.e. not just sets)
+
+\begin{code}
+
+retract-gives-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                       → is-set Y
+                       → retract X of Y
+                       → X has-size 𝓥
+retract-gives-has-size {𝓤} {𝓥} {X} {Y} i (r , s , ρ) = Z , γ
+ where
+  Z : 𝓥 ̇
+  Z = Σ y ꞉ Y , s (r y) ≡ y
+  γ : Z ≃ X
+  γ = qinveq f (g , gf , fg)
+   where
+    f : Z → X
+    f (y , p) = r y
+    g : X → Z
+    g x = (s x) , ap s (ρ x)
+    gf : (z : Z) → g (f z) ≡ z
+    gf (y , p) = to-Σ-≡ (p , (i _ p))
+    fg : (x : X) → f (g x) ≡ x
+    fg x = ρ x
+
+\end{code}

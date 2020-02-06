@@ -146,7 +146,7 @@ following definitions.
  is-least x = ∀ (y : D) → x ⊑ y
 
  has-least : 𝓤 ⊔ 𝓣 ̇
- has-least = Σ (\(x : D) → is-least x)
+ has-least = Σ x ꞉ D , is-least x
 
 \end{code}
 
@@ -197,7 +197,7 @@ We also consider dcpos with a least element.
 \begin{code}
 
  DCPO⊥ : (𝓥 ⁺) ⊔ (𝓤 ⁺) ⊔ (𝓣 ⁺) ̇
- DCPO⊥ = Σ \(𝓓 : DCPO) → has-least (underlying-order 𝓓)
+ DCPO⊥ = Σ 𝓓 ꞉ DCPO , has-least (underlying-order 𝓓)
 
  _⁻ : DCPO⊥ → DCPO
  _⁻ = pr₁
@@ -316,7 +316,7 @@ being-continuous-is-a-prop 𝓓 𝓔 f =
           (underlying-order 𝓔) (axioms-of-dcpo 𝓔) (f (∐ 𝓓 δ)) (f ∘ α))))
 
 DCPO[_,_] : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'} → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
-DCPO[ 𝓓 , 𝓔 ] = Σ (\(f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) → is-continuous 𝓓 𝓔 f)
+DCPO[ 𝓓 , 𝓔 ] = Σ f ꞉ (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) , is-continuous 𝓓 𝓔 f
 
 DCPO⊥[_,_] : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'} → (𝓥 ⁺) ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣' ̇
 DCPO⊥[ 𝓓 , 𝓔 ] = DCPO[ 𝓓 ⁻ , 𝓔 ⁻ ]

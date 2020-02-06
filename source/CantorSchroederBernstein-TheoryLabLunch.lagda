@@ -1,46 +1,176 @@
-Martin Escardo, 22nd January 2020. (This file needs the Agda release candidate 2.6.1.)
+The Cantor-Schröder-Bernstein Theorem for ∞-groupoids
+-----------------------------------------------------
 
-There are two parts, which assume function extensionality but not
-univalence or the existence of propositional truncations:
+    Martín Hötzel Escardó
+    6th February 2020
+    School of Computer Science
+    Birmingham Theory Group
+    Lab Lunch Talk
+
+    This talk has embedded Agda code.
+
+    In the end I gave the talk in a whiteboard (without showing any
+    Agda code). But it followed the script outlined in these "slides".
+
+    I have also written a blog post that gives the proof in
+    mathematical vernacular:
+    https://homotopytypetheory.org/2020/01/26/the-cantor-schroder-bernstein-theorem-for-∞-groupoids/
 
 
-(1) A univalent-foundations version of Pierre Pradic and Chad
-    E. Brown's argument that Cantor-Schröder-Bernstein implies
-    excluded middle in constructive set theory.
-    (https://arxiv.org/abs/1904.09193).
+Abstract
+--------
 
-    Their proof, reproduced here, uses the compactness (also known as
-    the searchability or omniscience) of ℕ∞.
+ (1) CSB in constructive set theory implies excluded middle
+     (Pradic & Brown 2019, https://arxiv.org/abs/1904.09193).
 
+       If for all sets X and Y, the existence of injections X → Y and
+       Y → X implies X ≃ Y,
 
-(2) A proof that excluded middle implies Cantor-Schröder-Bernstein for
-    all homotopy types, or ∞-groupoids. (Added 24th January.)
+       then P ∨ ¬P for any proposition P.
 
-    For any pair of types, if each one is embedded into the other,
-    then they are equivalent.
+ (2) In homotopy type theory / univalent foundations (HoTT/UF),
+     excluded middle implies CSB, not only for sets, but also for
+     arbitrary homotopy types, or ∞-groupoids.
 
-    For this it is crucial that a map is an embedding if and only if
-    its fibers are all propositions (rather than merely the map being
-    left-cancellable).
+     Assuming excluded middle, for all homotopy types X and Y, if
+     there are embeddings X → Y and Y → X, then X ≃ Y.
 
-    As far as we know, (2) is a new result.
+     This seems to be a new result.
+
+HoTT/UF
+-------
+
+An intensional Martin-Löf type theory (MLTT) in which types are
+understood as homotopy types, or ∞-groupoids, rather than as sets as
+in the original Martin-Löf conception.
+
+We work with a Spartan MLTT:
+
+  1. Empty type 𝟘.
+
+  2. One-point type 𝟙.
+
+  3. A type ℕ of natural numbers.
+
+  4. Type formers
+
+       Π  (product),
+       +  (binary sum),
+       Σ  (sum),
+       Id (identity type).
+
+  5. Universes (types of types), ranged over by 𝓤,𝓥,𝓦.
+
+Possible axioms for HoTT/UF
+---------------------------
+
+  1. Function extensionality.                    \ Given constructive content
+  2. Propositional extensionality.               | by cubical type theory.
+  3. Univalence.                                 |
+  4. Existence of propositional truncations.     | (Implemented in Cubical Agda).
+  5. Existence of (some) higher inductive types. /
+
+  6. Propositional resizing and impredicativity. ⟩ Constructive status open.
+
+  7. Excluded middle.                            \ Non constructive.
+  8. Choice.                                     /
+
+  * We will not postulate them. Instead we will use them as explicit
+    assumptions in theorems and constructions, when needed.
+
+  * For this talk we need only function extensionality and excluded
+    middle.
+
+  * Univalence implies function extensionality and propositional
+    extensionality.
+
+  * Unique choice just holds.
+
+  * Choice implies excluded middle, as usual.
+
+  * Excluded middle implies propositional resizing and
+    impredicativity.
+
+  * Function extensionality and propositional resizing imply the
+    existence of propositional truncations, and hence so do function
+    extensionality and excluded middle.
+
+  * Univalence and propositional truncations imply the existence of
+    some higher inductive types, such as the homotopical circle and
+    set quotients.
+
+  * HoTT/UF has a model in Kan simplicial sets after Voevodsky.
+
+  * It validates the above axioms, assuming classical logic and
+    Grothendieck universes in the meta-theory.
+
+  * Types are interpreted as homotopy types.
+
+Main differences between HoTT/UF and MLTT
+-----------------------------------------
+
+  1. The treatment of identity types.
+
+     * For a type X and points x , y : X, the identity type
+
+         Id X x y,
+
+       also written
+
+         x ≡ y
+
+       here, collects all the ways in which x and y are identified.
+
+     * The type x ≡ y has (provably) multiple elements in general.
+
+     * In the homotopical understanding, the identifications are paths.
+
+     * Example. In the type of groups, one can prove that the
+       identifications are in bijection with group isomorphisms,
+       assuming univalence.
+
+       Similarly for the types of rings, metric spaces, topological
+       spaces, graphs, posets, categories, functor algebras etc.
+
+       (https://www.cs.bham.ac.uk/~mhe/HoTT-UF-in-Agda-Lecture-Notes/)
+
+  2. The treatment of propositions.
+
+     * There isn't a a built-in type of propositions as in the
+       Calculus of Constructions (CoC).
+
+     * The constructed type of propositions, in a type universe 𝓤, is
+
+         Ω 𝓤 := Σ P ꞉ 𝓤 ̇ , is-prop P.
+
+     * A proposition, or truth value, is defined to be a type with at
+       most one element, or a subsingleton.
+
+       This e.g. makes unique choice automatic, while in CoC unique
+       choice fails.
+
+Part 1
+------
+
+The Pradic-Brown argument rendered in HoTT/UF
+---------------------------------------------
 
 \begin{code}
 
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-module CantorSchroederBernstein where
+module CantorSchroederBernstein-TheoryLabLunch where
 
 open import SpartanMLTT
-open import GenericConvergentSequence
 open import DecidableAndDetachable
-open import Plus-Properties
 open import CompactTypes
 open import ConvergentSequenceCompact
+open import GenericConvergentSequence
+open import Plus-Properties
 open import UF-Subsingletons
+open import UF-Retracts
 open import UF-Equiv
 open import UF-Embeddings
-open import UF-Retracts
 open import UF-FunExt
 open import UF-Subsingletons-FunExt
 open import UF-ExcludedMiddle
@@ -59,8 +189,26 @@ CantorSchröderBernstein 𝓤 𝓥 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) → CSB X Y
 
 \end{code}
 
-Part 1
-------
+We begin by recalling some definitions.
+
+\begin{code}
+
+recall₀ : {A : 𝓤 ̇ } → decidable A ≡ (A + ¬ A)
+recall₀ = by-definition
+
+
+recall₁ : {X : 𝓤 ̇ }
+        → Compact X {𝓥} ≡ ((A : X → 𝓥 ̇ ) → ((x : X) → decidable (A x))
+                                         → decidable (Σ x ꞉ X , A x))
+recall₁ = by-definition
+
+recall∞ : ℕ∞ ≡ (Σ α ꞉ (ℕ → 𝟚) , decreasing α)
+recall∞ = by-definition
+
+recall₂ : (fe : funext 𝓤₀ 𝓤₀) → Compact ℕ∞ {𝓤}
+recall₂ fe = ℕ∞-Compact fe
+
+\end{code}
 
 The following is Lemma 7 of the above reference, using retractions
 rather than surjections, for simplicity:
@@ -97,6 +245,16 @@ Pradic-Brown-lemma {𝓤} {𝓥} {X} {A} (r , s , η) c = γ e
 
 Function extensionality is used twice in the following, once to know
 that ℕ∞ is a set, and once to know that it is compact.
+
+\begin{code}
+
+recall₃ : EM 𝓤 ≡ ((P : 𝓤 ̇ ) → is-prop P → P + ¬ P)
+recall₃ = by-definition
+
+\end{code}
+
+Function extensionality says that any two pointwise equal functions
+are equal.
 
 \begin{code}
 
@@ -155,24 +313,79 @@ CantorSchröderBernstein-gives-EM fe csb P i = CSB-gives-EM fe P i (csb ℕ∞ (
 
 \end{code}
 
-Remark. If instead of requiring that we have a designated equivalence,
-we required that there is an unspecified equivalence in the
-formulation of Cantor-Schröder-Bernstein, we would still get excluded
-middle, because P + ¬ P is a proposition.
-
 
 Part 2
 ------
 
-The Cantor-Schröder-Bernstein Theorem holds for all homotopy types, or
-∞-gropoids, in the presence of excluded middle. It is crucial here
-that embeddings have subsingleton fibers, so that e.g. the function
-is-g-point defined in the proof is property rather than data and hence
-we can apply univalent excluded middle to it. It is also worth
-remembering, for the sake of comparing the classical result for sets
-with its generalization to ∞-groupoids, that a map of types that are
-sets is an embedding if and only if it is left-cancellable.
+Can the Cantor-Schröder-Bernstein Theorem be generalized from sets to
+arbitrary homotopy types, or ∞-groupoids, in the presence of excluded
+middle?
 
+This seems rather unlikely at first sight:
+
+  1. CSB fails for 1-categories.
+
+     In fact, it already fails for posets.
+     For example, the intervals (0,1) and [0,1] are order-embedded
+     into each other, but they are not order isomorphic.
+
+  2. The known proofs of CSB for sets rely on deciding equality of
+     elements of sets.
+
+     But, in the presence of excluded middle, the types that have
+     decidable equality are precisely the sets, by Hedberg’s Theorem.
+
+Now:
+
+  * In set theory, a map f : X → Y is an injection if and only if it
+    is left-cancellable:
+
+      f x = f x' implies x = x'.
+
+  * But, for (homotopy) types X and Y that are not sets, this notion
+    is too weak.
+
+  * Moreover, is not a proposition as the identity type x ≡ x' has
+    multiple elements in general.
+
+The appropriate notion of embedding for a function f of arbitrary
+types X and Y is given by any of the following two equivalent
+conditions:
+
+  1. The map ap f x x' : x ≡ x' → f x ≡ f x' is an equivalence for any x , x' : X.
+
+  2. The fibers of f are all subsingletons.
+
+We have:
+
+    * A map of sets is an embedding if and only if it is left-cancellable.
+
+    * However, for example, any map 𝟙 → Y that picks a point y : Y is
+      left-cancellable.
+
+      But it is an embedding if and only if the point y is homotopy isolated.
+
+      This amounts to saying that the identity type y = y is a singleton.
+
+      This fails, for instance, when the type Y is the homotopical
+      circle S¹, for any point y, or when Y is a univalent universe
+      and y : Y is the two-point type, or any type with more than one
+      automorphism.
+
+    * Example (Pradic). There are injections both ways between the
+      types ℕ × S¹ and 𝟙 + ℕ × S¹, but they aren't equivalent as one
+      of them has an isolated point but the other doesn't.
+
+      No injection 𝟙 + ℕ × S¹ → ℕ × S¹ is an embedding.
+
+    * It is the second characterization of embedding given above that
+      we exploit here.
+
+Theorem
+-------
+
+The Cantor-Schröder-Bernstein Theorem holds for all homotopy types, or
+∞-gropoids, in the presence of excluded middle.
 
 Our proof adapts Wikipedia's "alternate proof" (consulted 23rd January 2020)
 
@@ -180,28 +393,33 @@ Our proof adapts Wikipedia's "alternate proof" (consulted 23rd January 2020)
 
 to our more general situation.
 
+\begin{code}
 
-For foundational reasons, we make clear which instances of function
-extensionality and excluded middle are needed to conclude
-Cantor-Schröder-Bernstein for arbitrary universes 𝓤 and 𝓥.
+recall₄ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) (y : Y)
+        → fiber f y ≡ (Σ x ꞉ X , f x ≡ y)
+recall₄ x f = by-definition
 
-Added 28th January. To better understand this proof, you may consult the blog
-post
 
-  https://homotopytypetheory.org/2020/01/26/the-cantor-schroder-bernstein-theorem-for-∞-groupoids/
+recall₅ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
+        → is-embedding f ≡ ((y : Y) → is-prop (fiber f y))
+recall₅ f = by-definition
 
-first. However, we have tried to make the proof understandable as we
-can here, and hopefully it should be possible to read it without
-reference to the blog post.
+
+recall₆ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+        → (X ↪ Y) ≡ (Σ f ꞉ (X → Y) , is-embedding f)
+recall₆ = by-definition
+
+\end{code}
+
+We are now ready to prove the theorem.
 
 \begin{code}
 
-EM-gives-CantorSchröderBernstein : funext 𝓤 (𝓤 ⊔ 𝓥)
-                                 → funext (𝓤 ⊔ 𝓥) 𝓤₀
-                                 → funext 𝓤₀ (𝓤 ⊔ 𝓥)
+EM-gives-CantorSchröderBernstein : Fun-Ext
                                  → EM (𝓤 ⊔ 𝓥)
                                  → CantorSchröderBernstein 𝓤 𝓥
-EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle X Y (f , f-is-emb) (g , g-is-emb) =
+EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe excluded-middle
+                                 X Y (f , f-is-emb) (g , g-is-emb) =
 
   need (X ≃ Y) which-is-given-by 𝒽
 
@@ -225,18 +443,7 @@ In order to define 𝒽 : X ≃ Y, we use a notion of g-point.
 \end{code}
 
 What is important for our purposes is that this is property rather
-than data, using the fact that g is an embedding, which means that its
-fibers are all propositions.
-
-\begin{code}
-
-  recall : (x : X) → fiber g x ≡ (Σ y ꞉ Y , g y ≡ x)
-  recall _ = by-definition
-
-  also-recall : is-embedding g ≡ ((x : X) → is-prop (fiber g x))
-  also-recall = by-definition
-
-\end{code}
+than data, using the fact that g is an embedding.
 
 We use the fact that propositions are closed under products, which
 requires function extensionality:
@@ -245,10 +452,10 @@ requires function extensionality:
 
   being-g-point-is-a-prop : (x : X) → is-prop (is-g-point x)
   being-g-point-is-a-prop x =
-   Π-is-prop fe  (λ (x₀ : X                   ) →
-   Π-is-prop fe₁ (λ (n  : ℕ                   ) →
-   Π-is-prop fe  (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → need (is-prop (fiber g x₀))
-                                                  which-is-given-by (g-is-emb x₀))))
+   Π-is-prop fe (λ (x₀ : X                   ) →
+   Π-is-prop fe (λ (n  : ℕ                   ) →
+   Π-is-prop fe (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → need (is-prop (fiber g x₀))
+                                                 which-is-given-by (g-is-emb x₀))))
 \end{code}
 
 By construction, considering x₀ = x and n = 0, we have that g is
@@ -257,7 +464,7 @@ invertible at g-points, because, by definition, we have that
 
 \begin{code}
 
-  g-is-invertible-at-g-points : (x : X) (γ : is-g-point x) → fiber g x
+  g-is-invertible-at-g-points : (x : X) → is-g-point x → fiber g x
   g-is-invertible-at-g-points x γ = γ x 0 (by-definition ∶ ((g ∘ f) ^ 0) x ≡ x)
 
 \end{code}
@@ -275,9 +482,6 @@ Because being a g-point is property, we can apply excluded middle to
 it:
 
 \begin{code}
-
-  recall-the-notion-of-decidability : {𝓦 : Universe} {A : 𝓦 ̇ } → decidable A ≡ (A + ¬ A)
-  recall-the-notion-of-decidability = by-definition
 
   δ : (x : X) → decidable (is-g-point x)
   δ x = excluded-middle (is-g-point x) (being-g-point-is-a-prop x)
@@ -352,8 +556,8 @@ left-cancellability of h:
    where
     q : g (f x) ≡ x'
     q = have p ∶ f x ≡ g⁻¹ x' γ
-        so-use (g (f x)      ≡⟨ ap g p            ⟩
-                g (g⁻¹ x' γ) ≡⟨ g⁻¹-is-rinv x' γ  ⟩
+        so-use (g (f x)      ≡⟨ ap g p           ⟩
+                g (g⁻¹ x' γ) ≡⟨ g⁻¹-is-rinv x' γ ⟩
                 x'           ∎)
     u : ¬ is-g-point (g (f x))
     u = have ν ∶ ¬ is-g-point x
@@ -381,9 +585,9 @@ prove properties of H and then specialize them to h:
    where
     l : (d : decidable (is-g-point x)) (d' : decidable (is-g-point x')) → H x d ≡ H x' d' → x ≡ x'
 
-    l (inl γ) (inl γ') p = have p ∶ g⁻¹ x γ ≡ g⁻¹ x' γ'
+    l (inl γ) (inl γ') p = have p ∶ g⁻¹ x γ  ≡ g⁻¹ x'  γ'
                            so (x             ≡⟨ (g⁻¹-is-rinv x γ)⁻¹ ⟩
-                               g (g⁻¹ x γ)   ≡⟨ ap g p                  ⟩
+                               g (g⁻¹ x  γ ) ≡⟨ ap g p              ⟩
                                g (g⁻¹ x' γ') ≡⟨ g⁻¹-is-rinv x' γ'   ⟩
                                x'            ∎)
 
@@ -459,7 +663,7 @@ doesn't refer to the notion of f-point.
 
     iv : is-prop (Σ (x , p) ꞉ fiber f y , ¬ is-g-point x)
     iv = have f-is-emb y ∶ is-prop (fiber f y)
-         so-apply subtype-of-prop-is-a-prop pr₁ (pr₁-lc (λ {σ} → negations-are-props fe₀))
+         so-apply subtype-of-prop-is-a-prop pr₁ (pr₁-lc (λ {σ} → negations-are-props fe))
 
     v : Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
     v = double-negation-elimination excluded-middle _ iv iii
@@ -477,7 +681,8 @@ purpose.
   h-split-surjection : (y : Y) → Σ x ꞉ X , h x ≡ y
   h-split-surjection y = x , p
    where
-    a : decidable (is-g-point (g y)) → Σ x ꞉ X , ((d : decidable (is-g-point x)) → H x d ≡ y)
+    a : decidable (is-g-point (g y))
+      → Σ x ꞉ X , ((d : decidable (is-g-point x)) → H x d ≡ y)
     a (inl γ) = g y , ψ
      where
       ψ : (d : decidable (is-g-point (g y))) → H (g y) d ≡ y
@@ -522,160 +727,4 @@ are done:
 
 \end{code}
 
-We record the following special case:
-
-\begin{code}
-
-EM-gives-CantorSchröderBernstein₀ : funext 𝓤₀ 𝓤₀
-                                  → EM 𝓤₀
-                                  → CantorSchröderBernstein 𝓤₀ 𝓤₀
-EM-gives-CantorSchröderBernstein₀ fe = EM-gives-CantorSchröderBernstein fe fe fe
-
-\end{code}
-
-
-APPENDIX
---------
-
-The above is an attempt to make the proof more readable and match the
-blog post. Here is a more concise version of the above in a more
-direct Agda style which some will prefer (and which could be made even
-more concise by avoiding auxiliary definitions used for the purpose of
-indicating types explicitly).
-
-\begin{code}
-
-EM-gives-CantorSchröderBernstein' : funext 𝓤 (𝓤 ⊔ 𝓥)
-                                  → funext (𝓤 ⊔ 𝓥) 𝓤₀
-                                  → funext 𝓤₀ (𝓤 ⊔ 𝓥)
-                                  → EM (𝓤 ⊔ 𝓥)
-                                  → CantorSchröderBernstein 𝓤 𝓥
-EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle X Y (f , f-is-emb) (g , g-is-emb) = 𝒽
- where
-  is-g-point : (x : X) → 𝓤 ⊔ 𝓥 ̇
-  is-g-point x = (x₀ : X) (n : ℕ) → ((g ∘ f) ^ n) x₀ ≡ x → fiber g x₀
-
-  g-is-invertible-at-g-points : (x : X) (γ : is-g-point x) → fiber g x
-  g-is-invertible-at-g-points x γ = γ x 0 refl
-
-  g⁻¹ : (x : X) → is-g-point x → Y
-  g⁻¹ x γ = fiber-point g x (g-is-invertible-at-g-points x γ)
-
-  g⁻¹-is-rinv : (x : X) (γ : is-g-point x) → g (g⁻¹ x γ) ≡ x
-  g⁻¹-is-rinv x γ = fiber-path g x (g-is-invertible-at-g-points x γ)
-
-  g⁻¹-is-linv : (y : Y) (γ : is-g-point (g y)) → g⁻¹ (g y) γ ≡ y
-  g⁻¹-is-linv y γ = embeddings-are-left-cancellable g g-is-emb (g⁻¹-is-rinv (g y) γ)
-
-  α : (x : X) → is-g-point (g (f x)) → is-g-point x
-  α x γ x₀ n p = γ x₀ (succ n) (ap (g ∘ f) p)
-
-  f-g⁻¹-disjoint-images : (x x' : X)
-                        → ¬ is-g-point x
-                        → (γ : is-g-point x')
-                        → f x ≢ g⁻¹ x' γ
-  f-g⁻¹-disjoint-images x x' ν γ p = 𝟘-elim (v γ)
-   where
-    q = g (f x)      ≡⟨ ap g p            ⟩
-        g (g⁻¹ x' γ) ≡⟨ g⁻¹-is-rinv x' γ  ⟩
-        x'           ∎
-    u : ¬ is-g-point (g (f x))
-    u = contrapositive (α x) ν
-    v : ¬ is-g-point x'
-    v = transport (λ - → ¬ is-g-point -) q u
-
-  being-g-point-is-a-prop : (x : X) → is-prop (is-g-point x)
-  being-g-point-is-a-prop x = Π-is-prop fe (λ x₀ → Π-is-prop fe₁ (λ _ → Π-is-prop fe (λ _ → g-is-emb x₀)))
-
-  δ : (x : X) → decidable (is-g-point x)
-  δ x = excluded-middle (is-g-point x) (being-g-point-is-a-prop x)
-
-  H : (x : X) → decidable (is-g-point x) → Y
-  H x (inl γ) = g⁻¹ x γ
-  H x (inr _) = f x
-
-  h : X → Y
-  h x = H x (δ x)
-
-  h-lc : left-cancellable h
-  h-lc {x} {x'} = l (δ x) (δ x')
-   where
-    l : (d : decidable (is-g-point x)) (d' : decidable (is-g-point x')) → H x d ≡ H x' d' → x ≡ x'
-    l (inl γ) (inl γ') p = x             ≡⟨ (g⁻¹-is-rinv x γ)⁻¹     ⟩
-                           g (g⁻¹ x γ)   ≡⟨ ap g p                  ⟩
-                           g (g⁻¹ x' γ') ≡⟨ g⁻¹-is-rinv x' γ'   ⟩
-                           x'            ∎
-    l (inl γ) (inr ν') p = 𝟘-elim(f-g⁻¹-disjoint-images x' x  ν' γ (p ⁻¹))
-    l (inr ν) (inl γ') p = 𝟘-elim(f-g⁻¹-disjoint-images x  x' ν  γ' p)
-    l (inr ν) (inr ν') p = embeddings-are-left-cancellable f f-is-emb p
-
-  f-point : (x : X) → 𝓤 ⊔ 𝓥 ̇
-  f-point x = Σ x₀ ꞉ X , (Σ n ꞉ ℕ , ((g ∘ f) ^ n) x₀ ≡ x) × ¬ fiber g x₀
-
-  non-f-point-is-g-point : (x : X) → ¬ f-point x → is-g-point x
-  non-f-point-is-g-point x ν x₀ n p =
-   Cases (excluded-middle (fiber g x₀) (g-is-emb x₀))
-    (λ (σ :   fiber g x₀) → σ)
-    (λ (u : ¬ fiber g x₀) → 𝟘-elim(ν (x₀ , (n , p) , u)))
-
-  claim : (y : Y) → ¬ is-g-point (g y) → Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
-  claim y ν = v
-   where
-   i : ¬¬ f-point (g y)
-   i = contrapositive (non-f-point-is-g-point (g y)) ν
-
-   ii : f-point (g y) → Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
-   ii (x₀ , (0      , p) , u) = 𝟘-elim (u (y , (p ⁻¹)))
-   ii (x₀ , (succ n , p) , u) = a , b
-    where
-     q : f (((g ∘ f) ^ n) x₀) ≡ y
-     q = embeddings-are-left-cancellable g g-is-emb p
-     a : fiber f y
-     a = ((g ∘ f) ^ n) x₀ , q
-     b : ¬ is-g-point (((g ∘ f) ^ n) x₀)
-     b γ = 𝟘-elim (u (γ x₀ n refl))
-
-   iii : ¬¬ (Σ (x , p) ꞉ fiber f y , ¬ is-g-point x)
-   iii = double-contrapositive ii i
-
-   iv : is-prop (Σ (x , p) ꞉ fiber f y , ¬ is-g-point x)
-   iv = subtype-of-prop-is-a-prop pr₁ (pr₁-lc (λ {σ} → negations-are-props fe₀)) (f-is-emb y)
-
-   v : Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
-   v = double-negation-elimination excluded-middle _ iv iii
-
-  h-split-surjection : (y : Y) → Σ x ꞉ X , h x ≡ y
-  h-split-surjection y = x , p
-   where
-    a : decidable (is-g-point (g y)) → Σ x ꞉ X , ((d : decidable (is-g-point x)) → H x d ≡ y)
-    a (inl γ) = g y , ψ
-     where
-      ψ : (d : decidable (is-g-point (g y))) → H (g y) d ≡ y
-      ψ (inl γ') = g⁻¹-is-linv y γ'
-      ψ (inr ν)  = 𝟘-elim (ν γ)
-    a (inr ν) = x , ψ
-     where
-      w : Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
-      w = claim y ν
-      x : X
-      x = fiber-point f y (pr₁ w)
-      ψ : (d : decidable (is-g-point x)) → H x d ≡ y
-      ψ (inl γ) = 𝟘-elim (pr₂ w γ)
-      ψ (inr ν) = fiber-path f y (pr₁ w)
-
-    b : Σ x ꞉ X , ((d : decidable (is-g-point x)) → H x d ≡ y)
-    b = a (δ (g y))
-    x : X
-    x = pr₁ b
-    p : h x ≡ y
-    p = h x       ≡⟨ by-construction ⟩
-        H x (δ x) ≡⟨ pr₂ b (δ x)     ⟩
-        y         ∎
-
-  𝒽 : X ≃ Y
-  𝒽 = h , lc-split-surjections-are-equivs h h-lc h-split-surjection
-
-\end{code}
-
-Check our lecture notes https://www.cs.bham.ac.uk/~mhe/HoTT-UF-in-Agda-Lecture-Notes/
-if you want to learn HoTT/UF and Agda.
+Q.E.D.

@@ -380,7 +380,7 @@ Hence it is worth stating this explicitly:
 universe-retract' : Univalence
                   → Propositional-resizing
                   → (𝓤 𝓥 : Universe)
-                  → Σ \(ρ : retract 𝓤 ̇ of (𝓤 ⊔ 𝓥 ̇ )) → is-embedding (section ρ)
+                  → Σ ρ ꞉ retract 𝓤 ̇ of (𝓤 ⊔ 𝓥 ̇ ), is-embedding (section ρ)
 universe-retract' ua R 𝓤 𝓥 = (pr₁ a , lift 𝓥 , pr₂ a) , lift-is-embedding ua
  where
   a : Σ lower ꞉ (𝓤 ⊔ 𝓥 ̇ → 𝓤 ̇ ) , lower ∘ lift 𝓥 ∼ id
@@ -858,7 +858,7 @@ module Image
  open PropositionalTruncation (resizing-truncation fe R)
 
  image : (X → Y) → 𝓥 ̇
- image f = Σ \y → resize (R {𝓤 ⊔ 𝓥} {𝓥}) (∃ \x → f x ≡ y) ∥∥-is-a-prop
+ image f = Σ y ꞉ Y , resize (R {𝓤 ⊔ 𝓥} {𝓥}) (∃ x ꞉ X , f x ≡ y) ∥∥-is-a-prop
 
  restriction : (f : X → Y) → image f → Y
  restriction f (y , _) = y

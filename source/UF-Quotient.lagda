@@ -86,7 +86,7 @@ X : 𝓤 ̇, and an equivalence relation _≈_ with values in 𝓥 ̇.
 
 \begin{code}
 
-module Quotient
+module _
        (pt  : propositional-truncations-exist)
        (fe  : FunExt)
        {𝓤 𝓥 : Universe}
@@ -110,7 +110,7 @@ in the next universe 𝓥 ⁺.
 
 From the relation _≈_ : X → (X → 𝓥 ̇ ) we define a relation
 X → (X → Ω 𝓥), which of course is formally a function. We then take
-
+the quotient X/≈ to be the image of this function.
 
 Of course, it is for constructing the image that we need propositional
 truncations.
@@ -218,30 +218,30 @@ universe 𝓦.
                     → is-set A
                     → (f : X → A)
                     → ((x x' : X) → x ≈ x' → f x ≡ f x')
-                    → ∃! f' ꞉ (X/≈ → A), f' ∘ η ≡ f
+                    → ∃! f' ꞉( X/≈ → A), f' ∘ η ≡ f
  universal-property {𝓦} A iss f pr = ic
   where
-   φ : (x' : X/≈) → is-prop (Σ \a → ∃ \x → (η x ≡ x') × (f x ≡ a))
+   φ : (x' : X/≈) → is-prop (Σ a ꞉ A , ∃ x ꞉ X ,  (η x ≡ x') × (f x ≡ a))
    φ = η-induction _ γ induction-step
      where
-      induction-step : (y : X) → is-prop (Σ \a → ∃ \x → (η x ≡ η y) × (f x ≡ a))
+      induction-step : (y : X) → is-prop (Σ a ꞉ A , ∃ x ꞉ X ,  (η x ≡ η y) × (f x ≡ a))
       induction-step x (a , d) (b , e) = to-Σ-≡ (p , ∥∥-is-a-prop _ _)
        where
-        h : (Σ \x' → (η x' ≡ η x) × (f x' ≡ a))
-          → (Σ \y' → (η y' ≡ η x) × (f y' ≡ b))
+        h : (Σ x' ꞉ X , (η x' ≡ η x) × (f x' ≡ a))
+          → (Σ y' ꞉ X , (η y' ≡ η x) × (f y' ≡ b))
           → a ≡ b
         h (x' , r , s) (y' , t , u) = s ⁻¹ ∙ pr x' y' (η-equal-equiv (r ∙ t ⁻¹)) ∙ u
 
         p : a ≡ b
         p = ∥∥-rec iss (λ σ → ∥∥-rec iss (h σ) e) d
 
-      γ : (x' : X/≈) → is-prop (is-prop (Σ \a → ∃ \x → (η x ≡ x') × (f x ≡ a)))
+      γ : (x' : X/≈) → is-prop (is-prop (Σ a ꞉ A , ∃ x ꞉ X , (η x ≡ x') × (f x ≡ a)))
       γ x' = being-a-prop-is-a-prop (fe (𝓤 ⊔ (𝓥 ⁺) ⊔ 𝓦) (𝓤 ⊔ (𝓥 ⁺) ⊔ 𝓦))
 
-   k : (x' : X/≈) → Σ a ꞉ A , ∃ \(x : X) → (η x ≡ x') × (f x ≡ a)
+   k : (x' : X/≈) → Σ a ꞉ A , ∃ x ꞉ X , (η x ≡ x') × (f x ≡ a)
    k = η-induction _ φ induction-step
     where
-     induction-step : (y : X) → Σ \a → ∃ \x → (η x ≡ η y) × (f x ≡ a)
+     induction-step : (y : X) → Σ a ꞉ A , ∃ x ꞉ X , (η x ≡ η y) × (f x ≡ a)
      induction-step x = f x , ∣ x , refl , refl ∣
 
    f' : X/≈ → A
@@ -250,10 +250,10 @@ universe 𝓦.
    r : f' ∘ η ≡ f
    r = dfunext (fe 𝓤 𝓦) h
     where
-     g : (y : X) → ∃ \x → (η x ≡ η y) × (f x ≡ f' (η y))
+     g : (y : X) → ∃ x ꞉ X , (η x ≡ η y) × (f x ≡ f' (η y))
      g y = pr₂(k(η y))
 
-     j : (y : X) → (Σ \x → (η x ≡ η y) × (f x ≡ f' (η y))) → f'(η y) ≡ f y
+     j : (y : X) → (Σ x ꞉ X , (η x ≡ η y) × (f x ≡ f' (η y))) → f'(η y) ≡ f y
      j y (x , p , q) = q ⁻¹ ∙ pr x y (η-equal-equiv p)
 
      h : (y : X) → f'(η y) ≡ f y

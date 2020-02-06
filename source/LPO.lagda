@@ -3,7 +3,7 @@ Martin Escardo, December 2017 (but done much earlier on paper)
 As discussed in the module CompactTypes, Bishop's "limited principle
 of omniscience" amount to the compactness of the type ℕ, that is,
 
-  Π p ꞉ ℕ → 𝟚 , (Σ n ꞉ ℕ , p n ≡ ₀) + (Π n  ꞉  ℕ , p n ≡ ₁),
+  Π p ꞉ ℕ → 𝟚 , (Σ n ꞉ ℕ , p n ≡ ₀) + (Π n ꞉ ℕ , p n ≡ ₁),
 
 which fails in contructive mathematics (here in the sense that it is
 independent - it is not provable, and its negation is also not
@@ -46,10 +46,10 @@ LPO = (x : ℕ∞) → decidable(Σ n ꞉ ℕ , x ≡ under n)
 LPO-is-a-prop : is-prop LPO
 LPO-is-a-prop = Π-is-prop (fe 𝓤₀ 𝓤₀) f
  where
-  a : (x : ℕ∞) → is-prop(Σ \n → x ≡ under n)
+  a : (x : ℕ∞) → is-prop(Σ n ꞉ ℕ , x ≡ under n)
   a x (n , p) (m , q) = to-Σ-≡ (under-lc (p ⁻¹ ∙ q) , ℕ∞-is-set (fe 𝓤₀ 𝓤₀)_ _)
 
-  f : (x : ℕ∞) → is-prop (decidable (Σ \n → x ≡ under n))
+  f : (x : ℕ∞) → is-prop (decidable (Σ n ꞉ ℕ , x ≡ under n))
   f x = decidability-of-prop-is-prop (fe 𝓤₀ 𝓤₀) (a x)
 
 \end{code}

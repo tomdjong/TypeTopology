@@ -6,12 +6,12 @@ Tom de Jong, 6 February 2020
 
 module CompleteSmallLatticePropResizing where
 
-open import SpartanMLTT
+open import SpartanMLTT hiding (¬_ ; ¬¬_)
 
 open import UF-Base
 open import UF-FunExt
 open import UF-Subsingletons
-open import UF-Subsingletons-FunExt
+open import UF-Subsingletons-FunExt hiding (not)
 open import UF-Size
 open import UF-Retracts
 
@@ -112,8 +112,14 @@ module _
 
   -- To avoid lift in the construction below, we use 𝟘{𝓤} rather than 𝟘{𝓤₀} to
   -- define ¬.
+  ¬ : (X : 𝓤 ̇ ) → 𝓤 ̇
+  ¬ X = X → 𝟘{𝓤}
+
+  ¬¬ : (X : 𝓤 ̇ ) → 𝓤 ̇
+  ¬¬ X = ¬ (¬ X)
+
   is-non-trivial : 𝓤 ̇
-  is-non-trivial = bottom ≡ top → 𝟘 {𝓤}
+  is-non-trivial = ¬ (bottom ≡ top)
 
   strongly-non-trivial-implies-non-trivial : is-strongly-non-trivial → is-non-trivial
   strongly-non-trivial-implies-non-trivial snt e = u *
@@ -162,12 +168,12 @@ module _
   -- We now prove that a non-trivial complete small lattice gives a weak form of
   -- resizing.
 
-  -- We have too redo some of the stuff in Negation.lagda, because we take 𝟘 to
+  -- We have to redo some of the stuff in Negation.lagda, because we take 𝟘 to
   -- be in 𝓤. This is a little awkward.
-  is-¬¬-stable : (X : 𝓥 ̇ ) → 𝓥 ̇
-  is-¬¬-stable {𝓥} X = ((X → 𝟘{𝓥}) → 𝟘{𝓥}) → X
+  is-¬¬-stable : (X : 𝓤 ̇ ) → 𝓤 ̇
+  is-¬¬-stable X = ¬¬ X → X
 
-  being-¬¬-stable-is-a-prop : {X : 𝓥 ̇ } → is-prop X → is-prop (is-¬¬-stable X)
+  being-¬¬-stable-is-a-prop : {X : 𝓤 ̇ } → is-prop X → is-prop (is-¬¬-stable X)
   being-¬¬-stable-is-a-prop i = Π-is-prop fe (λ _ → i)
 
   Ω¬¬-stable : 𝓤 ⁺ ̇
@@ -179,7 +185,7 @@ module _
   ρ : L → Ω¬¬-stable
   ρ l = ((l ⊑ bottom → 𝟘{𝓤}) , (Π-is-prop fe (λ _ → 𝟘-is-prop))) , γ
    where
-    γ : (((l ⊑ bottom → 𝟘) → 𝟘) → 𝟘) → l ⊑ bottom → 𝟘
+    γ : is-¬¬-stable (l ⊑ bottom → 𝟘)
     γ dn h = dn (λ f → f h)
 
   Ω¬¬-stable-retract-of-L : propext 𝓤 → is-non-trivial → Ω¬¬-stable ◁ L
@@ -212,5 +218,68 @@ module _
                                           → is-non-trivial → Ω¬¬-stable has-size 𝓤
   non-trivial-implies-Ω¬¬-stable-resizing pe nt =
    retract-gives-has-size is-set-L (Ω¬¬-stable-retract-of-L pe nt)
+
+  -- We try to find a relation between being non-trivial and being strongly
+  -- non-trivial.
+
+  not : Ω 𝓤 → Ω 𝓤
+  not P = ¬ (P holds) , Π-is-prop fe (λ _ → 𝟘-is-prop)
+
+  notnot : Ω 𝓤 → Ω 𝓤
+  notnot P = not (not P)
+
+  ¬¬-lemma : {P Q : 𝓤 ̇ } → is-prop P → is-prop Q
+           → ((P → ¬¬ Q) → (¬¬ P → ¬¬ Q))
+           × ((¬¬ P → ¬¬ Q) → (P → ¬¬ Q))
+  ¬¬-lemma {P} {Q} i j = f , g
+   where
+    f : (P → ¬¬ Q) → ¬¬ P → ¬¬ Q
+    f h nnp nq = nnp (λ (p : P) → h p nq)
+    g : (¬¬ P → ¬¬ Q) → P → ¬¬ Q
+    g h p = h (λ (np : ¬ P) → np p)
+
+  -- By the above, variant is equivalent to
+  -- Ω-to-L P ⊑ Ω-to-L Q → (notnot P ⊑Ω notnot Q)
+  variant : 𝓤 ⁺ ̇
+  variant = (P Q : Ω 𝓤) → Ω-to-L P ⊑ Ω-to-L Q → (P ⊑Ω notnot Q)
+
+  variant-implies-non-trivial : variant → is-non-trivial
+  variant-implies-non-trivial v e = v ⊤ ⊥ γ * id
+   where
+    γ : Ω-to-L ⊤ ⊑ Ω-to-L ⊥
+    γ = transport (λ - → Ω-to-L ⊤ ⊑ -) p (⊑-refl (Ω-to-L ⊤))
+     where
+      p = Ω-to-L ⊤ ≡⟨ i ⟩
+          top      ≡⟨ e ⁻¹ ⟩
+          bottom   ≡⟨ ii ⟩
+          Ω-to-L ⊥ ∎
+       where
+        i  = ⊑-anti (Ω-to-L ⊤) top
+             (top-is-greatest (Ω-to-L ⊤)) (⋁-is-ub (λ _ → top) *)
+        ii = ⊑-anti bottom (Ω-to-L ⊥) (bottom-is-least (Ω-to-L ⊥))
+             (⋁-is-lb-of-ubs (λ _ → top) bottom 𝟘-induction)
+
+  non-trivial-implies-variant : is-non-trivial → variant
+  non-trivial-implies-variant nt P Q u p nq = nt γ
+   where
+    γ : bottom ≡ top
+    γ = ⊑-anti bottom top (top-is-greatest bottom)
+        ϕ
+     where
+      ϕ : top ⊑ bottom
+      ϕ = transport (λ - → - ⊑ bottom) a ψ
+       where
+        a : Ω-to-L P ≡ top
+        a = ⊑-anti (Ω-to-L P) top
+            (top-is-greatest (Ω-to-L P))
+            (⋁-is-ub (λ _ → top) p)
+        ψ : Ω-to-L P ⊑ bottom
+        ψ = transport (λ - → Ω-to-L P ⊑ -) b u
+         where
+          b : Ω-to-L Q ≡ bottom
+          b = ⊑-anti (Ω-to-L Q) bottom
+              (⋁-is-lb-of-ubs (λ _ → top) bottom
+                (λ (q : Q holds) → 𝟘-elim (nq q)))
+              (bottom-is-least (Ω-to-L Q))
 
 \end{code}

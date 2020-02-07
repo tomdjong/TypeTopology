@@ -239,7 +239,7 @@ module _
     g h p = h (λ (np : ¬ P) → np p)
 
   -- By the above, variant is equivalent to
-  -- Ω-to-L P ⊑ Ω-to-L Q → (notnot P ⊑Ω notnot Q)
+  -- Ω-to-L P ⊑ Ω-to-L Q → (notnot P ⊑Ω notnot Q).
   variant : 𝓤 ⁺ ̇
   variant = (P Q : Ω 𝓤) → Ω-to-L P ⊑ Ω-to-L Q → (P ⊑Ω notnot Q)
 
@@ -259,12 +259,12 @@ module _
         ii = ⊑-anti bottom (Ω-to-L ⊥) (bottom-is-least (Ω-to-L ⊥))
              (⋁-is-lb-of-ubs (λ _ → top) bottom 𝟘-induction)
 
+  -- With some transivity syntax and ≡-to-⊑, this would look cleaner.
   non-trivial-implies-variant : is-non-trivial → variant
   non-trivial-implies-variant nt P Q u p nq = nt γ
    where
     γ : bottom ≡ top
-    γ = ⊑-anti bottom top (top-is-greatest bottom)
-        ϕ
+    γ = ⊑-anti bottom top (top-is-greatest bottom) ϕ
      where
       ϕ : top ⊑ bottom
       ϕ = transport (λ - → - ⊑ bottom) a ψ

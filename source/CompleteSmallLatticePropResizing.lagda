@@ -152,5 +152,57 @@ module _
   strongly-non-trivial-implies-Ω-resizing pe snt =
    retract-gives-has-size is-set-L (Ω-retract-of-L pe snt)
 
+  -- We now prove that a non-trivial complete small lattice gives a weak form of resizing
+
+  -- We have too redo some of the stuff in Negation.lagda, because we take 𝟘 to
+  -- be in 𝓤. This is a little awkward.
+  is-¬¬-stable : (X : 𝓥 ̇ ) → 𝓥 ̇
+  is-¬¬-stable {𝓥} X = ((X → 𝟘{𝓥}) → 𝟘{𝓥}) → X
+
+  being-¬¬-stable-is-a-prop : {X : 𝓥 ̇ } → is-prop X → is-prop (is-¬¬-stable X)
+  being-¬¬-stable-is-a-prop i = Π-is-prop fe (λ _ → i)
+
+  Ω¬¬-stable : 𝓤 ⁺ ̇
+  Ω¬¬-stable = Σ P ꞉ Ω 𝓤 , is-¬¬-stable (P holds)
+
+  σ : Ω¬¬-stable → L
+  σ (P , _) = ⋁ {P holds} (λ _ → top)
+
+  ρ : L → Ω¬¬-stable
+  ρ l = ((l ⊑ bottom → 𝟘{𝓤}) , (Π-is-prop fe (λ _ → 𝟘-is-prop))) , γ
+   where
+    γ : (((l ⊑ bottom → 𝟘) → 𝟘) → 𝟘) → l ⊑ bottom → 𝟘
+    γ dn h = dn (λ f → f h)
+
+  Ω¬¬-stable-retract-of-L : propext 𝓤 → is-non-trivial → Ω¬¬-stable ◁ L
+  Ω¬¬-stable-retract-of-L pe nt = ρ , (σ , ρσ)
+   where
+    ρσ : (P : Ω¬¬-stable) → ρ (σ P) ≡ P
+    ρσ ((P , i) , s) = to-subtype-≡ (λ Q → being-¬¬-stable-is-a-prop (pr₂ Q))
+                       (to-subtype-≡ (λ _ → being-a-prop-is-a-prop fe) γ)
+     where
+      γ : (σ ((P , i) , s) ⊑ bottom → 𝟘{𝓤}) ≡ P
+      γ = pe (Π-is-prop fe (λ _ → 𝟘-is-prop)) i f g
+       where
+        f : (σ ((P , i) , s) ⊑ bottom → 𝟘{𝓤}) → P
+        f h = s ϕ
+         where
+          ϕ : (P → 𝟘{𝓤}) → 𝟘{𝓤}
+          ϕ np = h (⋁-is-lb-of-ubs (λ p → top) bottom ψ)
+           where
+            ψ : P → top ⊑ bottom
+            ψ p = 𝟘-elim (np p)
+        g : P → σ ((P , i) , s) ⊑ bottom → 𝟘{𝓤}
+        g p u = nt (⊑-anti bottom top (⋁-is-lb-of-ubs unique-from-𝟘 top 𝟘-induction)
+                (transport (λ - → - ⊑ bottom) (e ⁻¹) u))
+         where
+          e : top ≡ σ ((P , i) , s)
+          e = ⊑-anti top (σ ((P , i) , s))
+              (⋁-is-ub (λ p' → top) p) (⋁-is-ub id (σ ((P , i) , s)))
+
+  non-trivial-implies-Ω¬¬-stable-resizing : propext 𝓤
+                                          → is-non-trivial → Ω¬¬-stable has-size 𝓤
+  non-trivial-implies-Ω¬¬-stable-resizing pe nt =
+   retract-gives-has-size is-set-L (Ω¬¬-stable-retract-of-L pe nt)
 
 \end{code}

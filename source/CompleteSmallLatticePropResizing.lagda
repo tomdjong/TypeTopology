@@ -73,8 +73,14 @@ module _
   bottom : L
   bottom = ⋁ {𝟘} unique-from-𝟘
 
+  bottom-is-least : (l : L) → bottom ⊑ l
+  bottom-is-least l = ⋁-is-lb-of-ubs unique-from-𝟘 l 𝟘-induction
+
   top : L
   top = ⋁ {L} id
+
+  top-is-greatest : (l : L) → l ⊑ top
+  top-is-greatest l = ⋁-is-ub id l
 
   Ω-to-L : Ω 𝓤 → L
   Ω-to-L (P , i) = ⋁ {P} α
@@ -104,6 +110,8 @@ module _
   L-to-Ω : L → Ω 𝓤
   L-to-Ω l = top ⊑ l , ⊑-prop-valued top l
 
+  -- To avoid lift in the construction below, we use 𝟘{𝓤} rather than 𝟘{𝓤₀} to
+  -- define ¬.
   is-non-trivial : 𝓤 ̇
   is-non-trivial = bottom ≡ top → 𝟘 {𝓤}
 
@@ -117,8 +125,7 @@ module _
       v = ⋁-is-lb-of-ubs (λ _ → top) (Ω-to-L ⊥) γ
        where
         γ : ⊤ holds → top ⊑ Ω-to-L ⊥
-        γ * = transport (λ - → - ⊑ Ω-to-L ⊥) e
-              (⋁-is-lb-of-ubs unique-from-𝟘 (Ω-to-L ⊥) 𝟘-induction)
+        γ * = transport (λ - → - ⊑ Ω-to-L ⊥) e (bottom-is-least (Ω-to-L ⊥))
 
   Ω-retract-of-L : propext 𝓤 → is-strongly-non-trivial → Ω 𝓤 ◁ L
   Ω-retract-of-L pe snt = r , (s , rs)
@@ -143,16 +150,17 @@ module _
           ⌜top⌝ : 𝟙{𝓤} → L
           ⌜top⌝ _ = top
           e : top ≡ ⋁ ⌜top⌝
-          e = ⊑-anti top (⋁ ⌜top⌝) (⋁-is-ub ⌜top⌝ *) (⋁-is-ub id (⋁ ⌜top⌝))
+          e = ⊑-anti top (⋁ ⌜top⌝) (⋁-is-ub ⌜top⌝ *) (top-is-greatest (⋁ ⌜top⌝))
           v : ⋁ ⌜top⌝ ⊑ ⋁ α
           v = transport (λ - → - ⊑ ⋁ α) e u
 
   strongly-non-trivial-implies-Ω-resizing : propext 𝓤
-                                          → is-strongly-non-trivial → Ω 𝓤 has-size 𝓤
+                                          → is-strongly-non-trivial → (Ω 𝓤) has-size 𝓤
   strongly-non-trivial-implies-Ω-resizing pe snt =
    retract-gives-has-size is-set-L (Ω-retract-of-L pe snt)
 
-  -- We now prove that a non-trivial complete small lattice gives a weak form of resizing
+  -- We now prove that a non-trivial complete small lattice gives a weak form of
+  -- resizing.
 
   -- We have too redo some of the stuff in Negation.lagda, because we take 𝟘 to
   -- be in 𝓤. This is a little awkward.
@@ -193,12 +201,12 @@ module _
             ψ : P → top ⊑ bottom
             ψ p = 𝟘-elim (np p)
         g : P → σ ((P , i) , s) ⊑ bottom → 𝟘{𝓤}
-        g p u = nt (⊑-anti bottom top (⋁-is-lb-of-ubs unique-from-𝟘 top 𝟘-induction)
+        g p u = nt (⊑-anti bottom top (bottom-is-least top)
                 (transport (λ - → - ⊑ bottom) (e ⁻¹) u))
          where
           e : top ≡ σ ((P , i) , s)
           e = ⊑-anti top (σ ((P , i) , s))
-              (⋁-is-ub (λ p' → top) p) (⋁-is-ub id (σ ((P , i) , s)))
+              (⋁-is-ub (λ p' → top) p) (top-is-greatest (σ ((P , i) , s)))
 
   non-trivial-implies-Ω¬¬-stable-resizing : propext 𝓤
                                           → is-non-trivial → Ω¬¬-stable has-size 𝓤

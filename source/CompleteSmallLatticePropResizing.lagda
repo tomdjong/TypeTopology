@@ -85,28 +85,43 @@ module _
   _⊑Ω_ : Ω 𝓤 → Ω 𝓤 → 𝓤 ̇
   P ⊑Ω Q = P holds → Q holds
 
---  Ω-to-L-is-monotone : {P Q : Ω 𝓤} → P ⊑Ω Q → Ω-to-L P ⊑ Ω-to-L Q
---  Ω-to-L-is-monotone {P} {Q} i = {!!}
-
-{-
-  Ω-to-L-reflects-order : {P Q : Ω 𝓤} → Ω-to-L P ⊑ Ω-to-L Q → P ⊑Ω Q
-  Ω-to-L-reflects-order {P} {Q} u p = {!!}
+  Ω-to-L-is-monotone : {P Q : Ω 𝓤} → P ⊑Ω Q → Ω-to-L P ⊑ Ω-to-L Q
+  Ω-to-L-is-monotone {P} {Q} u = ⋁-is-lb-of-ubs α (Ω-to-L Q) γ
    where
-    e : Ω-to-L P ≡ top
-    e = ⊑-anti (Ω-to-L P) top (⋁-is-ub id (Ω-to-L P))
-        (⋁-is-ub (λ (x : P holds) → top) p)
-    v : top ⊑ Ω-to-L Q
-    v = transport (λ - → - ⊑ Ω-to-L Q) e u -}
+    α : P holds → L
+    α p = top
+    γ : P holds → top ⊑ Ω-to-L Q
+    γ p = ⋁-is-ub β (u p)
+     where
+      β : Q holds → L
+      β q = top
 
+  -- This just says that the Ω-to-L map reflects the order, i.e. it is an order
+  -- embedding.
+  is-strongly-non-trivial : 𝓤 ⁺ ̇
+  is-strongly-non-trivial = (P Q : Ω 𝓤) → Ω-to-L P ⊑ Ω-to-L Q → P ⊑Ω Q
 
   L-to-Ω : L → Ω 𝓤
   L-to-Ω l = top ⊑ l , ⊑-prop-valued top l
 
   is-non-trivial : 𝓤 ̇
-  is-non-trivial = bottom ≢ top
+  is-non-trivial = bottom ≡ top → 𝟘 {𝓤}
 
-  Ω-retract-of-L : propext 𝓤 → is-non-trivial → Ω 𝓤 ◁ L
-  Ω-retract-of-L pe nt = r , (s , rs)
+  strongly-non-trivial-implies-non-trivial : is-strongly-non-trivial → is-non-trivial
+  strongly-non-trivial-implies-non-trivial snt e = u *
+   where
+    u : ⊤ ⊑Ω ⊥
+    u = snt ⊤ ⊥ v
+     where
+      v : Ω-to-L ⊤ ⊑ Ω-to-L ⊥
+      v = ⋁-is-lb-of-ubs (λ _ → top) (Ω-to-L ⊥) γ
+       where
+        γ : ⊤ holds → top ⊑ Ω-to-L ⊥
+        γ * = transport (λ - → - ⊑ Ω-to-L ⊥) e
+              (⋁-is-lb-of-ubs unique-from-𝟘 (Ω-to-L ⊥) 𝟘-induction)
+
+  Ω-retract-of-L : propext 𝓤 → is-strongly-non-trivial → Ω 𝓤 ◁ L
+  Ω-retract-of-L pe snt = r , (s , rs)
    where
     r : L → Ω 𝓤
     r = L-to-Ω
@@ -120,17 +135,22 @@ module _
       γ : (top ⊑ ⋁ α) ≡ P
       γ = pe (⊑-prop-valued top (⋁ α)) i f g
        where
-        f : top ⊑ ⋁ α → P
-        f u = {!!}
-         {-
-             Idea:
-              top ≡ ⋁ {𝟙} (λ * → top) ⊑ ⋁ {P} α
-                iff
-              𝟙 ⊑ P (since ⋁ is an order embedding)
-         -}
-
         g : P → top ⊑ ⋁ α
         g p = ⋁-is-ub α p
+        f : top ⊑ ⋁ α → P
+        f u = snt ⊤ (P , i) v *
+         where
+          ⌜top⌝ : 𝟙{𝓤} → L
+          ⌜top⌝ _ = top
+          e : top ≡ ⋁ ⌜top⌝
+          e = ⊑-anti top (⋁ ⌜top⌝) (⋁-is-ub ⌜top⌝ *) (⋁-is-ub id (⋁ ⌜top⌝))
+          v : ⋁ ⌜top⌝ ⊑ ⋁ α
+          v = transport (λ - → - ⊑ ⋁ α) e u
+
+  strongly-non-trivial-implies-Ω-resizing : propext 𝓤
+                                          → is-strongly-non-trivial → Ω 𝓤 has-size 𝓤
+  strongly-non-trivial-implies-Ω-resizing pe snt =
+   retract-gives-has-size is-set-L (Ω-retract-of-L pe snt)
 
 
 \end{code}

@@ -952,7 +952,7 @@ has-size-idempotent-≡ ua 𝓤 𝓥 Y i =
 
 Added 6 February 2020 by Tom de Jong.
 
-Can we prove this for all types Y (i.e. not just sets)
+Can we prove this for all types Y (i.e. not just sets)?
 
 \begin{code}
 

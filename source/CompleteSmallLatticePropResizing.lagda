@@ -351,3 +351,5 @@ holds, because Ω-¬¬-stable has all small suprema.
           where
            ϕ : (Σ i ꞉ I , ⟨ α i ⟩ holds) → ⟨ P ⟩ holds
            ϕ (i , w) = u i w
+
+\end{code}

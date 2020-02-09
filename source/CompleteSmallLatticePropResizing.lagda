@@ -167,7 +167,7 @@ module _
   strongly-non-trivial-implies-Ω-resizing : propext 𝓤
                                           → is-strongly-non-trivial → (Ω 𝓤) has-size 𝓤
   strongly-non-trivial-implies-Ω-resizing pe snt =
-   retract-gives-has-size is-set-L (Ω-retract-of-L pe snt)
+   retract-of-a-set-has-size is-set-L (Ω-retract-of-L pe snt)
 
   -- We now prove that a non-trivial complete small lattice gives a weak form of
   -- resizing.
@@ -222,7 +222,7 @@ module _
                                           → is-non-trivial
                                           → Ω-¬¬-stable has-size 𝓤
   non-trivial-implies-Ω¬¬-stable-resizing pe nt =
-   retract-gives-has-size is-set-L (Ω-¬¬-stable-retract-of-L pe nt)
+   retract-of-a-set-has-size is-set-L (Ω-¬¬-stable-retract-of-L pe nt)
 
   not : Ω 𝓤 → Ω 𝓤
   not P = ¬ (P holds) , Π-is-prop fe (λ _ → 𝟘-is-prop)

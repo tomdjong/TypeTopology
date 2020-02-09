@@ -1,5 +1,9 @@
 Tom de Jong, 6 February 2020
 
+Small addition on 9 Feburary 2020.
+
+PoC, should clean up.
+
 \begin{code}
 
 {-# OPTIONS --without-K --exact-split --safe #-}
@@ -176,22 +180,22 @@ module _
   being-¬¬-stable-is-a-prop : {X : 𝓤 ̇ } → is-prop X → is-prop (is-¬¬-stable X)
   being-¬¬-stable-is-a-prop i = Π-is-prop fe (λ _ → i)
 
-  Ω¬¬-stable : 𝓤 ⁺ ̇
-  Ω¬¬-stable = Σ P ꞉ Ω 𝓤 , is-¬¬-stable (P holds)
+  Ω-¬¬-stable : 𝓤 ⁺ ̇
+  Ω-¬¬-stable = Σ P ꞉ Ω 𝓤 , is-¬¬-stable (P holds)
 
-  σ : Ω¬¬-stable → L
+  σ : Ω-¬¬-stable → L
   σ (P , _) = ⋁ {P holds} (λ _ → top)
 
-  ρ : L → Ω¬¬-stable
+  ρ : L → Ω-¬¬-stable
   ρ l = ((l ⊑ bottom → 𝟘{𝓤}) , (Π-is-prop fe (λ _ → 𝟘-is-prop))) , γ
    where
     γ : is-¬¬-stable (l ⊑ bottom → 𝟘)
     γ dn h = dn (λ f → f h)
 
-  Ω¬¬-stable-retract-of-L : propext 𝓤 → is-non-trivial → Ω¬¬-stable ◁ L
-  Ω¬¬-stable-retract-of-L pe nt = ρ , (σ , ρσ)
+  Ω-¬¬-stable-retract-of-L : propext 𝓤 → is-non-trivial → Ω-¬¬-stable ◁ L
+  Ω-¬¬-stable-retract-of-L pe nt = ρ , (σ , ρσ)
    where
-    ρσ : (P : Ω¬¬-stable) → ρ (σ P) ≡ P
+    ρσ : (P : Ω-¬¬-stable) → ρ (σ P) ≡ P
     ρσ ((P , i) , s) = to-subtype-≡ (λ Q → being-¬¬-stable-is-a-prop (pr₂ Q))
                        (to-subtype-≡ (λ _ → being-a-prop-is-a-prop fe) γ)
      where
@@ -215,9 +219,10 @@ module _
               (⋁-is-ub (λ p' → top) p) (top-is-greatest (σ ((P , i) , s)))
 
   non-trivial-implies-Ω¬¬-stable-resizing : propext 𝓤
-                                          → is-non-trivial → Ω¬¬-stable has-size 𝓤
+                                          → is-non-trivial
+                                          → Ω-¬¬-stable has-size 𝓤
   non-trivial-implies-Ω¬¬-stable-resizing pe nt =
-   retract-gives-has-size is-set-L (Ω¬¬-stable-retract-of-L pe nt)
+   retract-gives-has-size is-set-L (Ω-¬¬-stable-retract-of-L pe nt)
 
   -- We try to find a relation between being non-trivial and being strongly
   -- non-trivial.
@@ -283,3 +288,65 @@ module _
               (bottom-is-least (Ω-to-L Q))
 
 \end{code}
+
+Added 9 February 2020
+
+So we know that ((Ω 𝓤) has-size 𝓤) is equivalent to the existence of a strongly
+non-trivial complete small lattice. Moreover, the existence of a non-trivial
+complete small lattice implies (Ω-¬¬-stable has-size 𝓤). But the converse also
+holds, because Ω-¬¬-stable has all small suprema.
+
+\begin{code}
+
+  contrap : {X Y : 𝓤 ̇ } → (X → Y) → ¬ Y → ¬ X
+  contrap f ny x = ny (f x)
+
+  ⟨_⟩ : Ω-¬¬-stable → Ω 𝓤
+  ⟨_⟩ = pr₁
+
+  𝕤 : (P : Ω-¬¬-stable) → is-¬¬-stable (⟨ P ⟩ holds)
+  𝕤 = pr₂
+
+  _⊑Ω¬¬s_ : Ω-¬¬-stable → Ω-¬¬-stable → 𝓤 ̇
+  P ⊑Ω¬¬s Q = ⟨ P ⟩ ⊑Ω ⟨ Q ⟩
+
+  to-double-¬ : {X : 𝓤 ̇ } → X → ¬¬ X
+  to-double-¬ x nX = nX x
+
+--  triple-to-single-¬ : {X : 𝓤 ̇ } → ¬¬ (¬ X) → ¬ X
+--  triple-to-single-¬ nnnX x = nnnX (to-double-¬ x)
+
+  open import UF-PropTrunc
+  module _
+          (pt : propositional-truncations-exist)
+         where
+   open PropositionalTruncation pt
+
+   Ω-¬¬-stable-sup : {I : 𝓤 ̇ } (α : I → Ω-¬¬-stable)
+                   → Σ \(Q : Ω-¬¬-stable) →
+                     ((i : I) → α i ⊑Ω¬¬s Q) ×
+                     ((P : Ω-¬¬-stable) → ((i : I) → α i ⊑Ω¬¬s P) → Q ⊑Ω¬¬s P)
+   Ω-¬¬-stable-sup {I} α = (Q , s) , (ub , lb-of-ubs)
+    where
+     Q : Ω 𝓤
+     Q = notnot ((∃ i ꞉ I , ⟨ α i ⟩ holds) , ∥∥-is-a-prop)
+     s : is-¬¬-stable (Q holds)
+     s nnQ h = nnQ (to-double-¬ h)
+     ub : (i : I) → α i ⊑Ω¬¬s (Q , s)
+     ub i = h ∘ to-double-¬
+      where
+       h : notnot ⟨ α i ⟩ ⊑Ω Q
+       h = contrap (contrap (λ w → ∣ i , w ∣))
+     lb-of-ubs : (P : Ω-¬¬-stable)
+               → ((i : I) → α i ⊑Ω¬¬s P)
+               → (Q , s) ⊑Ω¬¬s P
+     lb-of-ubs P u = (𝕤 P) ∘ h
+      where
+       h : Q ⊑Ω notnot ⟨ P ⟩
+       h = contrap (contrap γ)
+        where
+         γ : (∃ i ꞉ I , ⟨ α i ⟩ holds) → ⟨ P ⟩ holds
+         γ = ∥∥-rec (holds-is-prop ⟨ P ⟩) ϕ
+          where
+           ϕ : (Σ i ꞉ I , ⟨ α i ⟩ holds) → ⟨ P ⟩ holds
+           ϕ (i , w) = u i w

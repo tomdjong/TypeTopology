@@ -224,9 +224,6 @@ module _
   non-trivial-implies-Ω¬¬-stable-resizing pe nt =
    retract-gives-has-size is-set-L (Ω-¬¬-stable-retract-of-L pe nt)
 
-  -- We try to find a relation between being non-trivial and being strongly
-  -- non-trivial.
-
   not : Ω 𝓤 → Ω 𝓤
   not P = ¬ (P holds) , Π-is-prop fe (λ _ → 𝟘-is-prop)
 
@@ -243,8 +240,6 @@ module _
     g : (¬¬ P → ¬¬ Q) → P → ¬¬ Q
     g h p = h (λ (np : ¬ P) → np p)
 
-  -- By the above, variant is equivalent to
-  -- Ω-to-L P ⊑ Ω-to-L Q → (notnot P ⊑Ω notnot Q).
   variant : 𝓤 ⁺ ̇
   variant = (P Q : Ω 𝓤) → Ω-to-L P ⊑ Ω-to-L Q → (P ⊑Ω notnot Q)
 
@@ -288,6 +283,12 @@ module _
               (bottom-is-least (Ω-to-L Q))
 
 \end{code}
+
+By the above, variant is equivalent to
+Ω-to-L P ⊑ Ω-to-L Q → (notnot P ⊑Ω notnot Q).
+
+Hence, a complete lattice L is non-trivial if and only we have an
+order-embedding of Ω-¬¬-stable into L.
 
 Added 9 February 2020
 

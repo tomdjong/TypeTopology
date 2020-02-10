@@ -701,3 +701,28 @@ retract-pointed-fibers {𝓤} {𝓥} {X} {Y} {r} = qinveq f (g , (p , q))
   q α = refl
 
 \end{code}
+
+Added 10 February 2020 by Tom de Jong.
+
+\begin{code}
+
+fiber-of-composite : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } (f : X → Y) (g : Y → Z)
+                   → (z : Z)
+                   → fiber (g ∘ f) z
+                   ≃ (Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w))
+fiber-of-composite {𝓤} {𝓥} {𝓦} {X} {Y} {Z} f g z =
+ qinveq ϕ (ψ , (ψϕ , ϕψ))
+  where
+   ϕ : fiber (g ∘ f) z
+     → (Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w))
+   ϕ (x , p) = ((f x) , p) , (x , refl)
+   ψ : (Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w))
+     → fiber (g ∘ f) z
+   ψ ((y , q) , (x , p)) = x , ((ap g p) ∙ q)
+   ψϕ : (w : fiber (g ∘ f) z) → ψ (ϕ w) ≡ w
+   ψϕ (x , refl) = refl
+   ϕψ : (w : Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w))
+      → ϕ (ψ w) ≡ w
+   ϕψ ((.(f x) , refl) , (x , refl)) = refl
+
+\end{code}

@@ -39,26 +39,23 @@ has-size₁-is-a-prop {𝓤} {𝓥} ua {𝓦} {X} {Y} {f} =
 has-size-to-has-size₁ : (𝓥 : Universe) {X : 𝓤 ̇ }
                       → X has-size 𝓥
                       → unique-to-𝟙 {_} {𝓥} {X} has-size₁ 𝓥
-has-size-to-has-size₁ 𝓥 {X} (Y , e) = γ
+has-size-to-has-size₁ 𝓥 {X} (Y , e) u = Y , γ
  where
-  γ : (u : 𝟙) → fiber unique-to-𝟙 u has-size 𝓥
-  γ * = Y , g
-   where
-    g = Y ≃⟨ e ⟩
-        X ≃⟨ h ⟩
-        fiber (unique-to-𝟙 {_} {𝓥} {X}) * ■
-     where
-      h : X ≃ fiber (unique-to-𝟙 {_} {𝓥} {X}) *
-      h = qinveq a (b , ba , ab)
-       where
-        a : X → fiber unique-to-𝟙 *
-        a x = x , (𝟙-is-prop (unique-to-𝟙 x) *)
-        b : fiber unique-to-𝟙 * → X
-        b (x , p) = x
-        ba : (x : X) → b (a x) ≡ x
-        ba x = refl
-        ab : (w : fiber unique-to-𝟙 *) → a (b w) ≡ w
-        ab (x , refl) = refl
+  γ = Y                   ≃⟨ e ⟩
+      X                   ≃⟨ ≃-sym (fibers-of-unique-to-𝟙 u) ⟩
+      fiber unique-to-𝟙 u ■
+
+has-size₁-to-has-size : (𝓥 : Universe) {X : 𝓤 ̇ }
+                      → unique-to-𝟙 {_} {𝓥} {X} has-size₁ 𝓥
+                      → X has-size 𝓥
+has-size₁-to-has-size 𝓥 {X} h = Y , γ
+ where
+  Y : 𝓥 ̇
+  Y = pr₁ (h *)
+  γ : Y ≃ X
+  γ = Y                   ≃⟨ pr₂ (h *) ⟩
+      fiber unique-to-𝟙 * ≃⟨ fibers-of-unique-to-𝟙 * ⟩
+      X                   ■
 
 {-
 

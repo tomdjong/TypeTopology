@@ -725,4 +725,15 @@ fiber-of-composite {𝓤} {𝓥} {𝓦} {X} {Y} {Z} f g z =
       → ϕ (ψ w) ≡ w
    ϕψ ((.(f x) , refl) , (x , refl)) = refl
 
+fibers-of-unique-to-𝟙 : {𝓥 : Universe} {X : 𝓤 ̇ }
+                      → (u : 𝟙) → fiber (unique-to-𝟙 {_} {𝓥} {X}) u ≃ X
+fibers-of-unique-to-𝟙 {𝓤} {𝓥} {X} * =
+ (Σ x ꞉ X , unique-to-𝟙 x ≡ *) ≃⟨ Σ-cong ψ ⟩
+ X × 𝟙{𝓥}                      ≃⟨ 𝟙-rneutral ⟩
+ X                             ■
+  where
+   ψ : (x : X) → (* ≡ *) ≃ 𝟙
+   ψ x = singleton-≃-𝟙
+         (pointed-props-are-singletons refl (props-are-sets 𝟙-is-prop))
+
 \end{code}

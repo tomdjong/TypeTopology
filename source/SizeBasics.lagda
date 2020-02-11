@@ -1,3 +1,4 @@
+
 Tom de Jong, 10 February 2020
 
 \begin{code}
@@ -56,6 +57,51 @@ has-size₁-to-has-size 𝓥 {X} h = Y , γ
   γ = Y                   ≃⟨ pr₂ (h *) ⟩
       fiber unique-to-𝟙 * ≃⟨ fibers-of-unique-to-𝟙 * ⟩
       X                   ■
+
+singleton-has-size : (𝓥 : Universe) {X : 𝓤 ̇ }
+                   → is-singleton X
+                   → X has-size 𝓥
+singleton-has-size {𝓤} 𝓥 {X} i = (𝟙{𝓥}) , singleton-≃-𝟙' i
+
+equivalence-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (𝓦 : Universe)
+                      → (f : X → Y)
+                      → is-equiv f
+                      → f has-size₁ 𝓦
+equivalence-has-size₁ 𝓦 f i y = singleton-has-size 𝓦 γ
+ where
+  γ : is-singleton (fiber f y)
+  γ = equivs-are-vv-equivs f i y
+
+-- TO DO: Embedding-Resizing <-> Prop. Resizing
+
+section-embedding-into-set-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                                    → (s : X → Y)
+                                    → is-section s
+                                    → is-embedding s
+                                    → is-set Y
+                                    → s has-size₁ 𝓥
+section-embedding-into-set-has-size s (r , ρ) ε σ y = (s (r y) ≡ y) , γ
+ where
+  γ : (s (r y) ≡ y) ≃ fiber s y
+  γ = qinveq f (g , (gf , fg))
+   where
+    f : s (r y) ≡ y → fiber s y
+    f q = (r y) , q
+    g : fiber s y → s (r y) ≡ y
+    g (x , p) = s (r y)     ≡⟨ ap (s ∘ r) (p ⁻¹) ⟩
+                s (r (s x)) ≡⟨ ap s (ρ x) ⟩
+                s x         ≡⟨ p ⟩
+                y           ∎
+    gf : (q : s (r y) ≡ y) → g (f q) ≡ q
+    gf q = σ (g (f q)) q
+    fg : (w : fiber s y) → f (g w) ≡ w
+    fg (x , refl) = to-subtype-≡ (λ _ → σ) (ρ x)
+
+retract-of-a-set-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                          → is-set Y
+                          → retract X of Y
+                          → X has-size 𝓥
+retract-of-a-set-has-size {𝓤} {𝓥} {X} {Y} i (r , s , ρ) = ?
 
 {-
 

@@ -74,13 +74,13 @@ equivalence-has-size₁ 𝓦 f i y = singleton-has-size 𝓦 γ
 
 -- TO DO: Embedding-Resizing <-> Prop. Resizing
 
-section-embedding-into-set-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
-                                    → (s : X → Y)
-                                    → is-section s
-                                    → is-embedding s
-                                    → is-set Y
-                                    → s has-size₁ 𝓥
-section-embedding-into-set-has-size s (r , ρ) ε σ y = (s (r y) ≡ y) , γ
+section-to-a-set-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                           → (s : X → Y)
+                           → is-section s
+                           → is-embedding s
+                           → is-set Y
+                           → s has-size₁ 𝓥
+section-to-a-set-has-size₁ s (r , ρ) ε σ y = (s (r y) ≡ y) , γ
  where
   γ : (s (r y) ≡ y) ≃ fiber s y
   γ = qinveq f (g , (gf , fg))
@@ -101,7 +101,13 @@ retract-of-a-set-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
                           → is-set Y
                           → retract X of Y
                           → X has-size 𝓥
-retract-of-a-set-has-size {𝓤} {𝓥} {X} {Y} i (r , s , ρ) = ?
+retract-of-a-set-has-size {𝓤} {𝓥} {X} {Y} i (r , s , ρ) =
+ (Σ y ꞉ Y , s (r y) ≡ y) , γ
+  where
+   γ : (Σ y ꞉ Y , s (r y) ≡ y) ≃ X
+   γ = (Σ y ꞉ Y , s (r y) ≡ y) ≃⟨ Σ-cong {!!} ⟩
+       (Σ y ꞉ Y , fiber s y) ≃⟨ {!!} ⟩
+       X ■
 
 {-
 

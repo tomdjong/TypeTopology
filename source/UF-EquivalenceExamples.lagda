@@ -736,4 +736,23 @@ fibers-of-unique-to-𝟙 {𝓤} {𝓥} {X} * =
    ψ x = singleton-≃-𝟙
          (pointed-props-are-singletons refl (props-are-sets 𝟙-is-prop))
 
+fibers-of-section-to-a-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                           → (s : X → Y)
+                           → (ρ : is-section s)
+                           → is-set Y
+                           → (y : Y) → (fiber s y) ≃ (s (pr₁ ρ y) ≡ y)
+fibers-of-section-to-a-set s (r , ρ) σ y = qinveq f (g , (gf , fg))
+ where
+  f : fiber s y → s (r y) ≡ y
+  f (x , p) = s (r y)     ≡⟨ ap (s ∘ r) (p ⁻¹) ⟩
+              s (r (s x)) ≡⟨ ap s (ρ x) ⟩
+              s x         ≡⟨ p ⟩
+              y           ∎
+  g : s (r y) ≡ y → fiber s y
+  g q = (r y) , q
+  gf : (w : fiber s y) → g (f w) ≡ w
+  gf (x , refl) = to-subtype-≡ (λ _ → σ) (ρ x)
+  fg : (q : s (r y) ≡ y) → f (g q) ≡ q
+  fg q = σ (f (g q)) q
+
 \end{code}

@@ -199,6 +199,10 @@ module _ (pt : propositional-truncations-exist) where
 
 \begin{code}
 
+-- TO DO: intertwine with image-resizing
+
+-- Question: are images with small domain small?
+
 subtype-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
 subtype-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (P : X → 𝓥 ̇ )
                      → ((x : X) → is-prop (P x))

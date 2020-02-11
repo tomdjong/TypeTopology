@@ -38,19 +38,19 @@ has-size₁-is-a-prop {𝓤} {𝓥} ua {𝓦} {X} {Y} {f} =
    fe : FunExt
    fe = FunExt-from-Univalence ua
 
-has-size-to-has-size₁ : (𝓥 : Universe) {X : 𝓤 ̇ }
+has-size-to-has-size₁ : {𝓥 : Universe} {X : 𝓤 ̇ }
                       → X has-size 𝓥
                       → unique-to-𝟙 {_} {𝓥} {X} has-size₁ 𝓥
-has-size-to-has-size₁ 𝓥 {X} (Y , e) u = Y , γ
+has-size-to-has-size₁ {𝓤} {𝓥} {X} (Y , e) u = Y , γ
  where
   γ = Y                   ≃⟨ e ⟩
       X                   ≃⟨ ≃-sym (fiber-of-unique-to-𝟙 u) ⟩
       fiber unique-to-𝟙 u ■
 
-has-size₁-to-has-size : (𝓥 : Universe) {X : 𝓤 ̇ }
+has-size₁-to-has-size : {𝓥 : Universe} {X : 𝓤 ̇ }
                       → unique-to-𝟙 {_} {𝓥} {X} has-size₁ 𝓥
                       → X has-size 𝓥
-has-size₁-to-has-size 𝓥 {X} h = Y , γ
+has-size₁-to-has-size {𝓤} {𝓥} {X} h = Y , γ
  where
   Y : 𝓥 ̇
   Y = pr₁ (h *)
@@ -59,16 +59,16 @@ has-size₁-to-has-size 𝓥 {X} h = Y , γ
       fiber unique-to-𝟙 * ≃⟨ fiber-of-unique-to-𝟙 * ⟩
       X                   ■
 
-singleton-has-size : (𝓥 : Universe) {X : 𝓤 ̇ }
+singleton-has-size : {𝓥 : Universe} {X : 𝓤 ̇ }
                    → is-singleton X
                    → X has-size 𝓥
-singleton-has-size {𝓤} 𝓥 {X} i = (𝟙{𝓥}) , singleton-≃-𝟙' i
+singleton-has-size i = (𝟙 , singleton-≃-𝟙' i)
 
-equivalence-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (𝓦 : Universe)
+equivalence-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {𝓦 : Universe}
                       → (f : X → Y)
                       → is-equiv f
                       → f has-size₁ 𝓦
-equivalence-has-size₁ 𝓦 f i y = singleton-has-size 𝓦 γ
+equivalence-has-size₁ f i y = singleton-has-size γ
  where
   γ : is-singleton (fiber f y)
   γ = equivs-are-vv-equivs f i y
@@ -83,18 +83,14 @@ Embedding-resizing = {𝓤 𝓥 𝓦 : Universe} → embedding-resizing 𝓤 �
 
 Embedding-resizing-gives-Propositional-resizing : Embedding-resizing
                                                 → Propositional-resizing
-Embedding-resizing-gives-Propositional-resizing Er {𝓤} {𝓥} P i = (Q , γ)
- where
-  er : fiber (unique-to-𝟙 {_} {𝓥} {P}) * has-size 𝓥
-  er = Er P (𝟙{𝓥}) unique-to-𝟙 ε *
-   where
-    ε : is-embedding (unique-to-𝟙 {_} {𝓥} {P})
-    ε * = Σ-is-prop i (λ _ → props-are-sets 𝟙-is-prop)
-  Q : 𝓥 ̇
-  Q = pr₁ er
-  γ = Q                   ≃⟨ pr₂ er ⟩
-      fiber unique-to-𝟙 * ≃⟨ fiber-of-unique-to-𝟙 * ⟩
-      P                   ■
+Embedding-resizing-gives-Propositional-resizing Er {𝓤} {𝓥} P i =
+ has-size₁-to-has-size γ
+  where
+   γ : (u : 𝟙) → fiber (unique-to-𝟙 {_} {𝓥} {P}) u has-size 𝓥
+   γ u = Er P 𝟙 unique-to-𝟙 ε u
+    where
+     ε : is-embedding (unique-to-𝟙 {_} {𝓥} {P})
+     ε * = Σ-is-prop i (λ _ → props-are-sets 𝟙-is-prop)
 
 Propositional-resizing-gives-Embedding-resizing : Propositional-resizing
                                                 → Embedding-resizing
@@ -180,12 +176,10 @@ module _ (pt : propositional-truncations-exist) where
                             → (y : Y) → (fiber s y) ≃ (s (pr₁ ρ y) ≡ y)
  fiber-of-section-to-a-set' σ s (r , ρ) y =
   fiber s y       ≃⟨ fiber-of-section-embedding s (r , ρ) ε y ⟩
-  ∥ s (r y) ≡ y ∥ ≃⟨ h ⟩
+  ∥ s (r y) ≡ y ∥ ≃⟨ a-prop-is-equivalent-to-its-truncation σ ⟩
   (s (r y) ≡ y)   ■
    where
     ε = lc-maps-into-sets-are-embeddings s (sections-are-lc s ((r , ρ))) σ
-    h = logically-equivalent-props-are-equivalent ∥∥-is-a-prop σ
-        (∥∥-rec σ id) ∣_∣
 
  embedding-retract-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
                             → (ρ : X ◁ Y)
@@ -234,5 +228,55 @@ Propositional-resizing-gives-Subtype-resizing Pr {𝓤} {𝓥} X P i =
    Q x = pr₁ (pr x)
    γ : (Σ x ꞉ X , Q x) ≃ (Σ x ꞉ X , P x)
    γ = Σ-cong (λ (x : X) → pr₂ (pr x))
+
+module _
+        (pt : propositional-truncations-exist)
+       where
+ open import UF-ImageAndSurjection
+ open ImageAndSurjection pt
+ open PropositionalTruncation pt
+
+ image-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
+ image-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ )
+                    → (f : X → Y)
+                    → image f has-size 𝓥
+
+ Image-resizing : 𝓤ω
+ Image-resizing = {𝓤 𝓥 : Universe} → image-resizing 𝓤 𝓥
+
+ Image-resizing-gives-Propositional-resizing : Image-resizing
+                                             → Propositional-resizing
+ Image-resizing-gives-Propositional-resizing Ir {𝓤} {𝓥} P s = Q , γ
+  where
+   ir : image unique-to-𝟙 has-size 𝓥
+   ir = Ir P (𝟙{𝓥}) unique-to-𝟙
+   Q : 𝓥 ̇
+   Q = pr₁ ir
+   γ = Q                           ≃⟨ pr₂ ir ⟩
+       image unique-to-𝟙           ≃⟨ ≃-refl (image unique-to-𝟙) ⟩
+       (Σ u ꞉ 𝟙 , ∃ p ꞉ P , * ≡ u) ≃⟨ i ⟩
+       (Σ u ꞉ 𝟙 , Σ p ꞉ P , * ≡ u) ≃⟨ ≃-refl _ ⟩
+       (Σ u ꞉ 𝟙 , P × (* ≡ u))     ≃⟨ Σ-flip ⟩
+       P × (Σ u ꞉ 𝟙 , * ≡ u)       ≃⟨ ii ⟩
+       P × 𝟙{𝓥}                    ≃⟨ 𝟙-rneutral ⟩
+       P                           ■
+    where
+     i  = Σ-cong (λ u → a-prop-is-equivalent-to-its-truncation (σ u))
+      where
+       σ : (u : 𝟙) → is-prop (Σ p ꞉ P , * ≡ u)
+       σ _ = Σ-is-prop s (λ _ → props-are-sets 𝟙-is-prop)
+     ii = ×cong (≃-refl P) (singleton-≃-𝟙 (singleton-types-are-singletons *))
+
+ Propositional-resizing-gives-Image-resizing : Propositional-resizing
+                                             → Image-resizing
+ Propositional-resizing-gives-Image-resizing Pr {𝓤} {𝓥} X Y f =
+  (Σ y ꞉ Y , Q y) , Σ-cong γ
+   where
+    pr : (y : Y) → (∃ x ꞉ X , f x ≡ y) has-size 𝓥
+    pr y = Pr (∃ x ꞉ X , f x ≡ y) ∥∥-is-a-prop
+    Q : Y → 𝓥 ̇
+    Q y = pr₁ (pr y)
+    γ : (y : Y) → Q y ≃ (∃ x ꞉ X , f x ≡ y)
+    γ y = pr₂ (pr y)
 
 \end{code}

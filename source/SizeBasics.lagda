@@ -10,14 +10,15 @@ module SizeBasics where
 open import SpartanMLTT
 
 open import UF-Base
-open import UF-Equiv
-open import UF-Retracts
 open import UF-Embeddings
+open import UF-Equiv
 open import UF-EquivalenceExamples
-open import UF-UA-FunExt
 open import UF-PropTrunc
-open import UF-Size
+open import UF-Retracts
+open import UF-UA-FunExt
 open import UF-Univalence
+
+open import UF-Size
 
 \end{code}
 
@@ -74,118 +75,99 @@ equivalence-has-size₁ 𝓦 f i y = singleton-has-size 𝓦 γ
 
 -- TO DO: Embedding-Resizing <-> Prop. Resizing
 
-section-to-a-set-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
-                           → (s : X → Y)
-                           → is-section s
-                           → is-embedding s
-                           → is-set Y
-                           → s has-size₁ 𝓥
-section-to-a-set-has-size₁ s (r , ρ) ε σ y = (s (r y) ≡ y) , γ
+
+fiber-of-section-to-a-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                          → is-set Y
+                          → (s : X → Y)
+                          → (ρ : is-section s)
+                          → (y : Y) → (fiber s y) ≃ (s (pr₁ ρ y) ≡ y)
+fiber-of-section-to-a-set σ s (r , ρ) y = qinveq f (g , (gf , fg))
  where
-  γ : (s (r y) ≡ y) ≃ fiber s y
-  γ = qinveq f (g , (gf , fg))
-   where
-    f : s (r y) ≡ y → fiber s y
-    f q = (r y) , q
-    g : fiber s y → s (r y) ≡ y
-    g (x , p) = s (r y)     ≡⟨ ap (s ∘ r) (p ⁻¹) ⟩
-                s (r (s x)) ≡⟨ ap s (ρ x) ⟩
-                s x         ≡⟨ p ⟩
-                y           ∎
-    gf : (q : s (r y) ≡ y) → g (f q) ≡ q
-    gf q = σ (g (f q)) q
-    fg : (w : fiber s y) → f (g w) ≡ w
-    fg (x , refl) = to-subtype-≡ (λ _ → σ) (ρ x)
+  f : fiber s y → s (r y) ≡ y
+  f (x , p) = s (r y)     ≡⟨ ap (s ∘ r) (p ⁻¹) ⟩
+              s (r (s x)) ≡⟨ ap s (ρ x) ⟩
+              s x         ≡⟨ p ⟩
+              y           ∎
+  g : s (r y) ≡ y → fiber s y
+  g q = (r y) , q
+  gf : (w : fiber s y) → g (f w) ≡ w
+  gf (x , refl) = to-subtype-≡ (λ _ → σ) (ρ x)
+  fg : (q : s (r y) ≡ y) → f (g q) ≡ q
+  fg q = σ (f (g q)) q
+
+fixed-points-of-section-retraction-to-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                                          → is-set Y
+                                          → (ρ : X ◁ Y)
+                                          → (Σ y ꞉ Y ,
+                                             section ρ (retraction ρ y) ≡ y)
+                                          ≃ X
+fixed-points-of-section-retraction-to-set {𝓤} {𝓥} {X} {Y} i (r , s , ρ) =
+ (Σ y ꞉ Y , s (r y) ≡ y) ≃⟨ γ ⟩
+ (Σ y ꞉ Y , (fiber s y)) ≃⟨ ≃-sym (sum-of-fibers X Y s) ⟩
+ X                       ■
+  where
+   γ = Σ-cong (λ (y : Y) → ≃-sym (fiber-of-section-to-a-set i s (r , ρ) y))
 
 retract-of-a-set-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
                           → is-set Y
-                          → retract X of Y
+                          → X ◁ Y
                           → X has-size 𝓥
 retract-of-a-set-has-size {𝓤} {𝓥} {X} {Y} i (r , s , ρ) =
- (Σ y ꞉ Y , s (r y) ≡ y) , γ
-  where
-   γ : (Σ y ꞉ Y , s (r y) ≡ y) ≃ X
-   γ = (Σ y ꞉ Y , s (r y) ≡ y) ≃⟨ Σ-cong {!!} ⟩
-       (Σ y ꞉ Y , fiber s y) ≃⟨ {!!} ⟩
-       X ■
-
-{-
-
-Tom de Jong, 6 February 2020
-
-Can we prove this for all types Y (i.e. not just sets)?
-
-Added 9 February 2020: Yes, we can, provided we assume that the section is an
-embedding (proved below). Note that the section is always left-cancellable, and
-so if Y is a set, then it is automatically an embedding.
-
-We keep the special case and construction below, because it was discovered first
-and doesn't require the existence of propositional truncations.
-
-\begin{code}
-
-retract-of-a-set-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
-                          → is-set Y
-                          → retract X of Y
-                          → X has-size 𝓥
-retract-of-a-set-has-size {𝓤} {𝓥} {X} {Y} i (r , s , ρ) = Z , γ
- where
-  Z : 𝓥 ̇
-  Z = Σ y ꞉ Y , s (r y) ≡ y
-  γ : Z ≃ X
-  γ = qinveq f (g , gf , fg)
-   where
-    f : Z → X
-    f (y , p) = r y
-    g : X → Z
-    g x = (s x) , ap s (ρ x)
-    gf : (z : Z) → g (f z) ≡ z
-    gf (y , p) = to-Σ-≡ (p , (i _ p))
-    fg : (x : X) → f (g x) ≡ x
-    fg x = ρ x
+ (Σ y ꞉ Y , s (r y) ≡ y) ,
+ fixed-points-of-section-retraction-to-set i (r , s , ρ)
 
 module _ (pt : propositional-truncations-exist) where
  open PropositionalTruncation pt
 
- retract-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
-                  → (ρ : retract X of Y)
-                  → is-embedding (section ρ)
-                  → X has-size 𝓥
- retract-has-size {𝓤} {𝓥} {X} {Y} (r , s , ρ) semb =
-  (Σ y ꞉ Y , ∥ s (r y) ≡ y ∥) , γ
+ fiber-of-section-embedding : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                            → (s : X → Y)
+                            → (ρ : is-section s)
+                            → is-embedding s
+                            → (y : Y) → fiber s y ≃ ∥ s (pr₁ ρ y) ≡ y ∥
+ fiber-of-section-embedding s (r , ρ) ε y =
+  logically-equivalent-props-are-equivalent (ε y) ∥∥-is-a-prop f g
    where
-    γ = (Σ y ꞉ Y , ∥ s (r y) ≡ y ∥) ≃⟨ Σ-cong ψ ⟩
-        (Σ y ꞉ Y , fiber s y)       ≃⟨ ≃-sym (sum-of-fibers X Y s) ⟩
-        X                           ■
+    f : fiber s y → ∥ s (r y) ≡ y ∥
+    f (x , refl) = ∣ ap s (ρ x) ∣
+    g : ∥ s (r y) ≡ y ∥ → fiber s y
+    g = ∥∥-rec (ε y) h
      where
-      ψ : (y : Y) → ∥ s (r y) ≡ y ∥ ≃ fiber s y
-      ψ y = logically-equivalent-props-are-equivalent
-             ∥∥-is-a-prop (semb y)
-             f g
-       where
-        f : ∥ s (r y) ≡ y ∥ → fiber s y
-        f = ∥∥-rec (semb y) ϕ
-         where
-          ϕ : s (r y) ≡ y → fiber s y
-          ϕ q = (r y) , q
-        g : fiber s y → ∥ s (r y) ≡ y ∥
-        g (x , p) = ∣ q ∣
-         where
-          q = s (r y)     ≡⟨ ap (s ∘ r) (p ⁻¹) ⟩
-              s (r (s x)) ≡⟨ ap s (ρ x) ⟩
-              s x         ≡⟨ p ⟩
-              y           ∎
+      h : s (r y) ≡ y → fiber s y
+      h q = (r y) , q
 
- retract-of-a-set-has-size' : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
-                            → is-set Y
-                            → retract X of Y
-                            → X has-size 𝓥
- retract-of-a-set-has-size' {𝓤} {𝓥} {X} {Y} i (r , s , ρ) =
-  retract-has-size (r , s , ρ) γ
+ fixed-points-of-embedding-retraction : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                                      → (ρ : X ◁ Y)
+                                      → is-embedding (section ρ)
+                                      → (Σ y ꞉ Y ,
+                                         ∥ section ρ (retraction ρ y) ≡ y ∥)
+                                      ≃ X
+ fixed-points-of-embedding-retraction {𝓤} {𝓥} {X} {Y} (r , s , ρ) ε =
+  (Σ y ꞉ Y , ∥ s (r y) ≡ y ∥) ≃⟨ h ⟩
+  (Σ y ꞉ Y , fiber s y)       ≃⟨ ≃-sym (sum-of-fibers X Y s) ⟩
+  X                           ■
    where
-    γ : is-embedding s
-    γ = lc-maps-into-sets-are-embeddings s (sections-are-lc s (r , ρ)) i
+    h = Σ-cong (λ (y : Y) → ≃-sym (fiber-of-section-embedding s (r , ρ) ε y))
 
--}
+ fiber-of-section-to-a-set' : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                            → is-set Y
+                            → (s : X → Y)
+                            → (ρ : is-section s)
+                            → (y : Y) → (fiber s y) ≃ (s (pr₁ ρ y) ≡ y)
+ fiber-of-section-to-a-set' σ s (r , ρ) y =
+  fiber s y       ≃⟨ fiber-of-section-embedding s (r , ρ) ε y ⟩
+  ∥ s (r y) ≡ y ∥ ≃⟨ h ⟩
+  (s (r y) ≡ y)   ■
+   where
+    ε = lc-maps-into-sets-are-embeddings s (sections-are-lc s ((r , ρ))) σ
+    h = logically-equivalent-props-are-equivalent ∥∥-is-a-prop σ
+        (∥∥-rec σ id) ∣_∣
+
+ embedding-retract-has-size : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                            → (ρ : X ◁ Y)
+                            → is-embedding (section ρ)
+                            → X has-size 𝓥
+ embedding-retract-has-size {𝓤} {𝓥} {X} {Y} (r , s , ρ) ε =
+  (Σ y ꞉ Y , ∥ s (r y) ≡ y ∥) ,
+  fixed-points-of-embedding-retraction (r , s , ρ) ε
 
 \end{code}

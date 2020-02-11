@@ -44,7 +44,7 @@ has-size-to-has-size₁ : (𝓥 : Universe) {X : 𝓤 ̇ }
 has-size-to-has-size₁ 𝓥 {X} (Y , e) u = Y , γ
  where
   γ = Y                   ≃⟨ e ⟩
-      X                   ≃⟨ ≃-sym (fibers-of-unique-to-𝟙 u) ⟩
+      X                   ≃⟨ ≃-sym (fiber-of-unique-to-𝟙 u) ⟩
       fiber unique-to-𝟙 u ■
 
 has-size₁-to-has-size : (𝓥 : Universe) {X : 𝓤 ̇ }
@@ -56,7 +56,7 @@ has-size₁-to-has-size 𝓥 {X} h = Y , γ
   Y = pr₁ (h *)
   γ : Y ≃ X
   γ = Y                   ≃⟨ pr₂ (h *) ⟩
-      fiber unique-to-𝟙 * ≃⟨ fibers-of-unique-to-𝟙 * ⟩
+      fiber unique-to-𝟙 * ≃⟨ fiber-of-unique-to-𝟙 * ⟩
       X                   ■
 
 singleton-has-size : (𝓥 : Universe) {X : 𝓤 ̇ }
@@ -73,8 +73,33 @@ equivalence-has-size₁ 𝓦 f i y = singleton-has-size 𝓦 γ
   γ : is-singleton (fiber f y)
   γ = equivs-are-vv-equivs f i y
 
--- TO DO: Embedding-Resizing <-> Prop. Resizing
+embedding-resizing : (𝓤 𝓥 𝓦 : Universe) → 𝓤 ⁺ ⊔ 𝓥 ⁺ ⊔ (𝓦 ⁺) ̇
+embedding-resizing 𝓤 𝓥 𝓦 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (f : X → Y)
+                         → is-embedding f
+                         → f has-size₁ 𝓦
 
+Embedding-resizing : 𝓤ω
+Embedding-resizing = {𝓤 𝓥 𝓦 : Universe} → embedding-resizing 𝓤 𝓥 𝓦
+
+Embedding-resizing-gives-Propositional-resizing : Embedding-resizing
+                                                → Propositional-resizing
+Embedding-resizing-gives-Propositional-resizing Er {𝓤} {𝓥} P i = (Q , γ)
+ where
+  er : fiber (unique-to-𝟙 {_} {𝓥} {P}) * has-size 𝓥
+  er = Er P (𝟙{𝓥}) unique-to-𝟙 ε *
+   where
+    ε : is-embedding (unique-to-𝟙 {_} {𝓥} {P})
+    ε * = Σ-is-prop i (λ _ → props-are-sets 𝟙-is-prop)
+  Q : 𝓥 ̇
+  Q = pr₁ er
+  γ = Q                   ≃⟨ pr₂ er ⟩
+      fiber unique-to-𝟙 * ≃⟨ fiber-of-unique-to-𝟙 * ⟩
+      P                   ■
+
+Propositional-resizing-gives-Embedding-resizing : Propositional-resizing
+                                                → Embedding-resizing
+Propositional-resizing-gives-Embedding-resizing Pr X Y f e y =
+ Pr (fiber f y) (e y)
 
 fiber-of-section-to-a-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
                           → is-set Y

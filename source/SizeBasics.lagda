@@ -196,3 +196,39 @@ module _ (pt : propositional-truncations-exist) where
   fixed-points-of-embedding-retraction (r , s , ρ) ε
 
 \end{code}
+
+\begin{code}
+
+subtype-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
+subtype-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (P : X → 𝓥 ̇ )
+                     → ((x : X) → is-prop (P x))
+                     → (Σ x ꞉ X , P x) has-size 𝓤
+
+Subtype-resizing : 𝓤ω
+Subtype-resizing = {𝓤 𝓥 : Universe} → subtype-resizing 𝓤 𝓥
+
+Subtype-resizing-gives-Propositional-resizing : Subtype-resizing
+                                              → Propositional-resizing
+Subtype-resizing-gives-Propositional-resizing Sr {𝓤} {𝓥} P i = Q , γ
+ where
+  sr : (𝟙{𝓥} × P) has-size 𝓥
+  sr = Sr (𝟙{𝓥}) (λ _ → P) (λ _ → i)
+  Q : 𝓥 ̇
+  Q = pr₁ sr
+  γ = Q     ≃⟨ pr₂ sr ⟩
+      𝟙 × P ≃⟨ 𝟙-lneutral ⟩
+      P     ■
+
+Propositional-resizing-gives-Subtype-resizing : Propositional-resizing
+                                              → Subtype-resizing
+Propositional-resizing-gives-Subtype-resizing Pr {𝓤} {𝓥} X P i =
+ (Σ x ꞉ X , Q x) , γ
+  where
+   pr : (x : X) → (P x) has-size 𝓤
+   pr x = Pr (P x) (i x)
+   Q : X → 𝓤 ̇
+   Q x = pr₁ (pr x)
+   γ : (Σ x ꞉ X , Q x) ≃ (Σ x ꞉ X , P x)
+   γ = Σ-cong (λ (x : X) → pr₂ (pr x))
+
+\end{code}

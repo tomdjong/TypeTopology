@@ -81,9 +81,9 @@ embedding-resizing 𝓤 𝓥 𝓦 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (f : X → Y)
 Embedding-resizing : 𝓤ω
 Embedding-resizing = {𝓤 𝓥 𝓦 : Universe} → embedding-resizing 𝓤 𝓥 𝓦
 
-Embedding-resizing-gives-Propositional-resizing : Embedding-resizing
-                                                → Propositional-resizing
-Embedding-resizing-gives-Propositional-resizing Er {𝓤} {𝓥} P i =
+Embedding-resizing-implies-Propositional-resizing : Embedding-resizing
+                                                  → Propositional-resizing
+Embedding-resizing-implies-Propositional-resizing Er {𝓤} {𝓥} P i =
  has-size₁-to-has-size γ
   where
    γ : (u : 𝟙) → fiber (unique-to-𝟙 {_} {𝓥} {P}) u has-size 𝓥
@@ -92,9 +92,9 @@ Embedding-resizing-gives-Propositional-resizing Er {𝓤} {𝓥} P i =
      ε : is-embedding (unique-to-𝟙 {_} {𝓥} {P})
      ε * = Σ-is-prop i (λ _ → props-are-sets 𝟙-is-prop)
 
-Propositional-resizing-gives-Embedding-resizing : Propositional-resizing
-                                                → Embedding-resizing
-Propositional-resizing-gives-Embedding-resizing Pr X Y f e y =
+Propositional-resizing-implies-Embedding-resizing : Propositional-resizing
+                                                  → Embedding-resizing
+Propositional-resizing-implies-Embedding-resizing Pr X Y f e y =
  Pr (fiber f y) (e y)
 
 fiber-of-section-to-a-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
@@ -193,8 +193,6 @@ module _ (pt : propositional-truncations-exist) where
 
 \begin{code}
 
--- TO DO: intertwine with image-resizing
-
 -- Question: are images with small domain small?
 
 subtype-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
@@ -205,9 +203,9 @@ subtype-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (P : X → 𝓥 ̇ )
 Subtype-resizing : 𝓤ω
 Subtype-resizing = {𝓤 𝓥 : Universe} → subtype-resizing 𝓤 𝓥
 
-Subtype-resizing-gives-Propositional-resizing : Subtype-resizing
-                                              → Propositional-resizing
-Subtype-resizing-gives-Propositional-resizing Sr {𝓤} {𝓥} P i = Q , γ
+Subtype-resizing-implies-Propositional-resizing : Subtype-resizing
+                                                → Propositional-resizing
+Subtype-resizing-implies-Propositional-resizing Sr {𝓤} {𝓥} P i = Q , γ
  where
   sr : (𝟙{𝓥} × P) has-size 𝓥
   sr = Sr (𝟙{𝓥}) (λ _ → P) (λ _ → i)
@@ -217,9 +215,9 @@ Subtype-resizing-gives-Propositional-resizing Sr {𝓤} {𝓥} P i = Q , γ
       𝟙 × P ≃⟨ 𝟙-lneutral ⟩
       P     ■
 
-Propositional-resizing-gives-Subtype-resizing : Propositional-resizing
-                                              → Subtype-resizing
-Propositional-resizing-gives-Subtype-resizing Pr {𝓤} {𝓥} X P i =
+Propositional-resizing-implies-Subtype-resizing : Propositional-resizing
+                                                → Subtype-resizing
+Propositional-resizing-implies-Subtype-resizing Pr {𝓤} {𝓥} X P i =
  (Σ x ꞉ X , Q x) , γ
   where
    pr : (x : X) → (P x) has-size 𝓤
@@ -244,9 +242,9 @@ module _
  Image-resizing : 𝓤ω
  Image-resizing = {𝓤 𝓥 : Universe} → image-resizing 𝓤 𝓥
 
- Image-resizing-gives-Propositional-resizing : Image-resizing
-                                             → Propositional-resizing
- Image-resizing-gives-Propositional-resizing Ir {𝓤} {𝓥} P s = Q , γ
+ Image-resizing-implies-Propositional-resizing : Image-resizing
+                                               → Propositional-resizing
+ Image-resizing-implies-Propositional-resizing Ir {𝓤} {𝓥} P s = Q , γ
   where
    ir : image unique-to-𝟙 has-size 𝓥
    ir = Ir P (𝟙{𝓥}) unique-to-𝟙
@@ -267,16 +265,12 @@ module _
        σ _ = Σ-is-prop s (λ _ → props-are-sets 𝟙-is-prop)
      ii = ×cong (≃-refl P) (singleton-≃-𝟙 (singleton-types-are-singletons *))
 
- Propositional-resizing-gives-Image-resizing : Propositional-resizing
-                                             → Image-resizing
- Propositional-resizing-gives-Image-resizing Pr {𝓤} {𝓥} X Y f =
-  (Σ y ꞉ Y , Q y) , Σ-cong γ
+ Propositional-resizing-implies-Image-resizing : Propositional-resizing
+                                               → Image-resizing
+ Propositional-resizing-implies-Image-resizing Pr {𝓤} {𝓥} X Y f =
+  Propositional-resizing-implies-Subtype-resizing Pr Y S (λ y → ∥∥-is-a-prop)
    where
-    pr : (y : Y) → (∃ x ꞉ X , f x ≡ y) has-size 𝓥
-    pr y = Pr (∃ x ꞉ X , f x ≡ y) ∥∥-is-a-prop
-    Q : Y → 𝓥 ̇
-    Q y = pr₁ (pr y)
-    γ : (y : Y) → Q y ≃ (∃ x ꞉ X , f x ≡ y)
-    γ y = pr₂ (pr y)
+    S : Y → 𝓤 ⊔ 𝓥 ̇
+    S y = ∃ x ꞉ X , f x ≡ y
 
 \end{code}

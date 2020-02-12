@@ -86,7 +86,7 @@ X : 𝓤 ̇, and an equivalence relation _≈_ with values in 𝓥 ̇.
 
 \begin{code}
 
-module _
+module Quotient
        (pt  : propositional-truncations-exist)
        (fe  : FunExt)
        {𝓤 𝓥 : Universe}

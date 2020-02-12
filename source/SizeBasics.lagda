@@ -1,5 +1,4 @@
-
-Tom de Jong, 10 February 2020
+Tom de Jong, 10-12 February 2020
 
 \begin{code}
 
@@ -193,8 +192,6 @@ module _ (pt : propositional-truncations-exist) where
 
 \begin{code}
 
--- Question: are images with small domain small?
-
 subtype-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
 subtype-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (P : X → 𝓥 ̇ )
                      → ((x : X) → is-prop (P x))
@@ -223,7 +220,7 @@ Propositional-resizing-implies-Subtype-resizing Pr {𝓤} {𝓥} X P i =
    pr : (x : X) → (P x) has-size 𝓤
    pr x = Pr (P x) (i x)
    Q : X → 𝓤 ̇
-   Q x = pr₁ (pr x)
+   Q x = resize Pr (P x) (i x)
    γ : (Σ x ꞉ X , Q x) ≃ (Σ x ꞉ X , P x)
    γ = Σ-cong (λ (x : X) → pr₂ (pr x))
 
@@ -272,5 +269,106 @@ module _
    where
     S : Y → 𝓤 ⊔ 𝓥 ̇
     S y = ∃ x ꞉ X , f x ≡ y
+
+\end{code}
+
+Question: are images with small domain small?
+
+Answer: equivalent to PR? (Quotient) construction
+
+\begin{code}
+
+open import UF-Quotient
+
+module _
+        (pt : propositional-truncations-exist)
+        (fe : FunExt)
+        (pe : PropExt)
+    {-    {𝓤 𝓥 : Universe}
+        -- (pe : propext 𝓥)
+        (X : 𝓤 ̇ )
+        (_≈_ : X → X → 𝓥 ̇ )
+        (≈p  : is-prop-valued _≈_)
+        (≈r  : reflexive _≈_)
+        (≈s  : symmetric _≈_)
+        (≈t  : transitive _≈_) -}
+       where
+
+ -- open Quotient pt fe pe X _≈_ ≈p ≈r ≈s ≈t
+ open Quotient pt fe
+
+ open import UF-ImageAndSurjection
+ open ImageAndSurjection pt
+
+ quotient-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
+ quotient-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (_≈_ : X → X → 𝓥 ̇ )
+                         (≈p : is-prop-valued _≈_)
+                         (≈r : reflexive _≈_)
+                         (≈s : symmetric _≈_)
+                         (≈t : transitive _≈_)
+                       → (X/≈ (pe 𝓥) X _≈_ ≈p ≈r ≈s ≈t) has-size 𝓤
+
+ Quotient-resizing : 𝓤ω
+ Quotient-resizing = {𝓤 𝓥 : Universe} → quotient-resizing 𝓤 𝓥
+
+ Propositional-resizing-implies-Quotient-resizing : Propositional-resizing
+                                                  → Quotient-resizing
+ Propositional-resizing-implies-Quotient-resizing Pr {𝓤} {𝓥} X _≈_ ≈p ≈r ≈s ≈t =
+  {!!}
+   where
+    _≈'_ : X → X → 𝓤 ̇
+    x ≈' y = resize Pr (x ≈ y) (≈p x y)
+    ≈-to-≈' : {x y : X} → x ≈ y → x ≈' y
+    ≈-to-≈' {x} {y} = to-resize Pr (x ≈ y) (≈p x y)
+    ≈'-to-≈ : {x y : X} → x ≈' y → x ≈ y
+    ≈'-to-≈ {x} {y} = from-resize Pr (x ≈ y) (≈p x y)
+    ≈-≃-≈' : {x y : X} → x ≈ y ≃ x ≈' y
+    ≈-≃-≈' {x} {y} =
+     logically-equivalent-props-are-equivalent (≈p x y)
+     (resize-is-a-prop Pr (x ≈ y) (≈p x y)) ≈-to-≈' ≈'-to-≈
+    ≈'p : is-prop-valued _≈'_
+    ≈'p x y = equiv-to-prop (≃-sym ≈-≃-≈') (≈p x y)
+    ≈'r : reflexive _≈'_
+    ≈'r x = ≈-to-≈' (≈r x)
+    ≈'s : symmetric _≈'_
+    ≈'s x y r = ≈-to-≈' (≈s x y (≈'-to-≈ r))
+    ≈'t : transitive _≈'_
+    ≈'t x y z r s = ≈-to-≈' (≈t x y z (≈'-to-≈ r) (≈'-to-≈ s))
+    X/≈' : 𝓤 ⊔ (𝓤 ⁺) ̇
+    X/≈' = X/≈ (pe 𝓤) X _≈'_ ≈'p ≈'r ≈'s ≈'t
+
+ {-
+ Image-resizing-implies-Propositional-resizing : Image-resizing
+                                               → Propositional-resizing
+ Image-resizing-implies-Propositional-resizing Ir {𝓤} {𝓥} P s = Q , γ
+  where
+   ir : image unique-to-𝟙 has-size 𝓥
+   ir = Ir P (𝟙{𝓥}) unique-to-𝟙
+   Q : 𝓥 ̇
+   Q = pr₁ ir
+   γ = Q                           ≃⟨ pr₂ ir ⟩
+       image unique-to-𝟙           ≃⟨ ≃-refl (image unique-to-𝟙) ⟩
+       (Σ u ꞉ 𝟙 , ∃ p ꞉ P , * ≡ u) ≃⟨ i ⟩
+       (Σ u ꞉ 𝟙 , Σ p ꞉ P , * ≡ u) ≃⟨ ≃-refl _ ⟩
+       (Σ u ꞉ 𝟙 , P × (* ≡ u))     ≃⟨ Σ-flip ⟩
+       P × (Σ u ꞉ 𝟙 , * ≡ u)       ≃⟨ ii ⟩
+       P × 𝟙{𝓥}                    ≃⟨ 𝟙-rneutral ⟩
+       P                           ■
+    where
+     i  = Σ-cong (λ u → a-prop-is-equivalent-to-its-truncation (σ u))
+      where
+       σ : (u : 𝟙) → is-prop (Σ p ꞉ P , * ≡ u)
+       σ _ = Σ-is-prop s (λ _ → props-are-sets 𝟙-is-prop)
+     ii = ×cong (≃-refl P) (singleton-≃-𝟙 (singleton-types-are-singletons *))
+
+ Propositional-resizing-implies-Image-resizing : Propositional-resizing
+                                               → Image-resizing
+ Propositional-resizing-implies-Image-resizing Pr {𝓤} {𝓥} X Y f =
+  Propositional-resizing-implies-Subtype-resizing Pr Y S (λ y → ∥∥-is-a-prop)
+   where
+    S : Y → 𝓤 ⊔ 𝓥 ̇
+    S y = ∃ x ꞉ X , f x ≡ y -}
+
+
 
 \end{code}

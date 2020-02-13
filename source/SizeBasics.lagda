@@ -1,4 +1,4 @@
-Tom de Jong, 10-12 February 2020
+Tom de Jong, 10 February 2020 -
 
 \begin{code}
 

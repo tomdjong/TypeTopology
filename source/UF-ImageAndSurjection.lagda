@@ -163,15 +163,15 @@ Added 13 February 2020 by Tom de Jong
 
  surjection-≃-image : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
                     → is-surjection f
-                    → Y ≃ image f
+                    → image f ≃ Y
  surjection-≃-image {𝓤} {𝓥} {X} {Y} f s =
-  Y                             ≃⟨ ≃-sym (𝟙-rneutral {𝓥} {𝓥}) ⟩
-  Y × 𝟙                         ≃⟨ ≃-refl _ ⟩
-  (Σ y ꞉ Y , 𝟙)                 ≃⟨ Σ-cong γ ⟩
-  (Σ y ꞉ Y , ∃ x ꞉ X , f x ≡ y) ≃⟨ ≃-refl _ ⟩
-  image f                       ■
+  image f                       ≃⟨ ≃-refl _ ⟩
+  (Σ y ꞉ Y , ∃ x ꞉ X , f x ≡ y) ≃⟨ Σ-cong γ ⟩
+  (Σ y ꞉ Y , 𝟙)                 ≃⟨ ≃-refl _ ⟩
+  Y × 𝟙                         ≃⟨ 𝟙-rneutral {𝓥} {𝓥} ⟩
+  Y                             ■
    where
-    γ : (y : Y) → 𝟙 ≃ (∃ x ꞉ X , f x ≡ y)
-    γ y = singleton-≃-𝟙' (pointed-props-are-singletons (s y) ∥∥-is-a-prop)
+    γ : (y : Y) → (∃ x ꞉ X , f x ≡ y) ≃ 𝟙
+    γ y = singleton-≃-𝟙 (pointed-props-are-singletons (s y) ∥∥-is-a-prop)
 
 \end{code}

@@ -339,11 +339,9 @@ module _
  Surjective-resizing-implies-Image-resizing-domain Sr {𝓤} {𝓥} X Y f =
   Sr X (image f) (corestriction f) (corestriction-surjection f)
 
- Ω-Resizingω : 𝓤ω
- Ω-Resizingω = {𝓤 𝓥 : Universe} → Ω-Resizing 𝓤 𝓥
-
- Ω-Resizingω-implies-Quotient-resizing : Ω-Resizingω → Quotient-resizing
- Ω-Resizingω-implies-Quotient-resizing ΩR {𝓤} {𝓥} X _≈_ ≈p ≈r ≈s ≈t =
+ Ω-Resizing-implies-quotient-resizing : {𝓤 𝓥 : Universe}
+                                      → Ω-Resizing 𝓥 𝓤 → quotient-resizing 𝓤 𝓥
+ Ω-Resizing-implies-quotient-resizing {𝓤} {𝓥} ΩR X _≈_ ≈p ≈r ≈s ≈t =
   (image _≋'_) , γ
    where
     _≋_ : X → X → Ω 𝓥

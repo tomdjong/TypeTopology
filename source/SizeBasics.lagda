@@ -390,7 +390,7 @@ module _
               v = _≋'_ x               ≡⟨ refl ⟩
                   back-eqtofun e ∘ _≋_ x ≡⟨ ap (λ - → back-eqtofun e ∘ -) u ⟩
                   back-eqtofun e ∘ ⌜ ϕ ⌝ α ≡⟨ refl ⟩
-                  back-eqtofun e ∘ ⌜ e ⌝ ∘ α ≡⟨ ap (λ - → - ∘ α) (dfunext fe' (inverse-is-retraction {!⌜ e ⌝!} (⌜⌝-is-equiv e))) ⟩
+                  back-eqtofun e ∘ ⌜ e ⌝ ∘ α ≡⟨ ap (λ - → - ∘ α) (dfunext fe' (inverse-is-retraction ⌜ e ⌝ (⌜⌝-is-equiv e))) ⟩
                   α ∎
 
  Quotient-resizing-gives-Set-truncation : Quotient-resizing → (X : 𝓤 ̇ )

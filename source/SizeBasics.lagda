@@ -282,18 +282,9 @@ module _
         (pt : propositional-truncations-exist)
         (fe : FunExt)
         (pe : PropExt)
-    {-    {𝓤 𝓥 : Universe}
-        -- (pe : propext 𝓥)
-        (X : 𝓤 ̇ )
-        (_≈_ : X → X → 𝓥 ̇ )
-        (≈p  : is-prop-valued _≈_)
-        (≈r  : reflexive _≈_)
-        (≈s  : symmetric _≈_)
-        (≈t  : transitive _≈_) -}
        where
 
  open import UF-Quotient
- -- open Quotient pt fe pe X _≈_ ≈p ≈r ≈s ≈t
  open Quotient pt fe
 
  open import UF-ImageAndSurjection hiding (_≈_)
@@ -348,7 +339,59 @@ module _
  Surjective-resizing-implies-Image-resizing-domain Sr {𝓤} {𝓥} X Y f =
   Sr X (image f) (corestriction f) (corestriction-surjection f)
 
- -- Ω-Resizing → Quotient-resizing
+ Ω-Resizingω : 𝓤ω
+ Ω-Resizingω = {𝓤 𝓥 : Universe} → Ω-Resizing 𝓤 𝓥
+
+ Ω-Resizingω-implies-Quotient-resizing : Ω-Resizingω → Quotient-resizing
+ Ω-Resizingω-implies-Quotient-resizing ΩR {𝓤} {𝓥} X _≈_ ≈p ≈r ≈s ≈t =
+  (image _≋'_) , γ
+   where
+    _≋_ : X → X → Ω 𝓥
+    x ≋ y = x ≈ y , ≈p x y
+    Ω' : 𝓤 ̇
+    Ω' = has-size-type ΩR
+    e : Ω' ≃ Ω 𝓥
+    e = has-size-equiv ΩR
+    _≋'_ : X → X → Ω'
+    x ≋' y = back-eqtofun e (x ≋ y)
+    fe' : {𝓤 𝓥 : Universe} → funext 𝓤 𝓥
+    fe' {𝓤} {𝓥} = fe 𝓤 𝓥
+    γ : image _≋'_ ≃ image _≋_
+    γ = image _≋'_ ≃⟨ ≃-refl _ ⟩
+        (Σ α ꞉ (X → Ω') , ∃ x ꞉ X , _≋'_ x ≡ α) ≃⟨ i ⟩
+        (Σ α ꞉ (X → Ω') , ∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) ≃⟨ Σ-change-of-variables (λ (α : X → Ω 𝓥) → ∃ x ꞉ X , _≋_ x ≡ α) ⌜ ϕ ⌝ (⌜⌝-is-equiv ϕ) ⟩
+        image _≋_ ■
+     where
+      ϕ : (X → Ω') ≃ (X → Ω 𝓥)
+      ϕ = →cong (fe') (fe') (≃-refl X) e
+      i = Σ-cong h
+       where
+        h : (α : X → Ω')
+          → (∃ x ꞉ X , _≋'_ x ≡ α) ≃ (∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α)
+        h α = logically-equivalent-props-are-equivalent ∥∥-is-a-prop ∥∥-is-a-prop f g
+         where
+          f : (∃ x ꞉ X , _≋'_ x ≡ α) → (∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α)
+          f = ∥∥-functor ψ
+           where
+            ψ : (Σ x ꞉ X , _≋'_ x ≡ α) → (Σ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α)
+            ψ (x , u) = x , v
+             where
+              v = _≋_ x ≡⟨ ap (λ - → - ∘ _≋_ x) (dfunext fe' (inverse-is-section ⌜ e ⌝ (⌜⌝-is-equiv e))) ⁻¹ ⟩
+                  ⌜ e ⌝ ∘ back-eqtofun e ∘ _≋_ x ≡⟨ refl ⟩
+                  ⌜ e ⌝ ∘ (_≋'_ x) ≡⟨ ap (λ - → ⌜ e ⌝ ∘ -) u ⟩
+                  ⌜ e ⌝ ∘ α ≡⟨ refl ⟩
+                  ⌜ ϕ ⌝ α ∎
+          g : (∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) → (∃ x ꞉ X , _≋'_ x ≡ α)
+          g = ∥∥-functor ψ
+           where
+            ψ : (Σ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) → (Σ x ꞉ X , _≋'_ x ≡ α)
+            ψ (x , u) = x , v
+             where
+              v = _≋'_ x               ≡⟨ refl ⟩
+                  back-eqtofun e ∘ _≋_ x ≡⟨ ap (λ - → back-eqtofun e ∘ -) u ⟩
+                  back-eqtofun e ∘ ⌜ ϕ ⌝ α ≡⟨ refl ⟩
+                  back-eqtofun e ∘ ⌜ e ⌝ ∘ α ≡⟨ ap (λ - → - ∘ α) (dfunext fe' (inverse-is-retraction {!⌜ e ⌝!} (⌜⌝-is-equiv e))) ⟩
+                  α ∎
 
  Quotient-resizing-gives-Set-truncation : Quotient-resizing → (X : 𝓤 ̇ )
                                         → Σ Y ꞉ 𝓤 ̇ , {!!}
@@ -411,34 +454,6 @@ module _
  Quotient-resizing-implies-Propositional-resizing Qr {𝓤} {𝓥} P i = {!!} -}
 
  {-
-
-Propositional-resizing-implies-Quotient-resizing : Propositional-resizing
-                                                  → Quotient-resizing
- Propositional-resizing-implies-Quotient-resizing Pr {𝓤} {𝓥} X _≈_ ≈p ≈r ≈s ≈t =
-  {!!}
-   where
-    _≈'_ : X → X → 𝓤 ̇
-    x ≈' y = resize Pr (x ≈ y) (≈p x y)
-    ≈-to-≈' : {x y : X} → x ≈ y → x ≈' y
-    ≈-to-≈' {x} {y} = to-resize Pr (x ≈ y) (≈p x y)
-    ≈'-to-≈ : {x y : X} → x ≈' y → x ≈ y
-    ≈'-to-≈ {x} {y} = from-resize Pr (x ≈ y) (≈p x y)
-    ≈-≃-≈' : {x y : X} → x ≈ y ≃ x ≈' y
-    ≈-≃-≈' {x} {y} =
-     logically-equivalent-props-are-equivalent (≈p x y)
-     (resize-is-a-prop Pr (x ≈ y) (≈p x y)) ≈-to-≈' ≈'-to-≈
-    ≈'p : is-prop-valued _≈'_
-    ≈'p x y = equiv-to-prop (≃-sym ≈-≃-≈') (≈p x y)
-    ≈'r : reflexive _≈'_
-    ≈'r x = ≈-to-≈' (≈r x)
-    ≈'s : symmetric _≈'_
-    ≈'s x y r = ≈-to-≈' (≈s x y (≈'-to-≈ r))
-    ≈'t : transitive _≈'_
-    ≈'t x y z r s = ≈-to-≈' (≈t x y z (≈'-to-≈ r) (≈'-to-≈ s))
-    X/≈' : 𝓤 ⊔ (𝓤 ⁺) ̇
-    X/≈' = X/≈ (pe 𝓤) X _≈'_ ≈'p ≈'r ≈'s ≈'t
-
-
  quotient-resizing⁺ : (𝓤 𝓥 : Universe) → (𝓤 ⁺) ⁺ ⊔ (𝓥 ⁺) ̇
  quotient-resizing⁺ 𝓤 𝓥 = (X : 𝓤 ⁺ ̇ ) (_≈_ : X → X → 𝓥 ̇ )
                           (≈p : is-prop-valued _≈_)

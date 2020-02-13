@@ -1,5 +1,4 @@
 Martin Escardo, 2012-
-Tom de Jong, September 2019 (two lemmas used in UF-Classifiers)
 
 Expanded on demand whenever a general equivalence is needed.
 
@@ -673,6 +672,8 @@ fiber-equiv {𝓤} {𝓥} {X} {Y} x = fiber pr₁ x                      ≃⟨ 
                                 Y x                              ■
 
 \end{code}
+
+Tom de Jong, September 2019 (two lemmas used in UF-Classifiers)
 
 A nice application of Σ-change-of-variables is that the fiber of a map doesn't
 change (up to equivalence, at least) when precomposing with an equivalence.

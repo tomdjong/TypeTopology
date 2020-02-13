@@ -11,6 +11,11 @@ open import UF-Embeddings
 open import UF-PropTrunc
 open import UF-Retracts
 
+-- This is only used at the end to prove that if f : X → Y is a surjection, then
+-- Y ≃ image f. This cannot be in UF-EquivalenceExamples, because of module
+-- dependencies.
+open import UF-EquivalenceExamples
+
 \end{code}
 
 A main application of propositional truncations is to be able to
@@ -149,5 +154,24 @@ Surjections can be characterized as follows, modulo size:
  retraction-surjection : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
                        → has-section f → is-surjection f
  retraction-surjection {𝓤} {𝓥} {X} f φ y = ∣ pr₁ φ y , pr₂ φ y ∣
+
+\end{code}
+
+Added 13 February 2020 by Tom de Jong
+
+\begin{code}
+
+ surjection-≃-image : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y)
+                    → is-surjection f
+                    → Y ≃ image f
+ surjection-≃-image {𝓤} {𝓥} {X} {Y} f s =
+  Y                             ≃⟨ ≃-sym (𝟙-rneutral {𝓥} {𝓥}) ⟩
+  Y × 𝟙                         ≃⟨ ≃-refl _ ⟩
+  (Σ y ꞉ Y , 𝟙)                 ≃⟨ Σ-cong γ ⟩
+  (Σ y ꞉ Y , ∃ x ꞉ X , f x ≡ y) ≃⟨ ≃-refl _ ⟩
+  image f                       ■
+   where
+    γ : (y : Y) → 𝟙 ≃ (∃ x ꞉ X , f x ≡ y)
+    γ y = singleton-≃-𝟙' (pointed-props-are-singletons (s y) ∥∥-is-a-prop)
 
 \end{code}

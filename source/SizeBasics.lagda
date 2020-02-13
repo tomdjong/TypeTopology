@@ -355,18 +355,21 @@ module _
     fe' : {𝓤 𝓥 : Universe} → funext 𝓤 𝓥
     fe' {𝓤} {𝓥} = fe 𝓤 𝓥
     γ : image _≋'_ ≃ image _≋_
-    γ = image _≋'_ ≃⟨ ≃-refl _ ⟩
-        (Σ α ꞉ (X → Ω') , ∃ x ꞉ X , _≋'_ x ≡ α) ≃⟨ i ⟩
-        (Σ α ꞉ (X → Ω') , ∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) ≃⟨ Σ-change-of-variables (λ (α : X → Ω 𝓥) → ∃ x ꞉ X , _≋_ x ≡ α) ⌜ ϕ ⌝ (⌜⌝-is-equiv ϕ) ⟩
-        image _≋_ ■
+    γ = image _≋'_                                   ≃⟨ ≃-refl _ ⟩
+        (Σ α ꞉ (X → Ω') , ∃ x ꞉ X , _≋'_ x ≡ α)      ≃⟨ I ⟩
+        (Σ α ꞉ (X → Ω') , ∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) ≃⟨ II ⟩
+        image _≋_                                    ■
      where
       ϕ : (X → Ω') ≃ (X → Ω 𝓥)
       ϕ = →cong (fe') (fe') (≃-refl X) e
-      i = Σ-cong h
+      II = Σ-change-of-variables (λ (α : X → Ω 𝓥) → ∃ x ꞉ X , _≋_ x ≡ α)
+           ⌜ ϕ ⌝ (⌜⌝-is-equiv ϕ)
+      I = Σ-cong h
        where
         h : (α : X → Ω')
           → (∃ x ꞉ X , _≋'_ x ≡ α) ≃ (∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α)
-        h α = logically-equivalent-props-are-equivalent ∥∥-is-a-prop ∥∥-is-a-prop f g
+        h α = logically-equivalent-props-are-equivalent
+              ∥∥-is-a-prop ∥∥-is-a-prop f g
          where
           f : (∃ x ꞉ X , _≋'_ x ≡ α) → (∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α)
           f = ∥∥-functor ψ
@@ -374,23 +377,30 @@ module _
             ψ : (Σ x ꞉ X , _≋'_ x ≡ α) → (Σ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α)
             ψ (x , u) = x , v
              where
-              v = _≋_ x ≡⟨ ap (λ - → - ∘ _≋_ x) (dfunext fe' (inverse-is-section ⌜ e ⌝ (⌜⌝-is-equiv e))) ⁻¹ ⟩
+              v = _≋_ x                          ≡⟨ i ⟩
                   ⌜ e ⌝ ∘ back-eqtofun e ∘ _≋_ x ≡⟨ refl ⟩
-                  ⌜ e ⌝ ∘ (_≋'_ x) ≡⟨ ap (λ - → ⌜ e ⌝ ∘ -) u ⟩
-                  ⌜ e ⌝ ∘ α ≡⟨ refl ⟩
-                  ⌜ ϕ ⌝ α ∎
+                  ⌜ e ⌝ ∘ (_≋'_ x)               ≡⟨ ap (λ - → ⌜ e ⌝ ∘ -) u ⟩
+                  ⌜ e ⌝ ∘ α                      ≡⟨ refl ⟩
+                  ⌜ ϕ ⌝ α                        ∎
+               where
+                i = ap (λ - → - ∘ _≋_ x)
+                    (dfunext fe' (inverse-is-section ⌜ e ⌝ (⌜⌝-is-equiv e))) ⁻¹
           g : (∃ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) → (∃ x ꞉ X , _≋'_ x ≡ α)
           g = ∥∥-functor ψ
            where
             ψ : (Σ x ꞉ X , _≋_ x ≡ ⌜ ϕ ⌝ α) → (Σ x ꞉ X , _≋'_ x ≡ α)
             ψ (x , u) = x , v
              where
-              v = _≋'_ x               ≡⟨ refl ⟩
-                  back-eqtofun e ∘ _≋_ x ≡⟨ ap (λ - → back-eqtofun e ∘ -) u ⟩
-                  back-eqtofun e ∘ ⌜ ϕ ⌝ α ≡⟨ refl ⟩
-                  back-eqtofun e ∘ ⌜ e ⌝ ∘ α ≡⟨ ap (λ - → - ∘ α) (dfunext fe' (inverse-is-retraction ⌜ e ⌝ (⌜⌝-is-equiv e))) ⟩
-                  α ∎
+              v = _≋'_ x                     ≡⟨ refl ⟩
+                  back-eqtofun e ∘ _≋_ x     ≡⟨ ap (λ - → back-eqtofun e ∘ -) u ⟩
+                  back-eqtofun e ∘ ⌜ ϕ ⌝ α   ≡⟨ refl ⟩
+                  back-eqtofun e ∘ ⌜ e ⌝ ∘ α ≡⟨ i ⟩
+                  α                          ∎
+               where
+                i = ap (λ - → - ∘ α)
+                    (dfunext fe' (inverse-is-retraction ⌜ e ⌝ (⌜⌝-is-equiv e)))
 
+{-
  Quotient-resizing-gives-Set-truncation : Quotient-resizing → (X : 𝓤 ̇ )
                                         → Σ Y ꞉ 𝓤 ̇ , {!!}
  Quotient-resizing-gives-Set-truncation = {!!}
@@ -446,6 +456,7 @@ module _
       ψϕ = {!!}
       ϕψ : (w : image f) → ϕ (ψ w) ≡ w
       ϕψ = {!!}
+-}
 
  {- Quotient-resizing-implies-Propositional-resizing : Quotient-resizing
                                                   → Propositional-resizing

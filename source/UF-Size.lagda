@@ -58,6 +58,13 @@ universe 𝓥:
 _has-size_ : 𝓤 ̇ → (𝓥 : Universe) → 𝓥 ⁺  ⊔ 𝓤 ̇
 X has-size 𝓥 = Σ Y ꞉ 𝓥 ̇ , Y ≃ X
 
+has-size-type : {X : 𝓤 ̇ } {𝓥 : Universe} → X has-size 𝓥 → 𝓥 ̇
+has-size-type = pr₁
+
+has-size-equiv : {X : 𝓤 ̇ } {𝓥 : Universe} (s : X has-size 𝓥)
+               → has-size-type s ≃ X
+has-size-equiv = pr₂
+
 propositional-resizing : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
 propositional-resizing 𝓤 𝓥 = (P : 𝓤 ̇ ) → is-prop P → P has-size 𝓥
 

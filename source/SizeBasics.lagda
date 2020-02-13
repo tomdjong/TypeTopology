@@ -207,8 +207,8 @@ Subtype-resizing-implies-Propositional-resizing Sr {𝓤} {𝓥} P i = Q , γ
   sr : (𝟙{𝓥} × P) has-size 𝓥
   sr = Sr (𝟙{𝓥}) (λ _ → P) (λ _ → i)
   Q : 𝓥 ̇
-  Q = pr₁ sr
-  γ = Q     ≃⟨ pr₂ sr ⟩
+  Q = has-size-type sr
+  γ = Q     ≃⟨ has-size-equiv sr ⟩
       𝟙 × P ≃⟨ 𝟙-lneutral ⟩
       P     ■
 
@@ -222,7 +222,7 @@ Propositional-resizing-implies-Subtype-resizing Pr {𝓤} {𝓥} X P i =
    Q : X → 𝓤 ̇
    Q x = resize Pr (P x) (i x)
    γ : (Σ x ꞉ X , Q x) ≃ (Σ x ꞉ X , P x)
-   γ = Σ-cong (λ (x : X) → pr₂ (pr x))
+   γ = Σ-cong (λ (x : X) → has-size-equiv (pr x))
 
 module _
         (pt : propositional-truncations-exist)
@@ -246,8 +246,8 @@ module _
    ir : image unique-to-𝟙 has-size 𝓥
    ir = Ir P (𝟙{𝓥}) unique-to-𝟙
    Q : 𝓥 ̇
-   Q = pr₁ ir
-   γ = Q                           ≃⟨ pr₂ ir ⟩
+   Q = has-size-type ir
+   γ = Q                           ≃⟨ has-size-equiv ir ⟩
        image unique-to-𝟙           ≃⟨ ≃-refl (image unique-to-𝟙) ⟩
        (Σ u ꞉ 𝟙 , ∃ p ꞉ P , * ≡ u) ≃⟨ i ⟩
        (Σ u ꞉ 𝟙 , Σ p ꞉ P , * ≡ u) ≃⟨ ≃-refl _ ⟩
@@ -338,8 +338,8 @@ module _
    ir : image f has-size 𝓤
    ir = Ir X Y f
    Z : 𝓤 ̇
-   Z = pr₁ ir
-   γ = Z       ≃⟨ pr₂ ir ⟩
+   Z = has-size-type ir
+   γ = Z       ≃⟨ has-size-equiv ir ⟩
        image f ≃⟨ surjection-≃-image f s ⟩
        Y       ■
 

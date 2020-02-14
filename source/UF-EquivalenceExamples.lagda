@@ -738,4 +738,31 @@ fiber-of-unique-to-𝟙 {𝓤} {𝓥} {X} * =
    ψ x = singleton-≃-𝟙
          (pointed-props-are-singletons refl (props-are-sets 𝟙-is-prop))
 
+∼-fiber-≃ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {f : X → Y} {g : X → Y}
+          → f ∼ g
+          → (y : Y) → fiber f y ≃ fiber g y
+∼-fiber-≃ {𝓤} {𝓥} {X} {Y} {f} {g} H y = Σ-cong γ
+ where
+  γ : (x : X) → (f x ≡ y) ≃ (g x ≡ y)
+  γ x = qinveq α (β , (βα , αβ))
+   where
+    α : f x ≡ y → g x ≡ y
+    α p = (H x) ⁻¹ ∙ p
+    β : g x ≡ y → f x ≡ y
+    β q = (H x) ∙ q
+    βα : (p : f x ≡ y) → β (α p) ≡ p
+    βα p = β (α p)                ≡⟨ refl ⟩
+           (H x) ∙ ((H x) ⁻¹ ∙ p) ≡⟨ (∙assoc (H x) ((H x) ⁻¹) p) ⁻¹ ⟩
+           (H x) ∙ (H x) ⁻¹ ∙ p   ≡⟨ i ⟩
+           refl ∙ p               ≡⟨ refl-left-neutral ⟩
+           p                      ∎
+     where
+      i = ap (λ - → - ∙ p) ((right-inverse (H x)) ⁻¹)
+    αβ : (q : g x ≡ y) → α (β q) ≡ q
+    αβ q = α (β q)                ≡⟨ refl ⟩
+           (H x) ⁻¹ ∙ ((H x) ∙ q) ≡⟨ (∙assoc ((H x) ⁻¹) (H x) q) ⁻¹ ⟩
+           (H x) ⁻¹ ∙ (H x) ∙ q   ≡⟨ ap (λ - → - ∙ q) (left-inverse (H x)) ⟩
+           refl ∙ q               ≡⟨ refl-left-neutral ⟩
+           q                      ∎
+
 \end{code}

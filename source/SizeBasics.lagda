@@ -85,13 +85,25 @@ composite-has-size₁ {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {Z} {f} {g} s t z =
   B y = has-size-type (s y)
   v : (y : Y) → B y ≃ fiber f y
   v y = has-size-equiv (s y)
-  γ = Σ (λ z₁ → B (pr₁ (⌜ pr₂ (t z) ⌝ z₁))) ≃⟨ Σ-cong (λ w → v (fiber-point g z (⌜ u ⌝ w))) ⟩
-      Sigma A (λ y → fiber f (pr₁ (⌜ pr₂ (t z) ⌝ y))) ≃⟨ Σ-change-of-variables (λ v → fiber f (pr₁ v)) ⌜ u ⌝ (⌜⌝-is-equiv u) ⟩
-      (Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w)) ≃⟨ ≃-sym (fiber-of-composite f g z) ⟩
-      fiber (g ∘ f) z ■
+  γ = (Σ a ꞉ A , B (fiber-point g z (⌜ u ⌝ a)))         ≃⟨ i ⟩
+      (Σ a ꞉ A , fiber f (fiber-point g z (⌜ u ⌝ a)))   ≃⟨ ii ⟩
+      (Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w)) ≃⟨ iii ⟩
+      fiber (g ∘ f) z                                   ■
+   where
+    i   = Σ-cong (λ w → v (fiber-point g z (⌜ u ⌝ w)))
+    ii  = Σ-change-of-variables (λ v → fiber f (pr₁ v)) ⌜ u ⌝ (⌜⌝-is-equiv u)
+    iii = ≃-sym (fiber-of-composite f g z)
 
-~-has-size₁ : {!!}
-~-has-size₁ = {!!}
+~-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {f : X → Y} {g : X → Y }
+            → f has-size₁ 𝓦
+            → f ∼ g
+            → g has-size₁ 𝓦
+~-has-size₁ {𝓤} {𝓥} {𝓦} {X} {Y} {f} {g} s H y = Z , (e ● (∼-fiber-≃ H y))
+ where
+  Z : 𝓦 ̇
+  Z = has-size-type (s y)
+  e : Z ≃ fiber f y
+  e = has-size-equiv (s y)
 
 embedding-resizing : (𝓤 𝓥 𝓦 : Universe) → 𝓤 ⁺ ⊔ 𝓥 ⁺ ⊔ (𝓦 ⁺) ̇
 embedding-resizing 𝓤 𝓥 𝓦 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (f : X → Y)

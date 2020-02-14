@@ -116,6 +116,7 @@ module _
         (ua : is-univalent 𝓤)
         (Y : 𝓤 ̇ )
        where
+
  open import UF-Classifiers
  open general-classifier {𝓤} {𝓥 ⁺ ⊔ 𝓤} fe fe' ua Y (λ X → X has-size 𝓥)
 

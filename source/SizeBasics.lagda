@@ -105,6 +105,28 @@ composite-has-size₁ {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {Z} {f} {g} s t z =
   e : Z ≃ fiber f y
   e = has-size-equiv (s y)
 
+\end{code}
+
+\begin{code}
+
+module _
+        {𝓤 𝓥 : Universe}
+        (fe : funext 𝓤 (𝓥 ⁺ ⊔ 𝓤))
+        (fe' : funext 𝓤 (𝓤 ⁺ ⊔ (𝓥 ⁺)))
+        (ua : is-univalent 𝓤)
+        (Y : 𝓤 ̇ )
+       where
+ open import UF-Classifiers
+ open general-classifier {𝓤} {𝓥 ⁺ ⊔ 𝓤} fe fe' ua Y (λ X → X has-size 𝓥)
+
+ has-size-classifier : (Σ X ꞉ 𝓤 ̇ , Σ f ꞉ (X → Y) , f has-size₁ 𝓥)
+                     ≃ (Y → Σ X ꞉ 𝓤 ̇ , X has-size 𝓥)
+ has-size-classifier = classification-equivalence
+
+\end{code}
+
+\begin{code}
+
 embedding-resizing : (𝓤 𝓥 𝓦 : Universe) → 𝓤 ⁺ ⊔ 𝓥 ⁺ ⊔ (𝓦 ⁺) ̇
 embedding-resizing 𝓤 𝓥 𝓦 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (f : X → Y)
                          → is-embedding f

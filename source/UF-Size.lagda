@@ -55,7 +55,7 @@ universe 𝓥:
 
 \begin{code}
 
-_has-size_ : 𝓤 ̇ → (𝓥 : Universe) → 𝓥 ⁺  ⊔ 𝓤 ̇
+_has-size_ : 𝓤 ̇ → (𝓥 : Universe) → 𝓥 ⁺ ⊔ 𝓤 ̇
 X has-size 𝓥 = Σ Y ꞉ 𝓥 ̇ , Y ≃ X
 
 has-size-type : {X : 𝓤 ̇ } {𝓥 : Universe} → X has-size 𝓥 → 𝓥 ̇

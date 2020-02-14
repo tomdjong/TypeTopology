@@ -72,6 +72,27 @@ equivalence-has-size₁ f i y = singleton-has-size γ
   γ : is-singleton (fiber f y)
   γ = equivs-are-vv-equivs f i y
 
+composite-has-size₁ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } {f : X → Y} {g : Y → Z}
+                    → f has-size₁ 𝓣 → g has-size₁ 𝓣 → (g ∘ f) has-size₁ 𝓣
+composite-has-size₁ {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {Z} {f} {g} s t z =
+ (Σ a ꞉ A , B (fiber-point g z (⌜ u ⌝ a))) , γ
+ where
+  A : 𝓣 ̇
+  A = has-size-type (t z)
+  u : A ≃ fiber g z
+  u = has-size-equiv (t z)
+  B : Y → 𝓣 ̇
+  B y = has-size-type (s y)
+  v : (y : Y) → B y ≃ fiber f y
+  v y = has-size-equiv (s y)
+  γ = Σ (λ z₁ → B (pr₁ (⌜ pr₂ (t z) ⌝ z₁))) ≃⟨ Σ-cong (λ w → v (fiber-point g z (⌜ u ⌝ w))) ⟩
+      Sigma A (λ y → fiber f (pr₁ (⌜ pr₂ (t z) ⌝ y))) ≃⟨ Σ-change-of-variables (λ v → fiber f (pr₁ v)) ⌜ u ⌝ (⌜⌝-is-equiv u) ⟩
+      (Σ w ꞉ (fiber g z) , fiber f (fiber-point g z w)) ≃⟨ ≃-sym (fiber-of-composite f g z) ⟩
+      fiber (g ∘ f) z ■
+
+~-has-size₁ : {!!}
+~-has-size₁ = {!!}
+
 embedding-resizing : (𝓤 𝓥 𝓦 : Universe) → 𝓤 ⁺ ⊔ 𝓥 ⁺ ⊔ (𝓦 ⁺) ̇
 embedding-resizing 𝓤 𝓥 𝓦 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (f : X → Y)
                          → is-embedding f

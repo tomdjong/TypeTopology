@@ -117,12 +117,88 @@ module _
         (Y : 𝓤 ̇ )
        where
 
+ open import UF-UniverseEmbedding
  open import UF-Classifiers
  open general-classifier {𝓤} {𝓥 ⁺ ⊔ 𝓤} fe fe' ua Y (λ X → X has-size 𝓥)
 
  has-size-classifier : (Σ X ꞉ 𝓤 ̇ , Σ f ꞉ (X → Y) , f has-size₁ 𝓥)
                      ≃ (Y → Σ X ꞉ 𝓤 ̇ , X has-size 𝓥)
  has-size-classifier = classification-equivalence
+
+\end{code}
+
+\begin{code}
+
+module _
+        {𝓤 𝓥 : Universe}
+        (fe : FunExt)
+        (ua : is-univalent (𝓤 ⊔ 𝓥))
+       where
+
+ open import UF-Equiv-FunExt
+ open import UF-UniverseEmbedding
+
+ Σ-small-types-≃-small-universe : (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , X has-size 𝓥) ≃ 𝓥 ̇
+ Σ-small-types-≃-small-universe =
+  (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , X has-size 𝓥)            ≃⟨ Σ-flip ⟩
+  (Σ Y ꞉ 𝓥 ̇ , Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , Y ≃ X)        ≃⟨ i ⟩
+  (Σ Y ꞉ 𝓥 ̇ , Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , lift 𝓤 Y ≃ X) ≃⟨ ii ⟩
+  (Σ Y ꞉ 𝓥 ̇ , Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , lift 𝓤 Y ≡ X) ≃⟨ iii ⟩
+  (Σ Y ꞉ 𝓥 ̇ , 𝟙{𝓥})                          ≃⟨ 𝟙-rneutral ⟩
+  𝓥 ̇                                         ■
+   where
+    ii  = Σ-cong (λ Y → Σ-cong (λ X → ≃-sym (is-univalent-≃ ua (lift 𝓤 Y) X)))
+    iii = Σ-cong h
+     where
+      h : (Y : 𝓥 ̇) → (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , lift 𝓤 Y ≡ X) ≃ 𝟙
+      h Y = singleton-≃-𝟙 (singleton-types-are-singletons (lift 𝓤 Y))
+
+    i   = Σ-cong f
+     where
+      f : (Y : 𝓥 ̇)
+        → (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , Y ≃ X) ≃ (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , lift 𝓤 Y ≃ X)
+      f Y = Σ-cong g
+       where
+        g : (X : 𝓤 ⊔ 𝓥 ̇) → (Y ≃ X) ≃ (lift 𝓤 Y ≃ X)
+        g X = qinveq ϕ (ψ , (ψϕ , ϕψ))
+         where
+          ϕ : Y ≃ X → lift 𝓤 Y ≃ X
+          ϕ e = (lift-≃ 𝓤 Y) ● e
+          ψ : lift 𝓤 Y ≃ X → Y ≃ X
+          ψ e = (≃-sym (lift-≃ 𝓤 Y)) ● e
+          ψϕ : (e : Y ≃ X) → ψ (ϕ e) ≡ e
+          ψϕ e = ψ (ϕ e)                                   ≡⟨ refl ⟩
+                 (≃-sym (lift-≃ 𝓤 Y)) ● ((lift-≃ 𝓤 Y) ● e) ≡⟨ i' ⟩
+                 ≃-sym (lift-≃ 𝓤 Y) ● lift-≃ 𝓤 Y ● e       ≡⟨ ii' ⟩
+                 ≃-refl Y ● e                              ≡⟨ ≃-refl-left fe e ⟩
+                 e                                         ∎
+           where
+            i'  = ≃-assoc fe (≃-sym (lift-≃ 𝓤 Y)) (lift-≃ 𝓤 Y) e
+            ii' = ap (λ - → - ● e) (≃-sym-left-inverse fe (lift-≃ 𝓤 Y))
+          ϕψ : (e : lift 𝓤 Y ≃ X) → ϕ (ψ e) ≡ e
+          ϕψ e = ϕ (ψ e)                                 ≡⟨ refl ⟩
+                 lift-≃ 𝓤 Y ● ((≃-sym (lift-≃ 𝓤 Y)) ● e) ≡⟨ i' ⟩
+                 (lift-≃ 𝓤 Y ● ≃-sym (lift-≃ 𝓤 Y)) ● e   ≡⟨ ii' ⟩
+                 ≃-refl (lift 𝓤 Y) ● e                   ≡⟨ ≃-refl-left fe e ⟩
+                 e                                       ∎
+           where
+            i'  = ≃-assoc fe (lift-≃ 𝓤 Y) (≃-sym (lift-≃ 𝓤 Y)) e
+            ii' = ap (λ - → - ● e) (≃-sym-right-inverse fe (lift-≃ 𝓤 Y))
+
+ module _ (Y : 𝓤 ⊔ 𝓥 ̇ ) where
+
+  open import UF-Classifiers
+  open general-classifier {𝓤 ⊔ 𝓥} {𝓤 ⊔ 𝓥 ⁺} (fe _ _) (fe _ _)
+                          ua Y (λ X → X has-size 𝓥)
+
+  has-size-classifier-simplified : (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , Σ f ꞉ (X → Y) , f has-size₁ 𝓥)
+                                 ≃ (Y → 𝓥 ̇)
+  has-size-classifier-simplified =
+   (Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , Σ f ꞉ (X → Y) , f has-size₁ 𝓥) ≃⟨ classification-equivalence ⟩
+   (Y → Σ X ꞉ 𝓤 ⊔ 𝓥 ̇ , X has-size 𝓥)              ≃⟨ h ⟩
+   (Y → 𝓥 ̇)                                       ■
+    where
+     h = →cong (fe _ _) (fe _ _) (≃-refl Y) Σ-small-types-≃-small-universe
 
 \end{code}
 
@@ -538,7 +614,6 @@ module _
  Image-resizing-domain⁺ : 𝓤ω
  Image-resizing-domain⁺ = {𝓤 𝓥 : Universe} → image-resizing-domain⁺ 𝓤 𝓥
 -}
-
 
 
 \end{code}

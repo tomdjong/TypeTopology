@@ -109,6 +109,8 @@ composite-has-size₁ {𝓤} {𝓥} {𝓦} {𝓣} {X} {Y} {Z} {f} {g} s t z =
 
 \begin{code}
 
+{-
+
 module _
         {𝓤 𝓥 : Universe}
         (fe : funext 𝓤 (𝓥 ⁺ ⊔ 𝓤))
@@ -228,6 +230,12 @@ Propositional-resizing-implies-Embedding-resizing : Propositional-resizing
 Propositional-resizing-implies-Embedding-resizing Pr X Y f e y =
  Pr (fiber f y) (e y)
 
+\end{code}
+
+\begin{code}
+
+-}
+
 fiber-of-section-to-a-set : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
                           → is-set Y
                           → (s : X → Y)
@@ -323,6 +331,49 @@ module _ (pt : propositional-truncations-exist) where
 \end{code}
 
 \begin{code}
+
+module _
+        {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {W : 𝓤' ̇ } {Z : 𝓥' ̇ }
+        (pt : propositional-truncations-exist)
+       where
+
+ open PropositionalTruncation pt
+
+ map-retract-into-a-set-has-size₁ : {f : X → Y} {g : W → Z}
+                                  → (r : f ◁₁ g)
+                                  → is-embedding (section (domains-retract r))
+                                  → is-embedding (section (codomains-retract r))
+                                  → g has-size₁ 𝓦
+                                  → f has-size₁ 𝓦
+ map-retract-into-a-set-has-size₁ {𝓦} {f} {g} (r₁ , r₂ , c , d) δ ε ghs y =
+  {!!}
+   where
+    s : X → W
+    s = section r₁
+    r : W → X
+    r = retraction r₁
+    u : Y → Z
+    u = section r₂
+    v : Z → Y
+    v = retraction r₂
+    a : (x : X) → r (s x) ≡ x
+    a = retract-condition r₁
+    b : (y : Y) → v (u y) ≡ y
+    b = retract-condition r₂
+    i : fiber f y ≃ (Σ x ꞉ X , u (f x) ≡ u y)
+    i = Σ-cong (λ (x : X) → (ap u) , (embedding-embedding' u ε (f x) y))
+    ii : (Σ x ꞉ X , u (f x) ≡ u y) ≃ (Σ x ꞉ X , g (s x) ≡ u y)
+    ii = ∼-fiber-≃ c (u y)
+    iii : (Σ x ꞉ X , g (s x) ≡ u y) ≃ (Σ ϕ ꞉ (fiber g (u y)) , fiber s (pr₁ ϕ))
+    iii = fiber-of-composite s g (u y)
+    iv : (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ)) ≃ (Σ ϕ ꞉ (fiber g (u y)) , ∥ s (r (pr₁ ϕ)) ≡ pr₁ ϕ ∥)
+    iv = Σ-cong (λ ϕ → fiber-of-section-embedding pt s ((r , retract-condition r₁)) δ (pr₁ ϕ))
+
+\end{code}
+
+\begin{code}
+
+{-
 
 subtype-resizing : (𝓤 𝓥 : Universe) → 𝓤 ⁺ ⊔ (𝓥 ⁺) ̇
 subtype-resizing 𝓤 𝓥 = (X : 𝓤 ̇ ) (P : X → 𝓥 ̇ )
@@ -531,6 +582,9 @@ module _
                where
                 i = ap (λ - → - ∘ α)
                     (dfunext fe' (inverse-is-retraction ⌜ e ⌝ (⌜⌝-is-equiv e)))
+
+-}
+
 
 {-
  Quotient-resizing-gives-Set-truncation : Quotient-resizing → (X : 𝓤 ̇ )

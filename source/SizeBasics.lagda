@@ -364,10 +364,62 @@ module _
     i = Σ-cong (λ (x : X) → (ap u) , (embedding-embedding' u ε (f x) y))
     ii : (Σ x ꞉ X , u (f x) ≡ u y) ≃ (Σ x ꞉ X , g (s x) ≡ u y)
     ii = ∼-fiber-≃ c (u y)
-    iii : (Σ x ꞉ X , g (s x) ≡ u y) ≃ (Σ ϕ ꞉ (fiber g (u y)) , fiber s (pr₁ ϕ))
+    iii : (Σ x ꞉ X , g (s x) ≡ u y) ≃ (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ))
     iii = fiber-of-composite s g (u y)
-    iv : (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ)) ≃ (Σ ϕ ꞉ (fiber g (u y)) , ∥ s (r (pr₁ ϕ)) ≡ pr₁ ϕ ∥)
-    iv = Σ-cong (λ ϕ → fiber-of-section-embedding pt s ((r , retract-condition r₁)) δ (pr₁ ϕ))
+
+    σ' : (Σ x ꞉ X , g (s x) ≡ u y) → fiber g (u y)
+    σ' (x , p) = s x , p
+
+    ρ' : fiber g (u y) → (Σ x ꞉ X , g (s x) ≡ u y)
+    ρ' (w , q) = r w , p
+     where
+      p = g (s (r w)) ≡⟨ (c (r w)) ⁻¹ ⟩
+          u (f (r w)) ≡⟨ ap u (((d w) ⁻¹) ∙ ((ap v q) ∙ (b y))) ⟩
+          u y         ∎
+      {-
+          u (f (r w)) ≡⟨ ap u ((d w) ⁻¹) ⟩
+          u (v (g w)) ≡⟨ ap (u ∘ v) q ⟩
+          u (v (u y)) ≡⟨ ap u (b y) ⟩
+          u y         ∎
+       -}
+
+    𝓇 : (Σ x ꞉ X , g (s x) ≡ u y) ◁ fiber g (u y)
+    𝓇 = ρ' , (σ' , 𝒽)
+     where
+      𝒽 : (k : (Σ x ꞉ X , g (s x) ≡ u y)) → ρ' (σ' k) ≡ k
+      𝒽 (x , p) = to-Σ-≡ ((a x) , h)
+       where
+        h : transport (λ x' → g (s x') ≡ u y) (a x)
+              ((c (r (s x))) ⁻¹ ∙ ap u (((d (s x)) ⁻¹) ∙ ((ap v p) ∙ (b y))))
+              -- (((c (r (s x))) ⁻¹) ∙ ((ap u ((d (s x)) ⁻¹)) ∙ ((ap (u ∘ v) p) ∙ (ap u (b y)))))
+          ≡ p
+        h = transport (λ x' → g (s x') ≡ u y) (a x)
+              ((c (r (s x))) ⁻¹ ∙ ap u (((d (s x)) ⁻¹) ∙ ((ap v p) ∙ (b y)))) ≡⟨ {!!} ⟩
+            ap (g ∘ s) ((a x) ⁻¹) ∙ ((c (r (s x))) ⁻¹ ∙ ap u (((d (s x)) ⁻¹) ∙ ((ap v p) ∙ (b y)))) ≡⟨ ap (λ - → - ∙ _) ((ap-sym (g ∘ s) (a x)) ⁻¹) ⟩
+            (ap (g ∘ s) ((a x))) ⁻¹ ∙ ((c (r (s x))) ⁻¹ ∙ ap u (((d (s x)) ⁻¹) ∙ ((ap v p) ∙ (b y)))) ≡⟨ ∙assoc {!!} {!!} {!!} ⟩
+            (ap (g ∘ s) ((a x))) ⁻¹ ∙ (c (r (s x))) ⁻¹ ∙ (ap u (((d (s x)) ⁻¹) ∙ ((ap v p) ∙ (b y)))) ≡⟨ ap (λ - → - ∙ _) (⁻¹-contravariant (c (r (s x))) _) ⟩
+            ((c (r (s x)) ∙ ap (g ∘ s) (a x)) ⁻¹) ∙ _ ≡⟨ ap (λ - → - ⁻¹ ∙ _) (homotopies-are-natural (u ∘ f) (g ∘ s) c) ⟩
+            (ap (u ∘ f) (a x) ∙ c x) ⁻¹ ∙ {!!}    ≡⟨ {!!} ⟩
+            p ∎
+
+    {-
+    σ' : (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ)) → fiber g (u y)
+    σ' = pr₁
+    ρ' : fiber g (u y) → (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ))
+    ρ' (w , q) = ⌜ iii ⌝ ((r w) , p)
+     where-
+      p = g (s (r w)) ≡⟨ (c (r w)) ⁻¹ ⟩
+          u (f (r w)) ≡⟨ ap u (d w) ⁻¹ ⟩
+          u (v (g w)) ≡⟨ ap (u ∘ v) q ⟩
+          u (v (u y)) ≡⟨ ap u (b y) ⟩
+          u y         ∎
+    𝓇 : (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ)) ◁ fiber g (u y)
+    𝓇 = ρ' , (σ' , ρ'σ')
+     where
+      ρ'σ' : (k : (Σ ϕ ꞉ (fiber g (u y)) , fiber s (fiber-point g (u y) ϕ)))
+           → ρ' (σ' k) ≡ k
+      ρ'σ' ((w , q) , (x , p)) = to-subtype-≡ {!!} (to-Σ-≡ ({!!} , {!!}))
+    -}
 
 \end{code}
 

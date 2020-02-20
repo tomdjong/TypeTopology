@@ -217,12 +217,18 @@ module _
  transport-equiv : {X : 𝓤 ̇ } {X' Y : 𝓤 ⊔ 𝓥 ̇ } (e' : X' ≃ Y) (e : X' ≃ X)
                  → transport (λ - → - ≃ X) (eqtoid ua X' Y e') e
                  ≡ ≃-sym e' ● e
- transport-equiv {X} {X'} {Y} e' e = {!τ!}
+ transport-equiv {X} {X'} {Y} e' e = τ (eqtoid ua X' Y e') refl
   where
    τ : (p : X' ≡ Y)
      → p ≡ eqtoid ua X' Y e'
      → transport (λ - → - ≃ X) p e ≡ ≃-sym e' ● e
-   τ refl q = {!!}
+   τ refl q = γ
+    where
+     γ : e ≡ ≃-sym e' ● e
+     γ = to-subtype-≡ (λ f → being-equiv-is-a-prop fe f) g
+      where
+       g : ⌜ e ⌝ ≡ ⌜ ? ⌝
+       g = {!!}
 
  -- This should have a better name?
  resizing-up-does-nothing : (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) ≃ 𝓤 ̇

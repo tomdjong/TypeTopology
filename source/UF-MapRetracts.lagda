@@ -103,8 +103,8 @@ the data of the map retract.
         where
 
   map-retract-gives-fiber-retract' : is-embedding v
-                                   → ((x : X) → ap f (a x) ⁻¹ ∙ d (s x)
-                                                ≡ (b (f x)) ⁻¹ ∙ ap u ((c x) ⁻¹))
+                                   → ((x : X) → ap f (a x ⁻¹) ∙ d (s x)
+                                                ≡ b (f x) ⁻¹ ∙ ap u (c x ⁻¹))
                                    → (y : Y)
                                    → fiber f y
                                    ◁ fiber g (v y)
@@ -154,11 +154,11 @@ the data of the map retract.
          IV  = ∙assoc (c x) (ap (v ∘ f) (a x ⁻¹)) p₁
          V   = (∙assoc (c x) (c x ⁻¹) p) ⁻¹
          VI  = ap (λ - → - ∙ p) ((right-inverse (c x)) ⁻¹)
-         ℏ = ap (v ∘ f) (a x ⁻¹) ∙ p₁       ≡⟨ ap (λ - → - ∙ p₁) ((ap-ap f v (a x ⁻¹)) ⁻¹) ⟩
+         ℏ = ap (v ∘ f) (a x ⁻¹) ∙ p₁       ≡⟨ I' ⟩
              ap v (ap f (a x ⁻¹)) ∙ p₁      ≡⟨ by-definition ⟩
              ap v (ap f (a x ⁻¹)) ∙ ap v p₂ ≡⟨ (ap-∙ v (ap f (a x ⁻¹)) p₂) ⁻¹ ⟩
              ap v (ap f (a x ⁻¹) ∙ p₂)      ≡⟨ ap (ap v) h ⟩
-             ap v q                         ≡⟨ inverse-is-section (ap v) ε' (c x ⁻¹ ∙ p) ⟩
+             ap v q                         ≡⟨ II' ⟩
              c x ⁻¹ ∙ p                     ∎
           where
            ε' : is-equiv (ap v {f x} {y})
@@ -166,7 +166,20 @@ the data of the map retract.
            q : f x ≡ y
            q = back-eqtofun ((ap v) , ε')
                ((c x ⁻¹) ∙ p)
+           I'  = ap (λ - → - ∙ p₁) ((ap-ap f v (a x ⁻¹)) ⁻¹)
+           II' = inverse-is-section (ap v) ε' (c x ⁻¹ ∙ p)
            h : ap f (a x ⁻¹) ∙ p₂ ≡ q
-           h = {!!}
+           h = ap f (a x ⁻¹) ∙ p₂ ≡⟨ by-definition ⟩
+               ap f (a x ⁻¹) ∙ (d (s x) ∙ (ap u p ∙ b y)) ≡⟨ (∙assoc (ap f (a x ⁻¹)) (d (s x)) (ap u p ∙ b y)) ⁻¹ ⟩
+               ap f (a x ⁻¹) ∙ d (s x) ∙ (ap u p ∙ b y) ≡⟨ ap (λ - → - ∙ (ap u p ∙ b y)) (coh x) ⟩
+               b (f x) ⁻¹ ∙ ap u (c x ⁻¹) ∙ (ap u p ∙ b y) ≡⟨ ∙assoc (b (f x) ⁻¹) (ap u (c x ⁻¹)) (ap u p ∙ b y) ⟩
+               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹) ∙ (ap u p ∙ b y)) ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ -) ((∙assoc (ap u (c x ⁻¹)) (ap u p) (b y)) ⁻¹) ⟩
+               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹) ∙ ap u p ∙ b y) ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ (- ∙ b y)) ((ap-∙ u (c x ⁻¹) p) ⁻¹) ⟩
+               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹ ∙ p) ∙ b y) ≡⟨ (∙assoc (b (f x) ⁻¹) (ap u (c x ⁻¹ ∙ p)) (b y)) ⁻¹ ⟩
+               b (f x) ⁻¹ ∙ ap u (c x ⁻¹ ∙ p) ∙ b y ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ ap u - ∙ b y) (II' ⁻¹) ⟩
+               b (f x) ⁻¹ ∙ ap u (ap v q) ∙ b y ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ - ∙ b y) (ap-ap v u q) ⟩
+               b (f x) ⁻¹ ∙ ap (u ∘ v) q ∙ b y ≡⟨ homotopies-are-natural'' (u ∘ v) id b {f x} {y} {q}⟩
+               ap id q ≡⟨ (ap-id-is-id q) ⁻¹ ⟩
+               q ∎
 
 \end{code}

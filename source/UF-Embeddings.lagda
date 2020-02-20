@@ -431,6 +431,8 @@ embedding-into-prop i (f , e) x y = d
    d : x ≡ y
    d = inverse a b c
 
+\end{code}
+
 \begin{code}
 
 infix  0 _↪_

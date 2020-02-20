@@ -168,18 +168,29 @@ the data of the map retract.
                ((c x ⁻¹) ∙ p)
            I'  = ap (λ - → - ∙ p₁) ((ap-ap f v (a x ⁻¹)) ⁻¹)
            II' = inverse-is-section (ap v) ε' (c x ⁻¹ ∙ p)
-           h : ap f (a x ⁻¹) ∙ p₂ ≡ q
-           h = ap f (a x ⁻¹) ∙ p₂ ≡⟨ by-definition ⟩
-               ap f (a x ⁻¹) ∙ (d (s x) ∙ (ap u p ∙ b y)) ≡⟨ (∙assoc (ap f (a x ⁻¹)) (d (s x)) (ap u p ∙ b y)) ⁻¹ ⟩
-               ap f (a x ⁻¹) ∙ d (s x) ∙ (ap u p ∙ b y) ≡⟨ ap (λ - → - ∙ (ap u p ∙ b y)) (coh x) ⟩
-               b (f x) ⁻¹ ∙ ap u (c x ⁻¹) ∙ (ap u p ∙ b y) ≡⟨ ∙assoc (b (f x) ⁻¹) (ap u (c x ⁻¹)) (ap u p ∙ b y) ⟩
-               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹) ∙ (ap u p ∙ b y)) ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ -) ((∙assoc (ap u (c x ⁻¹)) (ap u p) (b y)) ⁻¹) ⟩
-               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹) ∙ ap u p ∙ b y) ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ (- ∙ b y)) ((ap-∙ u (c x ⁻¹) p) ⁻¹) ⟩
-               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹ ∙ p) ∙ b y) ≡⟨ (∙assoc (b (f x) ⁻¹) (ap u (c x ⁻¹ ∙ p)) (b y)) ⁻¹ ⟩
-               b (f x) ⁻¹ ∙ ap u (c x ⁻¹ ∙ p) ∙ b y ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ ap u - ∙ b y) (II' ⁻¹) ⟩
-               b (f x) ⁻¹ ∙ ap u (ap v q) ∙ b y ≡⟨ ap (λ - → b (f x) ⁻¹ ∙ - ∙ b y) (ap-ap v u q) ⟩
-               b (f x) ⁻¹ ∙ ap (u ∘ v) q ∙ b y ≡⟨ homotopies-are-natural'' (u ∘ v) id b {f x} {y} {q}⟩
-               ap id q ≡⟨ (ap-id-is-id q) ⁻¹ ⟩
-               q ∎
+           h = ap f (a x ⁻¹) ∙ p₂                            ≡⟨ by-definition ⟩
+               ap f (a x ⁻¹) ∙ (d (s x) ∙ (ap u p ∙ b y))    ≡⟨ I₂ ⟩
+               ap f (a x ⁻¹) ∙ d (s x) ∙ (ap u p ∙ b y)      ≡⟨ II₂ ⟩
+               b (f x) ⁻¹ ∙ ap u (c x ⁻¹) ∙ (ap u p ∙ b y)   ≡⟨ III₂ ⟩
+               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹) ∙ (ap u p ∙ b y)) ≡⟨ IV₂ ⟩
+               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹) ∙ ap u p ∙ b y)   ≡⟨ V₂ ⟩
+               b (f x) ⁻¹ ∙ (ap u (c x ⁻¹ ∙ p) ∙ b y)        ≡⟨ VI₂ ⟩
+               b (f x) ⁻¹ ∙ ap u (c x ⁻¹ ∙ p) ∙ b y          ≡⟨ VII₂ ⟩
+               b (f x) ⁻¹ ∙ ap u (ap v q) ∙ b y              ≡⟨ VIII₂ ⟩
+               b (f x) ⁻¹ ∙ ap (u ∘ v) q ∙ b y               ≡⟨ IX₂ ⟩
+               ap id q                                       ≡⟨ X₂ ⟩
+               q                                             ∎
+            where
+             I₂    = (∙assoc (ap f (a x ⁻¹)) (d (s x)) (ap u p ∙ b y)) ⁻¹
+             II₂   = ap (λ - → - ∙ (ap u p ∙ b y)) (coh x)
+             III₂  = ∙assoc (b (f x) ⁻¹) (ap u (c x ⁻¹)) (ap u p ∙ b y)
+             IV₂   = ap (λ - → b (f x) ⁻¹ ∙ -)
+                     ((∙assoc (ap u (c x ⁻¹)) (ap u p) (b y)) ⁻¹)
+             V₂    = ap (λ - → b (f x) ⁻¹ ∙ (- ∙ b y)) ((ap-∙ u (c x ⁻¹) p) ⁻¹)
+             VI₂   = (∙assoc (b (f x) ⁻¹) (ap u (c x ⁻¹ ∙ p)) (b y)) ⁻¹
+             VII₂  = ap (λ - → b (f x) ⁻¹ ∙ ap u - ∙ b y) (II' ⁻¹)
+             VIII₂ = ap (λ - → b (f x) ⁻¹ ∙ - ∙ b y) (ap-ap v u q)
+             IX₂   = homotopies-are-natural'' (u ∘ v) id b {f x} {y} {q}
+             X₂    = (ap-id-is-id q) ⁻¹
 
 \end{code}

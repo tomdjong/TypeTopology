@@ -119,13 +119,13 @@ is a subsingleton for every y.
 
 \begin{code}
 
-econstruction' : {X : 𝓤 ̇ } {P : 𝓥 ̇ } (z : P → X) (s : X → X)
+econstruction' : {X : 𝓤 ̇ } (P : 𝓥 ̇ ) (z : P → X) (s : X → X)
                → is-prop P
                → ((p : P) → is-h-isolated (z p))
                → disjoint-images z s
                → is-embedding s
                → (X ↪ P + X) × (P + X ↪ X)
-econstruction' {𝓤} {𝓥} {X} {P} z s i h d e = ((f , j) , (g , k))
+econstruction' {𝓤} {𝓥} {X} P z s i h d e = ((f , j) , (g , k))
  where
   f : X → P + X
   f = inr
@@ -150,14 +150,14 @@ Hedberg's Theorem, every isolated point is h-isolated.
 
 \begin{code}
 
-econstruction : {X : 𝓤 ̇ } {P : 𝓥 ̇ } (x₀ : X) (s : X → X)
+econstruction : {X : 𝓤 ̇ } (P : 𝓥 ̇ ) (x₀ : X) (s : X → X)
               → is-set X
               → is-prop P
               → is-isolated x₀
               → ((x : X) → x₀ ≢ s x)
               → left-cancellable s
               → (X ↪ P + X) × (P + X ↪ X)
-econstruction {𝓤} {𝓥} {X} {P} x₀ s j i k d' lc = econstruction' z s i h d e
+econstruction {𝓤} {𝓥} {X} P x₀ s j i k d' lc = econstruction' P z s i h d e
  where
   z : P → X
   z p = x₀
@@ -179,9 +179,9 @@ is a set, (2) its finite elements (in particular zero) are isolated,
 
 \begin{code}
 
-econstruction-ℕ∞ : funext 𝓤₀ 𝓤₀ → {P : 𝓤 ̇ } → is-prop P → (ℕ∞ ↪ P + ℕ∞) × (P + ℕ∞ ↪ ℕ∞)
-econstruction-ℕ∞ fe i = econstruction Zero Succ
-                         (ℕ∞-is-set fe) i (finite-isolated fe zero) (x ↦ Zero-not-Succ) Succ-lc
+econstruction-ℕ∞ : funext 𝓤₀ 𝓤₀ → (P : 𝓤 ̇ ) → is-prop P → (ℕ∞ ↪ P + ℕ∞) × (P + ℕ∞ ↪ ℕ∞)
+econstruction-ℕ∞ fe P i = econstruction P Zero Succ
+                           (ℕ∞-is-set fe) i (finite-isolated fe zero) (x ↦ Zero-not-Succ) Succ-lc
 
 CSB-gives-EM : funext 𝓤₀ 𝓤₀
              → (P : 𝓤 ̇ )
@@ -191,7 +191,7 @@ CSB-gives-EM : funext 𝓤₀ 𝓤₀
 CSB-gives-EM fe P i csb = γ
  where
   e : ℕ∞ ≃ P + ℕ∞
-  e = csb (econstruction-ℕ∞ fe i)
+  e = csb (econstruction-ℕ∞ fe P i)
 
   ρ : retract (P + ℕ∞) of ℕ∞
   ρ = equiv-retract-r e
@@ -238,7 +238,7 @@ module wCSB-still-gives-EM (pt : propositional-truncations-exist) where
  wCantorSchröderBernstein-gives-EM fe₀ fe w P i = γ
   where
    s : ∥ ℕ∞ ≃ P + ℕ∞ ∥
-   s = w (econstruction-ℕ∞ fe₀ i)
+   s = w (econstruction-ℕ∞ fe₀ P i)
 
    t : ℕ∞ ≃ P + ℕ∞ → P + ¬ P
    t e = Pradic-Brown-lemma (equiv-retract-r e) (ℕ∞-Compact fe₀)
@@ -272,8 +272,8 @@ post
 
   https://homotopytypetheory.org/2020/01/26/the-cantor-schroder-bernstein-theorem-for-∞-groupoids/
 
-first. However, we have tried to make the proof understandable as we
-can here, and hopefully it should be possible to read it without
+first. However, we have tried to make the proof as understandable as
+we can here, and hopefully it should be possible to read it without
 reference to the blog post.
 
 \begin{code}
@@ -625,6 +625,74 @@ EM-gives-CantorSchröderBernstein₀ fe = EM-gives-CantorSchröderBernstein fe f
 
 \end{code}
 
+If the type X in the proof is connected, then every map of X into a
+set is constant. In particular, the property of being a g-point is
+constant, because the type of truth values is a set (assuming
+univalence for subsingletons). Hence, by excluded middle, it is
+constantly true or constantly false, and so h = g⁻¹ or h = f, which
+means that one of the embeddings f and g is already an equivalence.
+
+Mike Shulman observed that this is true even without excluded middle:
+If X is connected and we have an embedding g : Y → X and any function
+at all f : X → Y, then g is an equivalence. In fact, for any x : X, we
+have ∥ g(f(x)) = x ∥ since X is connected; thus g is (non-split)
+surjective. But a surjective embedding is an equivalence.
+
+\begin{code}
+
+module CSB-for-connected-types-without-EM (pt : propositional-truncations-exist) where
+
+ open PropositionalTruncation pt public
+ open import UF-Connected pt
+ open import UF-ImageAndSurjection
+ open ImageAndSurjection pt
+
+\end{code}
+
+We say that X is weakly connected if ∥ x ≡ x' ∥ for all x and x' in X,
+and that it is connected if additionally ∥ X ∥ is pointed.
+
+\begin{code}
+
+ lemma : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) (g : Y → X)
+       → is-wconnected X → is-embedding g → is-equiv g
+ lemma f g w e = surjective-embeddings-are-equivs g e s
+  where
+   a : ∀ x → ∥ g(f(x)) ≡ x ∥
+   a x = w (g (f x)) x
+   s : is-surjection g
+   s x = ∥∥-functor (λ p → (f x , p)) (a x)
+
+ cCSB : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → is-wconnected Y → CSB X Y
+ cCSB  {𝓤} {𝓥} {X} {Y} w ((f , i) , (g , _)) = γ
+  where
+   γ : X ≃ Y
+   γ = f , lemma g f w i
+
+\end{code}
+
+Of course, we can instead assume that X is wconnected:
+
+\begin{code}
+
+ cCSB' : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → is-wconnected X → CSB X Y
+ cCSB' w e = ≃-sym (cCSB w (pr₂ e , pr₁ e))
+
+\end{code}
+
+Another direct corollary is that weakly connected types are Dedekind
+finite:
+
+\begin{code}
+
+ wconnected-types-are-Dedekind-finite : {X : 𝓤 ̇ }
+                                      → is-wconnected X
+                                      → (f : X → X) → is-embedding f → is-equiv f
+ wconnected-types-are-Dedekind-finite w f = lemma f f w
+
+\end{code}
+
+
 
 APPENDIX I
 ----------
@@ -792,13 +860,13 @@ See
 https://www.sciencedirect.com/science/article/pii/S0019357718303276
 for BKS⁺ (strong Brouwer-Kripke Schema) and the fact that together
 with Markov Principle it implies excluded middle (attributed to
-Moschovakis). The terminology "rosolini-data" is in connection with
+Moschovakis). The terminology "Rosolini-data" is in connection with
 the Rosolini dominance from synthetic domain theory and topology.
 
 \begin{code}
 
-rosolini-data : 𝓤 ̇ → 𝓤 ⁺ ̇
-rosolini-data {𝓤} P = Σ A ꞉ (ℕ → 𝓤 ̇ ) , ((n : ℕ) → decidable (A n))
+Rosolini-data : 𝓤 ̇ → 𝓤 ⁺ ̇
+Rosolini-data {𝓤} P = Σ A ꞉ (ℕ → 𝓤 ̇ ) , ((n : ℕ) → decidable (A n))
                                       × is-prop (Σ A)
                                       × (P ⇔ Σ A)
 
@@ -808,19 +876,21 @@ Notice this is data on P rather than property of P because multiple
 A's apply to the same P, when P holds.
 
 Notice also that we don't need to require that each A n is a
-proposition, as this is automatic:
+proposition, as this is automatic because ℕ is a set:
 
 \begin{code}
 
-is-prop-total-gives-is-prop-each : (A : ℕ → 𝓤 ̇ ) → is-prop (Σ A) → (n : ℕ) → is-prop (A n)
-is-prop-total-gives-is-prop-each A i n a a' = t
+is-prop-total-gives-is-prop-each : {X : 𝓤 ̇} (A : X → 𝓥 ̇ )
+                                 → is-set X
+                                 → is-prop (Σ A) → (x : X) → is-prop (A x)
+is-prop-total-gives-is-prop-each A j i x a a' = t
  where
-  q : (n , a) ≡ (n , a')
-  q = i (n , a) (n , a')
+  q : (x , a) ≡ (x , a')
+  q = i (x , a) (x , a')
 
-  t = a                        ≡⟨ by-definition                                       ⟩
-      transport A refl       a ≡⟨ ap (- ↦ transport A - a) (ℕ-is-set refl (ap pr₁ q)) ⟩
-      transport A (ap pr₁ q) a ≡⟨ from-Σ-≡' q                                         ⟩
+  t = a                        ≡⟨ by-definition                                ⟩
+      transport A refl       a ≡⟨ ap (- ↦ transport A - a) (j refl (ap pr₁ q)) ⟩
+      transport A (ap pr₁ q) a ≡⟨ from-Σ-≡' q                                  ⟩
       a'                       ∎
 
 \end{code}
@@ -831,7 +901,7 @@ is data-valued rather than propositionally valued.
 \begin{code}
 
 dBKS⁺ : (𝓤 : Universe) → 𝓤 ⁺ ̇
-dBKS⁺ 𝓤 = (P : 𝓤 ̇ ) → is-prop P → rosolini-data P
+dBKS⁺ 𝓤 = (P : 𝓤 ̇ ) → is-prop P → Rosolini-data P
 
 \end{code}
 
@@ -886,12 +956,12 @@ We now show that CSB for discrete types gives dBKS⁺:
 
 \begin{code}
 
-blemma : {P : 𝓤 ̇ } {X : 𝓥 ̇ }
+blemma : (P : 𝓤 ̇ ) {X : 𝓥 ̇ }
        → is-set X
        → is-prop P
        → X ≃ P + X
        → Σ A ꞉ (X → 𝓤 ⊔ 𝓥 ̇ ) , ((x : X) → decidable (A x)) × is-prop (Σ A) × (P ⇔ Σ A)
-blemma {𝓤} {𝓥 } {P} {X} j i (f , (s , η) , (r , ε)) = A , d , k , (φ , γ)
+blemma {𝓤} {𝓥 } P {X} j i (f , (s , η) , (r , ε)) = A , d , l , (φ , γ)
  where
   A : X → 𝓤 ⊔ 𝓥 ̇
   A x = Σ p ꞉ P , f x ≡ inl p
@@ -903,8 +973,11 @@ blemma {𝓤} {𝓥 } {P} {X} j i (f , (s , η) , (r , ε)) = A , d , k , (φ , 
                                                                     f x   ≡⟨ v    ⟩
                                                                     inr y ∎)))
 
-  k : is-prop (Σ A)
-  k (x , p , u) (x' , p' , u') = t
+  k : (x : X) → is-prop (A x)
+  k x = Σ-is-prop i (λ p → +-is-set P X (props-are-sets i) j)
+
+  l : is-prop (Σ A)
+  l (x , p , u) (x' , p' , u') = t
    where
     q : x ≡ x'
     q = equivs-are-lc f ((s , η) , (r , ε)) (f x    ≡⟨ u               ⟩
@@ -913,7 +986,7 @@ blemma {𝓤} {𝓥 } {P} {X} j i (f , (s , η) , (r , ε)) = A , d , k , (φ , 
                                              f x'   ∎)
 
     t : x , p , u ≡ x' , p' , u'
-    t = to-Σ-≡ (q , to-Σ-≡ (i _ p' , +-is-set P X (props-are-sets i) j _ u'))
+    t = to-subtype-≡ k q
 
   φ : P → Σ A
   φ p = s (inl p) , p , η (inl p)
@@ -921,35 +994,35 @@ blemma {𝓤} {𝓥 } {P} {X} j i (f , (s , η) , (r , ε)) = A , d , k , (φ , 
   γ : Σ A → P
   γ (x , p , u) = p
 
-rlemma : {P : 𝓤 ̇ }
+rlemma : (P : 𝓤 ̇ )
        → is-prop P
        → ℕ ≃ P + ℕ
-       → rosolini-data P
-rlemma = blemma ℕ-is-set
+       → Rosolini-data P
+rlemma P = blemma P ℕ-is-set
 
 discrete-CantorSchröderBernstein : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
 discrete-CantorSchröderBernstein 𝓤 𝓥 = {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → is-discrete X → is-discrete Y → CSB X Y
 
-econstruction-ℕ : {P : 𝓤 ̇ } → is-prop P → (ℕ ↪ P + ℕ) × (P + ℕ ↪ ℕ)
-econstruction-ℕ i = econstruction zero succ
-                     ℕ-is-set i
-                     (ℕ-is-discrete zero)
-                     (λ (x : ℕ) (p : zero ≡ succ x) → positive-not-zero x (p ⁻¹))
-                     succ-lc
+econstruction-ℕ : (P : 𝓤 ̇ ) → is-prop P → (ℕ ↪ P + ℕ) × (P + ℕ ↪ ℕ)
+econstruction-ℕ P i = econstruction P zero succ
+                       ℕ-is-set i
+                       (ℕ-is-discrete zero)
+                       (λ (x : ℕ) (p : zero ≡ succ x) → positive-not-zero x (p ⁻¹))
+                       succ-lc
 
-dlemma : {P : 𝓥 ̇ }
+dlemma : (P : 𝓥 ̇ )
        → discrete-CantorSchröderBernstein 𝓤₀ 𝓥
        → is-prop P → ℕ ≃ P + ℕ
-dlemma csb i = csb ℕ-is-discrete (+discrete (props-are-discrete i) ℕ-is-discrete) (econstruction-ℕ i)
+dlemma P csb i = csb ℕ-is-discrete (+discrete (props-are-discrete i) ℕ-is-discrete) (econstruction-ℕ P i)
 
 discrete-CSB-gives-dBKS⁺ : discrete-CantorSchröderBernstein 𝓤₀ 𝓥 → dBKS⁺ 𝓥
 discrete-CSB-gives-dBKS⁺ csb P i = γ
  where
   e : ℕ ≃ P + ℕ
-  e = dlemma csb i
+  e = dlemma P csb i
 
-  γ : rosolini-data P
-  γ = rlemma i e
+  γ : Rosolini-data P
+  γ = rlemma P i e
 
 \end{code}
 
@@ -971,8 +1044,8 @@ can't hold, for if it did we would have p : P, and hence P=𝟙 by
 propositional extensionality, and the equivalence would have to map n
 to inl p, which is different from the value inr k of the equivalence
 at n. In order to simplify the calculational details of the proof, we
-work with the type T of true propositions, which is (contractible and
-hence) a subsingleton by propositional extensionality.
+work with the type T of true propositions, which is contractible with
+center of contraction 𝟙.
 
 \begin{code}
 
@@ -980,31 +1053,25 @@ ulemma : funext 𝓤 𝓤
        → propext 𝓤
        → ((P : 𝓤 ̇ ) → is-prop P → ℕ ≃ P + ℕ)
        → EM 𝓤
-ulemma {𝓤} fe pe φ P i = γ
+ulemma {𝓤} fe pe φ = em
  where
   T : 𝓤 ⁺ ̇
-  T = Σ Q ꞉ 𝓤 ̇ , is-prop Q × Q
+  T = Σ P ꞉ 𝓤 ̇ , is-prop P × P
 
-  u : (Q : 𝓤 ̇ ) → is-prop (is-prop Q × Q)
-  u Q (j , q) = ×-is-prop (being-a-prop-is-a-prop fe) j (j , q)
-
-  v : is-prop T
-  v (Q , j , q) (Q' , j' , q') = to-subtype-≡ u s
-   where
-    s : Q ≡ Q'
-    s = pe j j' (λ _ → q') (λ _ → q)
+  c : (t : T) → (𝟙 , 𝟙-is-prop , *) ≡ t
+  c = 𝟙-is-true-props-center fe pe
 
   f : T → ℕ
-  f (Q , j , q) = ⌜ ≃-sym (φ Q j) ⌝ (inl q)
+  f (P , i , p) = ⌜ ≃-sym (φ P i) ⌝ (inl p)
 
   n : ℕ
   n = f (𝟙 , 𝟙-is-prop , *)
 
-  ν : (k : ℕ) → ⌜ φ P i ⌝ n ≡ inr k → ¬ P
-  ν k r p = +disjoint' b
+  ν : (P : 𝓤 ̇ ) (i : is-prop P) (k : ℕ) → ⌜ φ P i ⌝ n ≡ inr k → ¬ P
+  ν P i k r p = +disjoint' b
    where
     a : n ≡ f (P , i , p)
-    a = ap f (v _ _)
+    a = ap f (c (P , i , p))
 
     b = inr k                                 ≡⟨ r ⁻¹                          ⟩
         ⌜ φ P i ⌝ n                           ≡⟨ ap ⌜ φ P i ⌝ a                ⟩
@@ -1012,10 +1079,10 @@ ulemma {𝓤} fe pe φ P i = γ
         ⌜ φ P i ⌝ (⌜ ≃-sym (φ P i) ⌝ (inl p)) ≡⟨ ≃-sym-is-rinv (φ P i) (inl p) ⟩
         inl p                                 ∎
 
-  γ : P + ¬ P
-  γ = equality-cases (⌜ φ P i ⌝ n)
-       (λ (p : P) (l : ⌜ φ P i ⌝ n ≡ inl p) → inl p)
-       (λ (k : ℕ) (r : ⌜ φ P i ⌝ n ≡ inr k) → inr (ν k r))
+  em : (P : 𝓤 ̇ ) → is-prop P → P + ¬ P
+  em P i = equality-cases (⌜ φ P i ⌝ n)
+           (λ (p : P) (l : ⌜ φ P i ⌝ n ≡ inl p) → inl p)
+           (λ (k : ℕ) (r : ⌜ φ P i ⌝ n ≡ inr k) → inr (ν P i k r))
 
 discrete-CSB-gives-EM : funext 𝓥 𝓥
                       → propext 𝓥
@@ -1024,7 +1091,7 @@ discrete-CSB-gives-EM : funext 𝓥 𝓥
 discrete-CSB-gives-EM {𝓥} fe pe csb = ulemma fe pe φ
  where
   φ : (P : 𝓥 ̇ ) → is-prop P → ℕ ≃ P + ℕ
-  φ P = dlemma csb
+  φ P = dlemma P csb
 
 \end{code}
 
@@ -1080,23 +1147,23 @@ We now consider the propositional version of BKS⁺:
 
 \begin{code}
 
- is-rosolini : 𝓤 ̇ → 𝓤 ⁺ ̇
- is-rosolini P = ∥ rosolini-data P ∥
+ is-Rosolini : 𝓤 ̇ → 𝓤 ⁺ ̇
+ is-Rosolini P = ∥ Rosolini-data P ∥
 
  BKS⁺ : (𝓤 : Universe) → 𝓤 ⁺ ̇
- BKS⁺ 𝓤 = (P : 𝓤 ̇ ) → is-prop P → is-rosolini P
+ BKS⁺ 𝓤 = (P : 𝓤 ̇ ) → is-prop P → is-Rosolini P
 
  discrete-wCSB-gives-BKS⁺ : discrete-wCantorSchröderBernstein 𝓤₀ 𝓥 → BKS⁺ 𝓥
  discrete-wCSB-gives-BKS⁺ w P i = γ
   where
    s : ∥ ℕ ≃ P + ℕ ∥
-   s = w ℕ-is-discrete (+discrete (props-are-discrete i) ℕ-is-discrete) (econstruction-ℕ i)
+   s = w ℕ-is-discrete (+discrete (props-are-discrete i) ℕ-is-discrete) (econstruction-ℕ P i)
 
-   γ : is-rosolini P
-   γ = ∥∥-functor (rlemma i) s
+   γ : is-Rosolini P
+   γ = ∥∥-functor (rlemma P i) s
 
 \end{code}
 
 Notice that BKS⁺ also implies excluded middle in the presence of MP,
-because EM is a proposition (in any case, this was already proved by
+because EM is a proposition (in any case, this was already observed by
 Moschovakis, as discussed above).

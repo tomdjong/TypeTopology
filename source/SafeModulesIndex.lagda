@@ -5,7 +5,7 @@
 
    Tested with Agda 2.6.0.1.
 
-   Martin Escardo, 2010--
+   Martin Escardo, 2010--2020--∞
    Continuously evolving.
 
    https://github.com/martinescardo/TypeTopology
@@ -150,6 +150,7 @@ import UF
 import UF-Base
 import UF-Choice
 import UF-Classifiers
+import UF-Connected
 import UF-Embeddings
 import UF-EquivalenceExamples
 import UF-Equiv-FunExt

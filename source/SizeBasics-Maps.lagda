@@ -203,6 +203,77 @@ consider types of size 𝓤 ⊔ 𝓥. Then we should get:
 
 We leave this as a TODO for now.
 
+\begin{code}
+
+module _
+        {𝓤 𝓥 : Universe}
+        (fe : FunExt)
+        (ua : is-univalent (𝓤 ⊔ 𝓥))
+       where
+
+ open import UF-Equiv-FunExt
+ open import UF-UniverseEmbedding
+
+ -- This should have a better name.
+
+ transport-equiv : {X : 𝓤 ̇ } {X' Y : 𝓤 ⊔ 𝓥 ̇ } (e' : X' ≃ Y) (e : X' ≃ X)
+                 → transport (λ - → - ≃ X) (eqtoid ua X' Y e') e
+                 ≡ ≃-sym e' ● e
+ transport-equiv {X} {X'} {Y} e' e = {!τ!}
+  where
+   τ : (p : X' ≡ Y)
+     → p ≡ eqtoid ua X' Y e'
+     → transport (λ - → - ≃ X) p e ≡ ≃-sym e' ● e
+   τ refl q = {!!}
+
+ resizing-up-does-nothing : (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) ≃ 𝓤 ̇
+ resizing-up-does-nothing = qinveq f (g , gf , fg)
+  where
+   f : (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) → 𝓤 ̇
+   f = pr₁
+   g : 𝓤 ̇ → (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥))
+   g X = X , (resize-up {𝓤} {𝓥} X)
+   gf : (p : Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) → g (f p) ≡ p
+   gf (X , Y , e) = to-Σ-≡ (refl , γ)
+    where
+     γ : lift 𝓥 X , lift-≃ 𝓥 X ≡ Y , e
+     γ = to-Σ-≡ (eqtoid ua (lift 𝓥 X) Y χ ,
+          to-subtype-≡ (λ _ → being-equiv-is-a-prop fe _)
+          (dfunext (fe _ _) h))
+      where
+       χ = lift 𝓥 X ≃⟨ lift-≃ 𝓥 X ⟩
+           X         ≃⟨ ≃-sym e ⟩
+           Y         ■
+       h : (y : Y)
+         → ⌜ transport (λ - → - ≃ X) (eqtoid ua (lift 𝓥 X) Y χ)
+           (lift-≃ 𝓥 X) ⌝ y
+         ≡ pr₁ e y
+       h y = pr₁ (transport (λ - → - ≃ X) (eqtoid ua (lift 𝓥 X) Y χ) (lift-≃ 𝓥 X)) y ≡⟨ (happly (ap ⌜_⌝ (transport-equiv χ (lift-≃ 𝓥 X))) y) ⟩
+             ⌜ (≃-sym χ ● lift-≃ 𝓥 X) ⌝ y ≡⟨ {!!} ⟩
+             {!!} ≡⟨ {!!} ⟩
+             ⌜ e ⌝ y ∎
+   fg : (X : 𝓤 ̇ ) → f (g X) ≡ X
+   fg X = refl
+
+ module _ (Y : 𝓤 ̇ ) (ua' : is-univalent 𝓤) where
+
+  open import UF-Classifiers
+  open general-classifier {𝓤} {(𝓤 ⁺) ⊔ (𝓥 ⁺)} (fe _ _) (fe _ _)
+                          ua' Y (λ X → X has-size (𝓤 ⊔ 𝓥))
+
+  has-size-classifier-simplified' : (Σ X ꞉ 𝓤 ̇ , Σ f ꞉ (X → Y) ,
+                                     f has-size₁ (𝓤 ⊔ 𝓥))
+                                  ≃ (Y → 𝓤 ̇)
+  has-size-classifier-simplified' =
+   (Σ X ꞉ 𝓤 ̇ , Σ f ꞉ (X → Y) , f has-size₁ (𝓤 ⊔ 𝓥)) ≃⟨ i ⟩
+   (Y → Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥))              ≃⟨ ii ⟩
+   (Y → 𝓤 ̇)                                         ■
+    where
+     i = classification-equivalence
+     ii = →cong (fe _ _) (fe _ _) (≃-refl Y) resizing-up-does-nothing
+
+\end{code}
+
 Next, we consider the resizing of embeddings and prove that this is equivalent
 to propositional resizing.
 

@@ -283,7 +283,7 @@ CSB-gives-EM fe P i csb = γ
   g = cases z Succ
 
   a : is-embedding z
-  a = maps-of-props-into-sets-are-embeddings (λ p → Zero) i (ℕ∞-is-set fe)
+  a = maps-of-props-into-sets-are-embeddings z i (ℕ∞-is-set fe)
 
   b : is-embedding Succ
   b = lc-maps-into-sets-are-embeddings Succ Succ-lc (ℕ∞-is-set fe)
@@ -392,11 +392,8 @@ Theorem
 The Cantor-Schröder-Bernstein Theorem holds for all homotopy types, or
 ∞-gropoids, in the presence of excluded middle.
 
-Our proof adapts Wikipedia's "alternate proof" (consulted 23rd January 2020)
-
-  https://en.wikipedia.org/wiki/Schröder-Bernstein_theorem#Alternate_proof
-
-to our more general situation.
+Our proof adapts Halmos' proof in his book Naive Set Theory to our
+more general situation.
 
 The fiber of a point y : Y over a map f : X → Y collects all the
 points x : X that are mapped by f to a point identified with y,
@@ -435,7 +432,7 @@ EM-gives-CantorSchröderBernstein : Fun-Ext
 EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe excluded-middle
                                  X Y (f , f-is-emb) (g , g-is-emb) =
 
-  need (X ≃ Y) which-is-given-by 𝒽
+  need X ≃ Y which-is-given-by 𝒽
 
  where
 
@@ -468,7 +465,7 @@ requires function extensionality:
   being-g-point-is-a-prop x =
    Π-is-prop fe (λ (x₀ : X                   ) →
    Π-is-prop fe (λ (n  : ℕ                   ) →
-   Π-is-prop fe (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → need (is-prop (fiber g x₀))
+   Π-is-prop fe (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → need is-prop (fiber g x₀)
                                                  which-is-given-by (g-is-emb x₀))))
 \end{code}
 
@@ -635,7 +632,7 @@ What is important for our argument is that non-f-points are g-points:
 \begin{code}
 
   non-f-point-is-g-point : (x : X) → ¬ f-point x → is-g-point x
-  non-f-point-is-g-point x ν x₀ n p = need (fiber g x₀) which-is-given-by
+  non-f-point-is-g-point x ν x₀ n p = need fiber g x₀ which-is-given-by
     (Cases (excluded-middle (fiber g x₀) (g-is-emb x₀))
       (σ ꞉   fiber g x₀ ↦ σ)
       (u ꞉ ¬ fiber g x₀ ↦ have (x₀ , (n , p) , u) ∶ f-point x

@@ -1,16 +1,25 @@
-Martin Escardo, 22nd January 2020. (This file needs the Agda release candidate 2.6.1.)
+The Cantor-Schröder-Bernstein for homotopy types, or ∞-groupoids, in Agda
+-------------------------------------------------------------------------
+
+Martin Escardo, 22nd and 24th January 2020, with further additions
+after that.
+
+This file needs the Agda release candidate 2.6.1.
 
 There are two parts, which assume function extensionality but not
-univalence or the existence of propositional truncations:
+univalence or the existence of propositional truncations (any
+assumption beyond MLTT is explicit in each claim).
 
 
 (1) A univalent-foundations version of Pierre Pradic and Chad
     E. Brown's argument that Cantor-Schröder-Bernstein implies
-    excluded middle in constructive set theory.
+    excluded middle in constructive set theory. (Added 22nd January.)
     (https://arxiv.org/abs/1904.09193).
 
     Their proof, reproduced here, uses the compactness (also known as
     the searchability or omniscience) of ℕ∞.
+
+    (See also Appendix II.)
 
 
 (2) A proof that excluded middle implies Cantor-Schröder-Bernstein for
@@ -25,6 +34,10 @@ univalence or the existence of propositional truncations:
 
     As far as we know, (2) is a new result.
 
+    This part is the Agda version of https://arxiv.org/abs/2002.07079.
+    Check our lecture notes to learn HoTT/UF with Agda:
+    https://www.cs.bham.ac.uk/~mhe/HoTT-UF-in-Agda-Lecture-Notes/
+
 \begin{code}
 
 {-# OPTIONS --without-K --exact-split --safe #-}
@@ -32,18 +45,23 @@ univalence or the existence of propositional truncations:
 module CantorSchroederBernstein where
 
 open import SpartanMLTT
-open import GenericConvergentSequence
-open import DecidableAndDetachable
-open import Plus-Properties
 open import CompactTypes
 open import ConvergentSequenceCompact
-open import UF-Subsingletons
+open import DecidableAndDetachable
+open import DiscreteAndSeparated
+open import GenericConvergentSequence
+open import NaturalNumbers-Properties
+open import Plus-Properties
+open import UF-Base
 open import UF-Equiv
 open import UF-Embeddings
-open import UF-Retracts
-open import UF-FunExt
-open import UF-Subsingletons-FunExt
 open import UF-ExcludedMiddle
+open import UF-FunExt
+open import UF-Miscelanea
+open import UF-PropTrunc
+open import UF-Retracts
+open import UF-Subsingletons
+open import UF-Subsingletons-FunExt
 
 \end{code}
 
@@ -52,10 +70,10 @@ Our formulation of Cantor-Schröder-Bernstein:
 \begin{code}
 
 CSB : 𝓤 ̇ → 𝓥 ̇ → 𝓤 ⊔ 𝓥 ̇
-CSB X Y = (X ↪ Y) → (Y ↪ X) → X ≃ Y
+CSB X Y = (X ↪ Y) × (Y ↪ X) → X ≃ Y
 
 CantorSchröderBernstein : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
-CantorSchröderBernstein 𝓤 𝓥 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) → CSB X Y
+CantorSchröderBernstein 𝓤 𝓥 = {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → CSB X Y
 
 \end{code}
 
@@ -95,10 +113,75 @@ Pradic-Brown-lemma {𝓤} {𝓥} {X} {A} (r , s , η) c = γ e
 
 \end{code}
 
-Function extensionality is used twice in the following, once to know
-that ℕ∞ is a set, and once to know that it is compact.
+We formulate the following in more generality than we need
+here. Recall that a point x is h-isolated if the identity type x ≡ y
+is a subsingleton for every y.
 
 \begin{code}
+
+econstruction' : {X : 𝓤 ̇ } {P : 𝓥 ̇ } (z : P → X) (s : X → X)
+               → is-prop P
+               → ((p : P) → is-h-isolated (z p))
+               → disjoint-images z s
+               → is-embedding s
+               → (X ↪ P + X) × (P + X ↪ X)
+econstruction' {𝓤} {𝓥} {X} {P} z s i h d e = ((f , j) , (g , k))
+ where
+  f : X → P + X
+  f = inr
+
+  j : is-embedding f
+  j = inr-is-embedding P X
+
+  g : P + X → X
+  g = cases z s
+
+  l : is-embedding z
+  l = maps-of-props-into-h-isolated-points-are-embeddings z i h
+
+  k : is-embedding g
+  k = disjoint-cases-embedding z s l e d
+
+\end{code}
+
+The level of generality we need here is the following. Recall that a
+point is x isolated if equality x ≡ y is decidable for every y. By
+Hedberg's Theorem, every isolated point is h-isolated.
+
+\begin{code}
+
+econstruction : {X : 𝓤 ̇ } {P : 𝓥 ̇ } (x₀ : X) (s : X → X)
+              → is-set X
+              → is-prop P
+              → is-isolated x₀
+              → ((x : X) → x₀ ≢ s x)
+              → left-cancellable s
+              → (X ↪ P + X) × (P + X ↪ X)
+econstruction {𝓤} {𝓥} {X} {P} x₀ s j i k d' lc = econstruction' z s i h d e
+ where
+  z : P → X
+  z p = x₀
+  h : (p : P) → is-h-isolated (z p)
+  h p = isolated-is-h-isolated x₀ k
+  d : disjoint-images z s
+  d p = d'
+  e : is-embedding s
+  e = lc-maps-into-sets-are-embeddings s lc j
+
+\end{code}
+
+The Pradic-Brown argument uses the special case X = ℕ∞ with Zero and
+Succ, but, in Appendix II, we also consider X = ℕ with zero and succ.
+
+In the following, function extensionality is used to know that (1) ℕ∞
+is a set, (2) its finite elements (in particular zero) are isolated,
+(3) ℕ∞ is compact.
+
+\begin{code}
+
+econstruction-ℕ∞ : funext 𝓤₀ 𝓤₀ → {P : 𝓤 ̇ } → is-prop P → (ℕ∞ ↪ P + ℕ∞) × (P + ℕ∞ ↪ ℕ∞)
+econstruction-ℕ∞ fe i = econstruction Zero Succ
+                         (ℕ∞-is-set fe) i (finite-isolated fe zero) (x ↦ Zero-not-Succ) Succ-lc
 
 CSB-gives-EM : funext 𝓤₀ 𝓤₀
              → (P : 𝓤 ̇ )
@@ -107,32 +190,8 @@ CSB-gives-EM : funext 𝓤₀ 𝓤₀
              → P + ¬ P
 CSB-gives-EM fe P i csb = γ
  where
-  f : ℕ∞ → P + ℕ∞
-  f = inr
-
-  j : is-embedding f
-  j = inr-is-embedding P ℕ∞
-
-  z : P → ℕ∞
-  z _ = Zero
-
-  g : P + ℕ∞ → ℕ∞
-  g = cases z Succ
-
-  a : is-embedding z
-  a = maps-of-props-into-sets-are-embeddings (λ p → Zero) i (ℕ∞-is-set fe)
-
-  b : is-embedding Succ
-  b = lc-maps-into-sets-are-embeddings Succ Succ-lc (ℕ∞-is-set fe)
-
-  c : disjoint-images z Succ
-  c = λ (p : P) (x : ℕ∞) (q : Zero ≡ Succ x) → Zero-not-Succ q
-
-  k : is-embedding g
-  k = disjoint-cases-embedding z Succ a b c
-
   e : ℕ∞ ≃ P + ℕ∞
-  e = csb (f , j) (g , k)
+  e = csb (econstruction-ℕ∞ fe i)
 
   ρ : retract (P + ℕ∞) of ℕ∞
   ρ = equiv-retract-r e
@@ -151,15 +210,43 @@ middle for propositions in the universe 𝓥:
 CantorSchröderBernstein-gives-EM : funext 𝓤₀ 𝓤₀
                                  → CantorSchröderBernstein 𝓤₀ 𝓥
                                  → EM 𝓥
-CantorSchröderBernstein-gives-EM fe csb P i = CSB-gives-EM fe P i (csb ℕ∞ (P + ℕ∞))
+CantorSchröderBernstein-gives-EM fe csb P i = CSB-gives-EM fe P i csb
 
 \end{code}
 
-Remark. If instead of requiring that we have a designated equivalence,
-we required that there is an unspecified equivalence in the
-formulation of Cantor-Schröder-Bernstein, we would still get excluded
-middle, because P + ¬ P is a proposition.
+We remark that if instead of requiring that we have a designated
+equivalence, we required that there is an unspecified equivalence in
+the formulation of Cantor-Schröder-Bernstein, we would still get
+excluded middle, because P + ¬ P is a proposition if P is:
 
+\begin{code}
+
+module wCSB-still-gives-EM (pt : propositional-truncations-exist) where
+
+ open PropositionalTruncation pt public
+
+ wCSB : 𝓤 ̇ → 𝓥 ̇ → 𝓤 ⊔ 𝓥 ̇
+ wCSB X Y = (X ↪ Y) × (Y ↪ X) → ∥ X ≃ Y ∥
+
+ wCantorSchröderBernstein : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
+ wCantorSchröderBernstein 𝓤 𝓥 = {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → wCSB X Y
+
+ wCantorSchröderBernstein-gives-EM : funext 𝓤₀ 𝓤₀
+                                   → funext 𝓥 𝓤₀
+                                   → wCantorSchröderBernstein 𝓤₀ 𝓥
+                                   → EM 𝓥
+ wCantorSchröderBernstein-gives-EM fe₀ fe w P i = γ
+  where
+   s : ∥ ℕ∞ ≃ P + ℕ∞ ∥
+   s = w (econstruction-ℕ∞ fe₀ i)
+
+   t : ℕ∞ ≃ P + ℕ∞ → P + ¬ P
+   t e = Pradic-Brown-lemma (equiv-retract-r e) (ℕ∞-Compact fe₀)
+
+   γ : P + ¬ P
+   γ = ∥∥-rec (decidability-of-prop-is-prop fe i) t s
+
+\end{code}
 
 Part 2
 ------
@@ -173,13 +260,8 @@ remembering, for the sake of comparing the classical result for sets
 with its generalization to ∞-groupoids, that a map of types that are
 sets is an embedding if and only if it is left-cancellable.
 
-
-Our proof adapts Wikipedia's "alternate proof" (consulted 23rd January 2020)
-
-  https://en.wikipedia.org/wiki/Schröder-Bernstein_theorem#Alternate_proof
-
-to our more general situation.
-
+Our proof adapts Halmos' proof in his book Naive Set Theory to our
+more general situation.
 
 For foundational reasons, we make clear which instances of function
 extensionality and excluded middle are needed to conclude
@@ -201,9 +283,9 @@ EM-gives-CantorSchröderBernstein : funext 𝓤 (𝓤 ⊔ 𝓥)
                                  → funext 𝓤₀ (𝓤 ⊔ 𝓥)
                                  → EM (𝓤 ⊔ 𝓥)
                                  → CantorSchröderBernstein 𝓤 𝓥
-EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle X Y (f , f-is-emb) (g , g-is-emb) =
+EM-gives-CantorSchröderBernstein {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle {X} {Y} ((f , f-is-emb) , (g , g-is-emb)) =
 
-  need (X ≃ Y) which-is-given-by 𝒽
+  need X ≃ Y which-is-given-by 𝒽
 
  where
 
@@ -247,7 +329,7 @@ requires function extensionality:
   being-g-point-is-a-prop x =
    Π-is-prop fe  (λ (x₀ : X                   ) →
    Π-is-prop fe₁ (λ (n  : ℕ                   ) →
-   Π-is-prop fe  (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → need (is-prop (fiber g x₀))
+   Π-is-prop fe  (λ (p  : ((g ∘ f) ^ n) x₀ ≡ x) → need is-prop (fiber g x₀)
                                                   which-is-given-by (g-is-emb x₀))))
 \end{code}
 
@@ -355,9 +437,11 @@ left-cancellability of h:
         so-use (g (f x)      ≡⟨ ap g p            ⟩
                 g (g⁻¹ x' γ) ≡⟨ g⁻¹-is-rinv x' γ  ⟩
                 x'           ∎)
+
     u : ¬ is-g-point (g (f x))
     u = have ν ∶ ¬ is-g-point x
         so-apply contrapositive (α x)
+
     v : ¬ is-g-point x'
     v = transport (- ↦ ¬ is-g-point -) q u
 
@@ -383,7 +467,7 @@ prove properties of H and then specialize them to h:
 
     l (inl γ) (inl γ') p = have p ∶ g⁻¹ x γ ≡ g⁻¹ x' γ'
                            so (x             ≡⟨ (g⁻¹-is-rinv x γ)⁻¹ ⟩
-                               g (g⁻¹ x γ)   ≡⟨ ap g p                  ⟩
+                               g (g⁻¹ x γ)   ≡⟨ ap g p              ⟩
                                g (g⁻¹ x' γ') ≡⟨ g⁻¹-is-rinv x' γ'   ⟩
                                x'            ∎)
 
@@ -417,7 +501,7 @@ What is important for our argument is that non-f-points are g-points:
 \begin{code}
 
   non-f-point-is-g-point : (x : X) → ¬ f-point x → is-g-point x
-  non-f-point-is-g-point x ν x₀ n p = need (fiber g x₀) which-is-given-by
+  non-f-point-is-g-point x ν x₀ n p = need fiber g x₀ which-is-given-by
     (Cases (excluded-middle (fiber g x₀) (g-is-emb x₀))
       (σ ꞉   fiber g x₀ ↦ σ)
       (u ꞉ ¬ fiber g x₀ ↦ have (x₀ , (n , p) , u) ∶ f-point x
@@ -447,8 +531,10 @@ doesn't refer to the notion of f-point.
       q = have p ∶ ((g ∘ f) ^ (succ n)) x₀  ≡ g y
                  ∶ g (f (((g ∘ f) ^ n) x₀)) ≡ g y
           so-apply embeddings-are-left-cancellable g g-is-emb
+
       a : fiber f y
       a = ((g ∘ f) ^ n) x₀ , q
+
       b : ¬ is-g-point (((g ∘ f) ^ n) x₀)
       b = assume γ ∶ is-g-point (((g ∘ f) ^ n) x₀)
           then (have γ x₀ n refl ∶ fiber g x₀
@@ -491,20 +577,26 @@ purpose.
       w : Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
       w = have ν ∶ ¬ is-g-point (g y)
           so-apply claim y
+
       x : X
       x = fiber-point f y (pr₁ w)
+
       p : f x ≡ y
       p = fiber-path f y (pr₁ w)
+
       ψ : (d : decidable (is-g-point x)) → H x d ≡ y
       ψ (inl γ) = have γ ∶ is-g-point x
                   which-is-impossible-by (pr₂ w ∶ ¬ is-g-point x)
       ψ (inr ν) = H x (inr ν) ≡⟨ by-definition ⟩
                   f x         ≡⟨ p             ⟩
                   y           ∎
+
     b : Σ x ꞉ X ,((d : decidable (is-g-point x)) → H x d ≡ y)
     b = a (δ (g y))
+
     x : X
     x = pr₁ b
+
     p : h x ≡ y
     p = h x       ≡⟨ by-construction ⟩
         H x (δ x) ≡⟨ pr₂ b (δ x)     ⟩
@@ -534,8 +626,8 @@ EM-gives-CantorSchröderBernstein₀ fe = EM-gives-CantorSchröderBernstein fe f
 \end{code}
 
 
-APPENDIX
---------
+APPENDIX I
+----------
 
 The above is an attempt to make the proof more readable and match the
 blog post. Here is a more concise version of the above in a more
@@ -550,7 +642,7 @@ EM-gives-CantorSchröderBernstein' : funext 𝓤 (𝓤 ⊔ 𝓥)
                                   → funext 𝓤₀ (𝓤 ⊔ 𝓥)
                                   → EM (𝓤 ⊔ 𝓥)
                                   → CantorSchröderBernstein 𝓤 𝓥
-EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle X Y (f , f-is-emb) (g , g-is-emb) = 𝒽
+EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle {X} {Y} ((f , f-is-emb) , (g , g-is-emb)) = 𝒽
  where
   is-g-point : (x : X) → 𝓤 ⊔ 𝓥 ̇
   is-g-point x = (x₀ : X) (n : ℕ) → ((g ∘ f) ^ n) x₀ ≡ x → fiber g x₀
@@ -579,10 +671,12 @@ EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle 
     q = g (f x)      ≡⟨ ap g p            ⟩
         g (g⁻¹ x' γ) ≡⟨ g⁻¹-is-rinv x' γ  ⟩
         x'           ∎
+
     u : ¬ is-g-point (g (f x))
     u = contrapositive (α x) ν
+
     v : ¬ is-g-point x'
-    v = transport (λ - → ¬ is-g-point -) q u
+    v = transport (- ↦ ¬ is-g-point -) q u
 
   being-g-point-is-a-prop : (x : X) → is-prop (is-g-point x)
   being-g-point-is-a-prop x = Π-is-prop fe (λ x₀ → Π-is-prop fe₁ (λ _ → Π-is-prop fe (λ _ → g-is-emb x₀)))
@@ -630,8 +724,10 @@ EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle 
     where
      q : f (((g ∘ f) ^ n) x₀) ≡ y
      q = embeddings-are-left-cancellable g g-is-emb p
+
      a : fiber f y
      a = ((g ∘ f) ^ n) x₀ , q
+
      b : ¬ is-g-point (((g ∘ f) ^ n) x₀)
      b γ = 𝟘-elim (u (γ x₀ n refl))
 
@@ -657,16 +753,20 @@ EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle 
      where
       w : Σ (x , p) ꞉ fiber f y , ¬ is-g-point x
       w = claim y ν
+
       x : X
       x = fiber-point f y (pr₁ w)
+
       ψ : (d : decidable (is-g-point x)) → H x d ≡ y
       ψ (inl γ) = 𝟘-elim (pr₂ w γ)
       ψ (inr ν) = fiber-path f y (pr₁ w)
 
     b : Σ x ꞉ X , ((d : decidable (is-g-point x)) → H x d ≡ y)
     b = a (δ (g y))
+
     x : X
     x = pr₁ b
+
     p : h x ≡ y
     p = h x       ≡⟨ by-construction ⟩
         H x (δ x) ≡⟨ pr₂ b (δ x)     ⟩
@@ -677,5 +777,326 @@ EM-gives-CantorSchröderBernstein' {𝓤} {𝓥} fe fe₀ fe₁ excluded-middle 
 
 \end{code}
 
-Check our lecture notes https://www.cs.bham.ac.uk/~mhe/HoTT-UF-in-Agda-Lecture-Notes/
-if you want to learn HoTT/UF and Agda.
+APPENDIX II
+-----------
+
+Added 17th Feb 2020. A stronger result is added below, 18th Feb 2020,
+with a technically and conceptually simpler proof.
+
+Coming back to part 1, we consider what follows if we assume CSB for
+types with decidable equality (which are necessarily sets) only. Such
+types are called discrete. We adapt an argument in Johnstone's
+Sketches of an Elephant Volume 2 (Lemma D.4.1.2).
+
+See
+https://www.sciencedirect.com/science/article/pii/S0019357718303276
+for BKS⁺ (strong Brouwer-Kripke Schema) and the fact that together
+with Markov Principle it implies excluded middle (attributed to
+Moschovakis). The terminology "rosolini-data" is in connection with
+the Rosolini dominance from synthetic domain theory and topology.
+
+\begin{code}
+
+rosolini-data : 𝓤 ̇ → 𝓤 ⁺ ̇
+rosolini-data {𝓤} P = Σ A ꞉ (ℕ → 𝓤 ̇ ) , ((n : ℕ) → decidable (A n))
+                                      × is-prop (Σ A)
+                                      × (P ⇔ Σ A)
+
+\end{code}
+
+Notice this is data on P rather than property of P because multiple
+A's apply to the same P, when P holds.
+
+Notice also that we don't need to require that each A n is a
+proposition, as this is automatic:
+
+\begin{code}
+
+is-prop-total-gives-is-prop-each : (A : ℕ → 𝓤 ̇ ) → is-prop (Σ A) → (n : ℕ) → is-prop (A n)
+is-prop-total-gives-is-prop-each A i n a a' = t
+ where
+  q : (n , a) ≡ (n , a')
+  q = i (n , a) (n , a')
+
+  t = a                        ≡⟨ by-definition                                       ⟩
+      transport A refl       a ≡⟨ ap (- ↦ transport A - a) (ℕ-is-set refl (ap pr₁ q)) ⟩
+      transport A (ap pr₁ q) a ≡⟨ from-Σ-≡' q                                         ⟩
+      a'                       ∎
+
+\end{code}
+
+We consider a typal, rather than propositional, version of BKS⁺, which
+is data-valued rather than propositionally valued.
+
+\begin{code}
+
+dBKS⁺ : (𝓤 : Universe) → 𝓤 ⁺ ̇
+dBKS⁺ 𝓤 = (P : 𝓤 ̇ ) → is-prop P → rosolini-data P
+
+\end{code}
+
+It is convenient to work with the following formulation of Markov's
+Principle that avoids ∃ (and hence propositional truncations), which
+is easily seen to be equivalent to the traditional formulation using ∃
+(using the fact that unique choice just holds (trivially) in HoTT/UF).
+
+\begin{code}
+
+MP : (𝓤 : Universe) → 𝓤 ⁺ ̇
+MP 𝓤 = (A : ℕ → 𝓤 ̇ ) → ((n : ℕ) → decidable (A n)) → is-prop (Σ A) → ¬¬ Σ A → Σ A
+
+\end{code}
+
+The following, which derives double negation elimination from dBKS⁺
+and MP, is formulated and proved in pure (spartan) MLTT:
+
+\begin{code}
+
+dBKS⁺-and-MP-give-DNE : dBKS⁺ 𝓤 → MP 𝓤 → DNE 𝓤
+dBKS⁺-and-MP-give-DNE {𝓤} bks mp P i = γ (bks P i)
+ where
+  γ : (Σ A ꞉ (ℕ → 𝓤 ̇ ) , ((n : ℕ) → decidable (A n)) × is-prop (Σ A) × (P ⇔ Σ A))
+    → ¬¬ P → P
+  γ (A , d , j , f , g) = dne
+   where
+    f' : ¬¬ P → ¬¬ Σ A
+    f' = double-contrapositive f
+
+    h : ¬¬ Σ A → Σ A
+    h = mp A d j
+
+    dne : ¬¬ P → P
+    dne = g ∘ h ∘ f'
+
+\end{code}
+
+But the following, which derives excluded middle, needs function
+extensionality:
+
+\begin{code}
+
+dBKS⁺-and-MP-give-EM : funext 𝓤 𝓤₀ → dBKS⁺ 𝓤 → MP 𝓤 → EM 𝓤
+dBKS⁺-and-MP-give-EM fe bks MP = DNE-gives-EM fe (dBKS⁺-and-MP-give-DNE bks MP)
+
+\end{code}
+
+So dBKS⁺ "almost" gives excluded middle in some sense.
+
+We now show that CSB for discrete types gives dBKS⁺:
+
+\begin{code}
+
+blemma : {P : 𝓤 ̇ } {X : 𝓥 ̇ }
+       → is-set X
+       → is-prop P
+       → X ≃ P + X
+       → Σ A ꞉ (X → 𝓤 ⊔ 𝓥 ̇ ) , ((x : X) → decidable (A x)) × is-prop (Σ A) × (P ⇔ Σ A)
+blemma {𝓤} {𝓥 } {P} {X} j i (f , (s , η) , (r , ε)) = A , d , k , (φ , γ)
+ where
+  A : X → 𝓤 ⊔ 𝓥 ̇
+  A x = Σ p ꞉ P , f x ≡ inl p
+
+  d : (x : X) → decidable (A x)
+  d x = equality-cases (f x)
+         (λ (p : P) (u : f x ≡ inl p) → inl (p , u))
+         (λ (y : X) (v : f x ≡ inr y) → inr (λ (a , u) → +disjoint (inl a ≡⟨ u ⁻¹ ⟩
+                                                                    f x   ≡⟨ v    ⟩
+                                                                    inr y ∎)))
+
+  k : is-prop (Σ A)
+  k (x , p , u) (x' , p' , u') = t
+   where
+    q : x ≡ x'
+    q = equivs-are-lc f ((s , η) , (r , ε)) (f x    ≡⟨ u               ⟩
+                                             inl p  ≡⟨ ap inl (i p p') ⟩
+                                             inl p' ≡⟨ u' ⁻¹           ⟩
+                                             f x'   ∎)
+
+    t : x , p , u ≡ x' , p' , u'
+    t = to-Σ-≡ (q , to-Σ-≡ (i _ p' , +-is-set P X (props-are-sets i) j _ u'))
+
+  φ : P → Σ A
+  φ p = s (inl p) , p , η (inl p)
+
+  γ : Σ A → P
+  γ (x , p , u) = p
+
+rlemma : {P : 𝓤 ̇ }
+       → is-prop P
+       → ℕ ≃ P + ℕ
+       → rosolini-data P
+rlemma = blemma ℕ-is-set
+
+discrete-CantorSchröderBernstein : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
+discrete-CantorSchröderBernstein 𝓤 𝓥 = {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → is-discrete X → is-discrete Y → CSB X Y
+
+econstruction-ℕ : {P : 𝓤 ̇ } → is-prop P → (ℕ ↪ P + ℕ) × (P + ℕ ↪ ℕ)
+econstruction-ℕ i = econstruction zero succ
+                     ℕ-is-set i
+                     (ℕ-is-discrete zero)
+                     (λ (x : ℕ) (p : zero ≡ succ x) → positive-not-zero x (p ⁻¹))
+                     succ-lc
+
+dlemma : {P : 𝓥 ̇ }
+       → discrete-CantorSchröderBernstein 𝓤₀ 𝓥
+       → is-prop P → ℕ ≃ P + ℕ
+dlemma csb i = csb ℕ-is-discrete (+discrete (props-are-discrete i) ℕ-is-discrete) (econstruction-ℕ i)
+
+discrete-CSB-gives-dBKS⁺ : discrete-CantorSchröderBernstein 𝓤₀ 𝓥 → dBKS⁺ 𝓥
+discrete-CSB-gives-dBKS⁺ csb P i = γ
+ where
+  e : ℕ ≃ P + ℕ
+  e = dlemma csb i
+
+  γ : rosolini-data P
+  γ = rlemma i e
+
+\end{code}
+
+Added 18th Feb 2020. We make the last development above sharper, at
+the expense of assuming propositional extensionality (univalence for
+propositions).
+
+If we have a uniform way to get an equivalence ℕ ≃ P + ℕ for any
+proposition P, given by a function
+
+ φ : (P : 𝓤 ̇ ) → is-prop P → ℕ ≃ P + ℕ,
+
+then we can use φ to decide P for any proposition P. To see this,
+first consider P=𝟙, and let n be the natural number that is mapped to
+inl * by the equivalence given by φ. Then, for an arbitrary
+proposition P, if the equivalence maps n to inl p for some p, we have
+that P holds. Otherwise, if it maps n to inl k for some k : ℕ, then P
+can't hold, for if it did we would have p : P, and hence P=𝟙 by
+propositional extensionality, and the equivalence would have to map n
+to inl p, which is different from the value inr k of the equivalence
+at n. In order to simplify the calculational details of the proof, we
+work with the type T of true propositions, which is (contractible and
+hence) a subsingleton by propositional extensionality.
+
+\begin{code}
+
+ulemma : funext 𝓤 𝓤
+       → propext 𝓤
+       → ((P : 𝓤 ̇ ) → is-prop P → ℕ ≃ P + ℕ)
+       → EM 𝓤
+ulemma {𝓤} fe pe φ P i = γ
+ where
+  T : 𝓤 ⁺ ̇
+  T = Σ Q ꞉ 𝓤 ̇ , is-prop Q × Q
+
+  u : (Q : 𝓤 ̇ ) → is-prop (is-prop Q × Q)
+  u Q (j , q) = ×-is-prop (being-a-prop-is-a-prop fe) j (j , q)
+
+  v : is-prop T
+  v (Q , j , q) (Q' , j' , q') = to-subtype-≡ u s
+   where
+    s : Q ≡ Q'
+    s = pe j j' (λ _ → q') (λ _ → q)
+
+  f : T → ℕ
+  f (Q , j , q) = ⌜ ≃-sym (φ Q j) ⌝ (inl q)
+
+  n : ℕ
+  n = f (𝟙 , 𝟙-is-prop , *)
+
+  ν : (k : ℕ) → ⌜ φ P i ⌝ n ≡ inr k → ¬ P
+  ν k r p = +disjoint' b
+   where
+    a : n ≡ f (P , i , p)
+    a = ap f (v _ _)
+
+    b = inr k                                 ≡⟨ r ⁻¹                          ⟩
+        ⌜ φ P i ⌝ n                           ≡⟨ ap ⌜ φ P i ⌝ a                ⟩
+        ⌜ φ P i ⌝ (f (P , i , p))             ≡⟨ by-definition                 ⟩
+        ⌜ φ P i ⌝ (⌜ ≃-sym (φ P i) ⌝ (inl p)) ≡⟨ ≃-sym-is-rinv (φ P i) (inl p) ⟩
+        inl p                                 ∎
+
+  γ : P + ¬ P
+  γ = equality-cases (⌜ φ P i ⌝ n)
+       (λ (p : P) (l : ⌜ φ P i ⌝ n ≡ inl p) → inl p)
+       (λ (k : ℕ) (r : ⌜ φ P i ⌝ n ≡ inr k) → inr (ν k r))
+
+discrete-CSB-gives-EM : funext 𝓥 𝓥
+                      → propext 𝓥
+                      → discrete-CantorSchröderBernstein 𝓤₀ 𝓥
+                      → EM 𝓥
+discrete-CSB-gives-EM {𝓥} fe pe csb = ulemma fe pe φ
+ where
+  φ : (P : 𝓥 ̇ ) → is-prop P → ℕ ≃ P + ℕ
+  φ P = dlemma csb
+
+\end{code}
+
+Thus, in particular, decidable equality is not enough to get a
+constructive version of CSB. Even with decidable equality of the given
+types, one still needs full excluded middle.
+
+Discussion
+----------
+
+The Pradic-Brown argument, although it requires a non-discrete type to
+work, has the advantage that if we weaken the statement of CSB to say
+that an unspecified (rather than designated) equivalence exists, for
+any two given embeddings in opposite directions,
+
+    (X ↪ Y) × (Y ↪ X) → ∥ X ≃ Y ∥.
+
+one still gets excluded middle, as already remarked above. And it is
+also nice and clear and short. Our argument, however, doesn't work
+with this weakening, as in this case it is no longer possible to
+define the function φ in the proof (without choice, which is stronger
+than what we want to prove, namely excluded middle) to apply the
+uniformity lemma. The reason is that Pradic and Brown use only one
+instance of CSB, for a given proposition, whereas we use a family of
+instances. In any case, in the other direction, excluded middle does
+give CSB with a designated equivalence in the conclusion, as
+previously shown above.
+
+Added 19th Feb 2020: In light of the above discussion, notice that the
+17th Feb 2020 development has its merits, after all, compared to the
+18th Feb 2020 development. We don't get excluded middle if we weaken
+CSB, but we do get BKS⁺.
+
+\begin{code}
+
+module discrete-wCSB-gives-BKS⁺ (pt : propositional-truncations-exist) where
+
+\end{code}
+
+We open the following module only to have access to the definition of
+wCSB:
+
+\begin{code}
+
+ open wCSB-still-gives-EM pt
+
+ discrete-wCantorSchröderBernstein : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
+ discrete-wCantorSchröderBernstein 𝓤 𝓥 = {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → is-discrete X → is-discrete Y → wCSB X Y
+
+\end{code}
+
+We now consider the propositional version of BKS⁺:
+
+\begin{code}
+
+ is-rosolini : 𝓤 ̇ → 𝓤 ⁺ ̇
+ is-rosolini P = ∥ rosolini-data P ∥
+
+ BKS⁺ : (𝓤 : Universe) → 𝓤 ⁺ ̇
+ BKS⁺ 𝓤 = (P : 𝓤 ̇ ) → is-prop P → is-rosolini P
+
+ discrete-wCSB-gives-BKS⁺ : discrete-wCantorSchröderBernstein 𝓤₀ 𝓥 → BKS⁺ 𝓥
+ discrete-wCSB-gives-BKS⁺ w P i = γ
+  where
+   s : ∥ ℕ ≃ P + ℕ ∥
+   s = w ℕ-is-discrete (+discrete (props-are-discrete i) ℕ-is-discrete) (econstruction-ℕ i)
+
+   γ : is-rosolini P
+   γ = ∥∥-functor (rlemma i) s
+
+\end{code}
+
+Notice that BKS⁺ also implies excluded middle in the presence of MP,
+because EM is a proposition (in any case, this was already proved by
+Moschovakis, as discussed above).

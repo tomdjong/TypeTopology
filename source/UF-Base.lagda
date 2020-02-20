@@ -35,9 +35,13 @@ _≈_ : {X : 𝓤 ̇ } {x : X} {A : X → 𝓥 ̇ } → Nat (Id x) A → Nat (Id
 ap-const : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (y : Y) {x x' : X} (p : x ≡ x') → ap (λ _ → y) p ≡ refl
 ap-const y refl = refl
 
+transport-fiber : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) (x x' : X) (y : Y) (p : x ≡ x') (q : f x ≡ y)
+                → transport (λ - → f - ≡ y) p q ≡ ap f (p ⁻¹) ∙ q
+transport-fiber f x x' y refl refl = refl
+
 transport₂ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (A : X → Y → 𝓦 ̇ )
              {x x' : X} {y y' : Y}
-          → x ≡ x' → y ≡ y' → A x y → A x' y'
+             → x ≡ x' → y ≡ y' → A x y → A x' y'
 transport₂ A refl refl = id
 
 back-transport₂ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (A : X → Y → 𝓦 ̇ )
@@ -135,9 +139,9 @@ apd = apd' _
 ap-id-is-id : {X : 𝓤 ̇ } {x y : X} (p : x ≡ y) → p ≡ ap id p
 ap-id-is-id refl = refl
 
-ap-comp : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) {x y z : X} (p : x ≡ y) (q : y ≡ z)
-        → ap f (p ∙ q) ≡ ap f p ∙ ap f q
-ap-comp f refl refl = refl
+ap-∙ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) {x y z : X} (p : x ≡ y) (q : y ≡ z)
+     → ap f (p ∙ q) ≡ ap f p ∙ ap f q
+ap-∙ f refl refl = refl
 
 ap-sym : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } (f : X → Y) {x y : X} (p : x ≡ y)
        → (ap f p) ⁻¹ ≡ ap f (p ⁻¹)

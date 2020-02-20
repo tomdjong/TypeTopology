@@ -46,7 +46,7 @@ being-discrete-is-a-prop {𝓤} fe {X} = Π-is-prop (fe 𝓤 𝓤) (being-isolat
 isolated-is-h-isolated : {X : 𝓤 ̇ } (x : X) → is-isolated x → is-h-isolated x
 isolated-is-h-isolated {𝓤} {X} x i {y} = local-hedberg x (λ y → γ y (i y)) y
  where
-  γ : (y : X) → decidable (x ≡ y) → Σ f ꞉ (x ≡ y → x ≡ y) , constant f
+  γ : (y : X) → decidable (x ≡ y) → Σ f ꞉ (x ≡ y → x ≡ y) , wconstant f
   γ y (inl p) = (λ _ → p) , (λ q r → refl)
   γ y (inr n) = id , (λ q r → 𝟘-elim (n r))
 
@@ -201,5 +201,27 @@ C-B-embeddings-are-left-cancellable fe {α} {β} p = dfunext fe h
  where
   h : (n : ℕ) → α n ≡ β n
   h n = 𝟚-ℕ-embeddings-are-left-cancellable (ap (λ - → - n) p)
+
+\end{code}
+
+Added 19th Feb 2020:
+
+\begin{code}
+
+open import UF-Embeddings
+
+maps-of-props-into-h-isolated-points-are-embeddings : {P : 𝓤 ̇ } {X : 𝓥 ̇ } (f : P → X)
+                                                  → is-prop P
+                                                  → ((p : P) → is-h-isolated (f p))
+                                                  → is-embedding f
+maps-of-props-into-h-isolated-points-are-embeddings f i j q (p , s) (p' , s') = to-Σ-≡ (i p p' , j p' _ s')
+
+maps-of-props-into-isolated-points-are-embeddings : {P : 𝓤 ̇ } {X : 𝓥 ̇ } (f : P → X)
+                                                  → is-prop P
+                                                  → ((p : P) → is-isolated (f p))
+                                                  → is-embedding f
+maps-of-props-into-isolated-points-are-embeddings f i j = maps-of-props-into-h-isolated-points-are-embeddings
+                                                           f i (λ p → isolated-is-h-isolated (f p) (j p))
+
 
 \end{code}

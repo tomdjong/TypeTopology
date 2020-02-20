@@ -137,27 +137,46 @@ Now, if LPO is false, that is, an empty type, then the function type
 
   LPO → ℕ
 
-is isomorphic to the unit type 𝟙, and hence is compact and compact. If
-LPO holds, that is, LPO is isomorphic to 𝟙 because it is a univalent
-proposition, then the function type LPO → ℕ is isomorphic to ℕ, and
-hence the type LPO → ℕ is again compact by LPO. So in any case we have
-that the type LPO → ℕ is compact. However, LPO is an undecided
-proposition in our type theory, so that the nature of the function
-type LPO → ℕ is undecided. Nevertheless, we can show that it is
-compact, without knowing whether LPO holds or not!
+is isomorphic to the unit type 𝟙, and hence is compact. If LPO holds,
+that is, LPO is isomorphic to 𝟙 because it is a univalent proposition,
+then the function type LPO → ℕ is isomorphic to ℕ, and hence the type
+LPO → ℕ is again compact by LPO. So in any case we have that the type
+LPO → ℕ is compact. However, LPO is an undecided proposition in our
+type theory, so that the nature of the function type LPO → ℕ is
+undecided. Nevertheless, we can show that it is compact, without
+knowing whether LPO holds or not!
 
 \begin{code}
 
 open import PropTychonoff
 
-LPO-gives-ℕ-compact∙ : compact∙(LPO → ℕ)
-LPO-gives-ℕ-compact∙ = prop-tychonoff-corollary' fe LPO-is-a-prop f
+[LPO→ℕ]-compact∙ : compact∙(LPO → ℕ)
+[LPO→ℕ]-compact∙ = prop-tychonoff-corollary' fe LPO-is-a-prop f
  where
    f : LPO → compact∙ ℕ
    f lpo = compact-pointed-gives-compact∙ (LPO-gives-compact-ℕ lpo) 0
 
-LPO-gives-ℕ-compact : compact(LPO → ℕ)
-LPO-gives-ℕ-compact = compact∙-gives-compact LPO-gives-ℕ-compact∙
+[LPO→ℕ]-compact : compact(LPO → ℕ)
+[LPO→ℕ]-compact = compact∙-gives-compact [LPO→ℕ]-compact∙
+
+[LPO→ℕ]-Compact : Compact (LPO → ℕ) {𝓤}
+[LPO→ℕ]-Compact = compact-gives-Compact (LPO → ℕ) [LPO→ℕ]-compact
+
+\end{code}
+
+However, we cannot prove that the function type LPO→ℕ is discrete, as
+otherwise we would be able to decide the negation of LPO (added 14th
+Feb 2020):
+
+\begin{code}
+
+open import DiscreteAndSeparated
+open import NaturalNumbers-Properties
+
+[LPO→ℕ]-discrete-gives-¬LPO-decidable : is-discrete (LPO → ℕ) → decidable (¬ LPO)
+[LPO→ℕ]-discrete-gives-¬LPO-decidable = discrete-exponential-has-decidable-emptiness-of-exponent
+                                         (fe 𝓤₀ 𝓤₀)
+                                         (1 , 0 , positive-not-zero 0)
 
 \end{code}
 
@@ -170,15 +189,15 @@ has-section-under𝟙-gives-LPO : (Σ s ꞉ (ℕ∞ → ℕ + 𝟙) , under𝟙 
 has-section-under𝟙-gives-LPO (s , ε) u = ψ (s u) refl
  where
   ψ : (z : ℕ + 𝟙) → s u ≡ z → decidable(Σ n ꞉ ℕ , u ≡ under n)
-  ψ (inl n) p = inl (n , (u            ≡⟨ (ε u) ⁻¹ ⟩
+  ψ (inl n) p = inl (n , (u            ≡⟨ (ε u) ⁻¹    ⟩
                           under𝟙 (s u) ≡⟨ ap under𝟙 p ⟩
                           under n      ∎))
   ψ (inr *) p = inr γ
    where
     γ : ¬ (Σ n ꞉ ℕ , u ≡ under n)
     γ (n , q) = ∞-is-not-finite n (∞            ≡⟨ (ap under𝟙 p)⁻¹ ⟩
-                                   under𝟙 (s u) ≡⟨ ε u ⟩
-                                   u            ≡⟨ q ⟩
+                                   under𝟙 (s u) ≡⟨ ε u             ⟩
+                                   u            ≡⟨ q               ⟩
                                    under n      ∎)
 
 under𝟙-inverse : (u : ℕ∞) → decidable(Σ n ꞉ ℕ , u ≡ under n) → ℕ + 𝟙 {𝓤₀}

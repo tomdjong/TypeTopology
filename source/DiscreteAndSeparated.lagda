@@ -58,11 +58,14 @@ Standard examples:
 
 \begin{code}
 
+props-are-discrete : {P : 𝓤 ̇ } → is-prop P → is-discrete P
+props-are-discrete i x y = inl (i x y)
+
 𝟘-is-discrete : is-discrete (𝟘 {𝓤})
-𝟘-is-discrete x y = 𝟘-elim x
+𝟘-is-discrete = props-are-discrete 𝟘-is-prop
 
 𝟙-is-discrete : is-discrete (𝟙 {𝓤})
-𝟙-is-discrete * * = inl refl
+𝟙-is-discrete = props-are-discrete 𝟙-is-prop
 
 𝟚-is-discrete : is-discrete 𝟚
 𝟚-is-discrete ₀ ₀ = inl refl
@@ -277,7 +280,7 @@ binary-sum-is-separated {𝓤} {𝓥} {X} {Y} s t (inr y) (inr y') = lemma
 ⊥-⊤-density' : funext 𝓤 𝓤 → propext 𝓤
              → ∀ {𝓥} {X : 𝓥 ̇ }
              → is-separated X
-             → (f : Ω 𝓤 → X) → f ⊥ ≡ f ⊤ → constant f
+             → (f : Ω 𝓤 → X) → f ⊥ ≡ f ⊤ → wconstant f
 ⊥-⊤-density' fe pe s f r p q = g p ∙ (g q)⁻¹
   where
     a : ∀ p → ¬¬(f p ≡ f ⊤)
@@ -354,5 +357,35 @@ infix  30 _≠_
 
 ≠-agrees-with-≢ : (m n : ℕ) → m ≠ n ⇔ m ≢ n
 ≠-agrees-with-≢ m n = pr₂(χ≢-spec m n) , (λ d → different-from-₀-equal-₁ (contrapositive(pr₁(χ≢-spec m n)) d))
+
+\end{code}
+
+Added 14th Feb 2020:
+
+\begin{code}
+
+discrete-exponential-has-decidable-emptiness-of-exponent : {X : 𝓤 ̇ } {Y : 𝓥 ̇ }
+                                                         → funext 𝓤 𝓥
+                                                         → (Σ y₀ ꞉ Y , Σ y₁ ꞉ Y , y₀ ≢ y₁)
+                                                         → is-discrete (X → Y)
+                                                         → decidable (¬ X)
+discrete-exponential-has-decidable-emptiness-of-exponent {𝓤} {𝓥} {X} {Y} fe (y₀ , y₁ , ne) d = γ
+ where
+  a : decidable ((λ _ → y₀) ≡ (λ _ → y₁))
+  a = d (λ _ → y₀) (λ _ → y₁)
+  f : decidable ((λ _ → y₀) ≡ (λ _ → y₁)) → decidable (¬ X)
+  f (inl p) = inl g
+   where
+    g : ¬ X
+    g x = ne q
+     where
+      q : y₀ ≡ y₁
+      q = ap (λ - → - x) p
+  f (inr ν) = inr (contrapositive g ν)
+   where
+    g : ¬ X → (λ _ → y₀) ≡ (λ _ → y₁)
+    g ν = dfunext fe (λ x → 𝟘-elim (ν x))
+  γ : decidable (¬ X)
+  γ = f a
 
 \end{code}

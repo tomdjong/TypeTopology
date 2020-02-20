@@ -196,12 +196,10 @@ module _
 
 \end{code}
 
-We should also consider the other case, i.e. the case where Y : 𝓤 ̇ and we
-consider types of size 𝓤 ⊔ 𝓥. Then we should get:
+We could also consider the other case, i.e. the case where Y : 𝓤 ̇ and we
+consider types of size 𝓤 ⊔ 𝓥. Then get:
 
 (Σ X ꞉ 𝓤 ̇ , Σ f ꞉ (X → Y) , f has-size₁ (𝓤 ⊔ 𝓥)) ≃ (Y → 𝓤 ̇ )
-
-We leave this as a TODO for now.
 
 \begin{code}
 
@@ -213,6 +211,12 @@ module _
 
  open import UF-Equiv-FunExt
  open import UF-UniverseEmbedding
+
+\end{code}
+
+The following lemma is essentially transport-map from UF-Classifiers.
+
+\begin{code}
 
  transport-equiv : {X : 𝓤 ̇ } {X' Y : 𝓤 ⊔ 𝓥 ̇ } (e' : X' ≃ Y) (e : X' ≃ X)
                  → transport (λ - → - ≃ X) (eqtoid ua X' Y e') e
@@ -227,10 +231,19 @@ module _
      γ : e ≡ ≃-sym e' ● e
      γ = to-subtype-≡ (λ f → being-equiv-is-a-prop fe f) g
       where
-       g : ⌜ e ⌝ ≡ ⌜ ? ⌝
-       g = {!!}
+       g = ⌜ e ⌝                ≡⟨ refl ⟩
+           ⌜ e ⌝ ∘ id           ≡⟨ ap (λ - → ⌜ e ⌝ ∘ -) s ⟩
+           ⌜ e ⌝ ∘ ⌜ ≃-sym e' ⌝ ≡⟨ refl ⟩
+           ⌜ ≃-sym e' ● e ⌝     ∎
+        where
+         r : idtoeq X' X' refl                 ≡ e'
+         r = idtoeq X' X' refl                 ≡⟨ ap (idtoeq X' X') q ⟩
+             idtoeq X' X' (eqtoid ua X' X' e') ≡⟨ idtoeq-eqtoid ua X' X' e' ⟩
+             e'                                ∎
+         s : id ≡ ⌜ ≃-sym e' ⌝
+         s = ap (λ - → ⌜ ≃-sym - ⌝) r
 
- -- This should have a better name?
+ -- TO DO: This should have a better name?
  resizing-up-does-nothing : (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) ≃ 𝓤 ̇
  resizing-up-does-nothing = qinveq f (g , gf , fg)
   where

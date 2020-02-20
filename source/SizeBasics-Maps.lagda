@@ -214,8 +214,6 @@ module _
  open import UF-Equiv-FunExt
  open import UF-UniverseEmbedding
 
- -- This should have a better name?
-
  transport-equiv : {X : 𝓤 ̇ } {X' Y : 𝓤 ⊔ 𝓥 ̇ } (e' : X' ≃ Y) (e : X' ≃ X)
                  → transport (λ - → - ≃ X) (eqtoid ua X' Y e') e
                  ≡ ≃-sym e' ● e
@@ -226,6 +224,7 @@ module _
      → transport (λ - → - ≃ X) p e ≡ ≃-sym e' ● e
    τ refl q = {!!}
 
+ -- This should have a better name?
  resizing-up-does-nothing : (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) ≃ 𝓤 ̇
  resizing-up-does-nothing = qinveq f (g , gf , fg)
   where

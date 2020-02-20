@@ -73,11 +73,12 @@ As a first step, we record the following fact.
                                  ◁ fiber (g ∘ section (domains-retract mr) ∘
                                           retraction (domains-retract mr))
                                          (section (codomains-retract mr) y)
- map-retract-gives-fiber-retract {f} {g} ((r , s , rs) , ((u , v , vu) , c , d)) y =
-  fiber f y               ◁⟨ Σ-section-retract (u , v , vu) f y ⟩
-  fiber (v ∘ f) (v y)     ◁⟨ equiv-retract-r (∼-fiber-≃ c (v y)) ⟩
-  fiber (g ∘ s) (v y)     ◁⟨ Σ-reindex-retract r (s , rs) ⟩
-  fiber (g ∘ s ∘ r) (v y) ◀
+ map-retract-gives-fiber-retract {f} {g}
+  ((r , s , rs) , ((u , v , vu) , c , d)) y =
+   fiber f y               ◁⟨ Σ-section-retract (u , v , vu) f y ⟩
+   fiber (v ∘ f) (v y)     ◁⟨ equiv-retract-r (∼-fiber-≃ c (v y)) ⟩
+   fiber (g ∘ s) (v y)     ◁⟨ Σ-reindex-retract r (s , rs) ⟩
+   fiber (g ∘ s ∘ r) (v y) ◀
 
 \end{code}
 
@@ -150,7 +151,8 @@ the data of the map retract.
          p₁ = ap v p₂
          I   = transport-fiber (g ∘ s) (a x) p'
          II  = (∙assoc (ap (g ∘ s) (a x ⁻¹)) (c (r (s x))) p₁) ⁻¹
-         III = ap (λ - → - ∙ p₁) (homotopies-are-natural (g ∘ s) (v ∘ f) c {x} {r (s x)} {a x ⁻¹}) ⁻¹
+         III = ap (λ - → - ∙ p₁) (homotopies-are-natural (g ∘ s) (v ∘ f) c
+                {x} {r (s x)} {a x ⁻¹}) ⁻¹
          IV  = ∙assoc (c x) (ap (v ∘ f) (a x ⁻¹)) p₁
          V   = (∙assoc (c x) (c x ⁻¹) p) ⁻¹
          VI  = ap (λ - → - ∙ p) ((right-inverse (c x)) ⁻¹)

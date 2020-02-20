@@ -237,4 +237,6 @@ Propositional-resizing-implies-Embedding-resizing Pr X Y f e y =
 There should be some theorems about has-size₁ being closed under (appropriately
 coherent) retracts of maps for which the sections are embeddings.
 
+See UF-MapRetracts.
+
 This should be compared to the (simpler) case of has-size for types.

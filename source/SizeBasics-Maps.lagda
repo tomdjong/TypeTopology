@@ -214,7 +214,7 @@ module _
  open import UF-Equiv-FunExt
  open import UF-UniverseEmbedding
 
- -- This should have a better name.
+ -- This should have a better name?
 
  transport-equiv : {X : 𝓤 ̇ } {X' Y : 𝓤 ⊔ 𝓥 ̇ } (e' : X' ≃ Y) (e : X' ≃ X)
                  → transport (λ - → - ≃ X) (eqtoid ua X' Y e') e
@@ -233,6 +233,8 @@ module _
    f = pr₁
    g : 𝓤 ̇ → (Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥))
    g X = X , (resize-up {𝓤} {𝓥} X)
+   fg : (X : 𝓤 ̇ ) → f (g X) ≡ X
+   fg X = refl
    gf : (p : Σ X ꞉ 𝓤 ̇ , X has-size (𝓤 ⊔ 𝓥)) → g (f p) ≡ p
    gf (X , Y , e) = to-Σ-≡ (refl , γ)
     where
@@ -244,16 +246,16 @@ module _
        χ = lift 𝓥 X ≃⟨ lift-≃ 𝓥 X ⟩
            X         ≃⟨ ≃-sym e ⟩
            Y         ■
+       e' : lift 𝓥 X ≡ Y
+       e' = eqtoid ua (lift 𝓥 X) Y χ
        h : (y : Y)
-         → ⌜ transport (λ - → - ≃ X) (eqtoid ua (lift 𝓥 X) Y χ)
-           (lift-≃ 𝓥 X) ⌝ y
+         → ⌜ transport (λ - → - ≃ X) e' (lift-≃ 𝓥 X) ⌝ y
          ≡ pr₁ e y
-       h y = pr₁ (transport (λ - → - ≃ X) (eqtoid ua (lift 𝓥 X) Y χ) (lift-≃ 𝓥 X)) y ≡⟨ (happly (ap ⌜_⌝ (transport-equiv χ (lift-≃ 𝓥 X))) y) ⟩
-             ⌜ (≃-sym χ ● lift-≃ 𝓥 X) ⌝ y ≡⟨ {!!} ⟩
-             {!!} ≡⟨ {!!} ⟩
-             ⌜ e ⌝ y ∎
-   fg : (X : 𝓤 ̇ ) → f (g X) ≡ X
-   fg X = refl
+       h y = ⌜ transport (λ - → - ≃ X) e' (lift-≃ 𝓥 X) ⌝ y ≡⟨ ℏ ⟩
+             ⌜ (≃-sym χ ● lift-≃ 𝓥 X) ⌝ y                  ≡⟨ refl ⟩
+             ⌜ e ⌝ y                                       ∎
+        where
+         ℏ = happly (ap ⌜_⌝ (transport-equiv χ (lift-≃ 𝓥 X))) y
 
  module _ (Y : 𝓤 ̇ ) (ua' : is-univalent 𝓤) where
 

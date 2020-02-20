@@ -301,11 +301,11 @@ imports this file.
 
 \begin{code}
 
-Σ-section-retract : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } {ρ : Y ◁ Z} {g : X → Y}
+Σ-section-retract : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ } (ρ : Y ◁ Z) (g : X → Y)
                   → (y : Y)
                   → (Σ x ꞉ X , g x ≡ y)
                   ◁ (Σ x ꞉ X , section ρ (g x) ≡ section ρ y)
-Σ-section-retract {𝓤} {𝓥} {𝓦} {X} {Y} {Z} {(r , s , rs)} {g} y =
+Σ-section-retract {𝓤} {𝓥} {𝓦} {X} {Y} {Z} (r , s , rs) g y =
  Σ-retract (λ x → g x ≡ y) (λ x → s (g x) ≡ s y) γ
   where
    γ : (x : X) → (g x ≡ y) ◁ (s (g x) ≡ s y)

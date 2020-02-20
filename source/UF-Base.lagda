@@ -208,11 +208,15 @@ cancel-left {𝓤} {X} {x} {y} {z} {p} {q} {r} s =
        r ∎
 
 homotopies-are-natural' : {X : 𝓤 ̇ } {A : 𝓥 ̇ } (f g : X → A) (H : f ∼ g) {x y : X} {p : x ≡ y}
-                      → H x ∙ ap g p ∙ (H y)⁻¹ ≡ ap f p
+                        → H x ∙ ap g p ∙ (H y)⁻¹ ≡ ap f p
 homotopies-are-natural' f g H {x} {_} {refl} = trans-sym' (H x)
 
+homotopies-are-natural'' : {X : 𝓤 ̇ } {A : 𝓥 ̇ } (f g : X → A) (H : f ∼ g) {x y : X} {p : x ≡ y}
+                         → (H x) ⁻¹ ∙ ap f p ∙ H y ≡ ap g p
+homotopies-are-natural'' f g H {x} {_} {refl} = trans-sym (H x)
+
 homotopies-are-natural : {X : 𝓤 ̇ } {A : 𝓥 ̇ } (f g : X → A) (H : f ∼ g) {x y : X} {p : x ≡ y}
-                      → H x ∙ ap g p ≡ ap f p ∙ H y
+                       → H x ∙ ap g p ≡ ap f p ∙ H y
 homotopies-are-natural f g H {x} {_} {refl} = refl-left-neutral ⁻¹
 
 to-×-≡ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {x x' : X} {y y' : Y}

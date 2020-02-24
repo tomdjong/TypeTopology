@@ -196,3 +196,75 @@ the data of the map retract.
              X₂    = (ap-id-is-id q) ⁻¹
 
 \end{code}
+
+We can get the desired retract without the embedding assumption, see Lemma 4.7.3
+of the HoTT book.
+
+It is noteworthy to mention that the coherence law above (which I
+"rediscovered") is part of the definition of a retract in Definition 4.7.2 of
+the HoTT book.
+
+We use the same naming as there.
+
+A --s--> X --r--> A # composition is id
+|        |        |
+g        f        g
+|        |        |
+∨        ∨        ∨
+B --s'-> Y --r'-> B # composition is id
+
+\begin{code}
+
+module _
+        {A : 𝓤 ̇ } {B : 𝓥 ̇ } {X : 𝓤' ̇ } {Y : 𝓥' ̇ }
+        {f : X → Y}
+        {g : A → B}
+        (s : A → X)
+        (r : X → A)
+        (s' : B → Y)
+        (r' : Y → B)
+        (R : (a : A) → r (s a) ≡ a)
+        (R' : (b : B) → r' (s' b) ≡ b)
+        (L : (a : A) → f (s a) ≡ s' (g a))
+        (K : (x : X) → g (r x) ≡ r' (f x))
+        (H : (a : A) → K (s a) ∙ ap r' (L a) ≡ ap g (R a) ∙ R' (g a) ⁻¹)
+       where
+
+ map-retract-gives-fiber-retract'' : (b : B) → fiber g b ◁ fiber f (s' b)
+ map-retract-gives-fiber-retract'' b = ρ , σ , ρσ
+  where
+   σ : fiber g b → fiber f (s' b)
+   σ (a , p)  = (s a) , (f (s a)  ≡⟨ L a ⟩
+                        s' (g a) ≡⟨ ap s' p ⟩
+                        s' b     ∎)
+   ρ : fiber f (s' b) → fiber g b
+   ρ (x , q) = (r x) , (g (r x)   ≡⟨ K x ⟩
+                        r' (f x)  ≡⟨ ap r' q ⟩
+                        r' (s' b) ≡⟨ R' b ⟩
+                        b         ∎)
+   ρσ : (w : fiber g b) → ρ (σ w) ≡ w
+   ρσ (a , refl) = to-Σ-≡ (R a , γ)
+    where
+     γ = transport (λ - → g - ≡ g a) (R a) p                     ≡⟨ i ⟩
+         ap g (R a ⁻¹) ∙ p                                       ≡⟨ ii ⟩
+         ap g (R a ⁻¹) ∙ (K (s a) ∙ (ap r' (L a) ∙ R' b))        ≡⟨ iii ⟩
+         ap g (R a ⁻¹) ∙ (K (s a) ∙ ap r' (L a) ∙ R' b)          ≡⟨ iv ⟩
+         ap g (R a ⁻¹) ∙ (ap g (R a) ∙ R' (g a) ⁻¹ ∙ R' (g a))   ≡⟨ v ⟩
+         ap g (R a ⁻¹) ∙ (ap g (R a) ∙ (R' (g a) ⁻¹ ∙ R' (g a))) ≡⟨ vi ⟩
+         ap g (R a ⁻¹) ∙ ap g (R a)                              ≡⟨ vii ⟩
+         ap g (R a) ⁻¹ ∙ ap g (R a)                              ≡⟨ viii ⟩
+         refl                                                    ∎
+      where
+       p : g (r (s a)) ≡ g a
+       p = K (s a) ∙ (ap r' (L a ∙ ap s' refl) ∙ R' b)
+       i    = transport-fiber g (R a) p
+       ii   = by-definition
+       iii  = ap (λ - → ap g (R a ⁻¹) ∙ -)
+             ((∙assoc (K (s a)) (ap r' (L a)) (R' b)) ⁻¹)
+       iv   = ap (λ - → ap g (R a ⁻¹) ∙ (- ∙ R' b)) (H a)
+       v    = ap (λ - → ap g (R a ⁻¹) ∙ -)
+             (∙assoc (ap g (R a)) (R' (g a) ⁻¹) (R' (g a)))
+       vi   = ap (λ - → ap g (R a ⁻¹) ∙ (ap g (R a) ∙ -))
+              (left-inverse (R' (g a)))
+       vii  = ap (λ - → - ∙ ap g (R a)) ((ap-sym g (R a)) ⁻¹)
+       viii = left-inverse (ap g (R a))

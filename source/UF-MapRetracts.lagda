@@ -26,6 +26,7 @@ open import UF-Retracts
 open import UF-Embeddings
 open import UF-Equiv
 open import UF-EquivalenceExamples
+open import UF-Subsingletons
 
 module _
         {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {W : 𝓦 ̇ } {Z : 𝓣 ̇ }
@@ -268,3 +269,61 @@ module _
               (left-inverse (R' (g a)))
        vii  = ap (λ - → - ∙ ap g (R a)) ((ap-sym g (R a)) ⁻¹)
        viii = left-inverse (ap g (R a))
+
+\end{code}
+
+Moreover, if s and s' are embeddings, then so is σ.
+
+\begin{code}
+
+ fiber-retract-section-is-embedding : is-embedding s
+                                    → is-embedding s'
+                                    → (b : B)
+                                    → is-embedding (section
+                                       (map-retract-gives-fiber-retract'' b))
+ fiber-retract-section-is-embedding ε ε' b = embedding-criterion' σ γ
+  where
+   σ : fiber g b → fiber f (s' b)
+   σ = section (map-retract-gives-fiber-retract'' b)
+   σ₂ : (a : A) (p : g a ≡ b) → f (s a) ≡ s' b
+   σ₂ a p = L a ∙ ap s' p
+   γ : (u v : fiber g b) → (σ u ≡ σ v) ≃ (u ≡ v)
+   γ (a , p) (a' , p') =
+    (σ (a , p) ≡ σ (a' , p'))                                ≃⟨ Σ-≡-≃ ⟩
+    (Σ q ꞉ s a ≡ s a' , transport T q (σ₂ a p) ≡ (σ₂ a' p')) ≃⟨ i ⟩
+    (Σ q ꞉ s a ≡ s a' , ap f (q ⁻¹) ∙ σ₂ a p ≡ σ₂ a' p')     ≃⟨ ii ⟩
+    (Σ q ꞉ a ≡ a' , ap f (ap s q ⁻¹) ∙ σ₂ a p ≡ σ₂ a' p')    ≃⟨ iii ⟩
+    (Σ q ꞉ a ≡ a' , ap s' (ap g (q ⁻¹) ∙ p) ≡ ap s' p')      ≃⟨ iv ⟩
+    (Σ q ꞉ a ≡ a' , ap g (q ⁻¹) ∙ p ≡ p')                    ≃⟨ v ⟩
+    (Σ q ꞉ a ≡ a' , transport (λ - → g - ≡ b) q p ≡ p')      ≃⟨ ≃-sym Σ-≡-≃ ⟩
+    (a , p ≡ a' , p')                                        ■
+     where
+      T : X → 𝓥' ̇
+      T x = f x ≡ s' b
+      i   = Σ-cong (λ q → idtoeq _ _
+            (ap (λ - → - ≡ σ₂ a' p') (transport-fiber f q (σ₂ a p))))
+      ii  = ≃-sym (Σ-change-of-variables (λ q → ap f (q ⁻¹) ∙ σ₂ a p ≡ σ₂ a' p')
+            (ap s) (embedding-embedding' s ε a a'))
+      iv  = Σ-cong (λ q → ≃-sym ((ap (ap s')) , embedding-embedding' (ap s')
+            (equivs-are-embeddings (ap s') (embedding-embedding' s' ε' (g a') b))
+            (ap g (q ⁻¹) ∙ p) p'))
+      v   = Σ-cong (λ q → idtoeq _ _ (ap (λ - → - ≡ p')
+            (transport-fiber g q p) ⁻¹))
+      iii = Σ-cong (λ q → idtoeq _ _ (h q))
+       where
+        h : (q : a ≡ a')
+          → (ap f (ap s q ⁻¹) ∙ σ₂ a p ≡ σ₂ a' p')
+          ≡ (ap s' (ap g (q ⁻¹) ∙ p) ≡ ap s' p')
+        h refl = (ap f (ap s refl ⁻¹) ∙ σ₂ a p ≡ σ₂ a' p') ≡⟨ refl ⟩
+                 (refl ∙ σ₂ a p ≡ σ₂ a' p')                ≡⟨ i' ⟩
+                 (σ₂ a p ≡ σ₂ a p')                        ≡⟨ by-definition ⟩
+                 (L a ∙ ap s' p ≡ L a ∙ ap s' p')          ≡⟨ cancel-left-≡ ⟩
+                 (ap s' p ≡ ap s' p')                      ≡⟨ ii' ⟩
+                 (ap s' (refl ∙ p) ≡ ap s' p')             ≡⟨ refl ⟩
+                 (ap s' (ap g (refl ⁻¹) ∙ p) ≡ ap s' p')   ∎
+         where
+          i'  = ap (λ - → - ≡ σ₂ a' p') refl-left-neutral
+          ii' = ap (λ - → ap s' - ≡ ap s' p')
+                (refl-left-neutral {𝓥} {B} {g a} {b} {p}) ⁻¹
+
+\end{code}

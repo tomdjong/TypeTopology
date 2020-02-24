@@ -110,10 +110,10 @@ the data of the map retract.
                                    → fiber f y
                                    ◁ fiber g (v y)
   map-retract-gives-fiber-retract' ε coh y =
-   fiber f y ◁⟨ Σ-section-retract (u , v , b) f y ⟩
+   fiber f y           ◁⟨ Σ-section-retract (u , v , b) f y ⟩
    fiber (v ∘ f) (v y) ◁⟨ equiv-retract-r (∼-fiber-≃ c (v y)) ⟩
    fiber (g ∘ s) (v y) ◁⟨ ρ , (σ , ρσ) ⟩
-   fiber g (v y) ◀
+   fiber g (v y)       ◀
     where
      ρ : fiber g (v y) → fiber (g ∘ s) (v y)
      ρ (w , q) = (r w) , p

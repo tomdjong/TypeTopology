@@ -1,4 +1,4 @@
-Tom de Jong, 11 December 2019.
+Tom de Jong, 11 December 2019 -
 
 \begin{code}
 

@@ -105,8 +105,8 @@ module Ideals
  carrier : Idl → 𝓟 (𝓥 ⊔ 𝓣) P
  carrier = pr₁
 
- idealness : (I : Idl) → is-ideal (carrier I)
- idealness = pr₂
+ ideality : (I : Idl) → is-ideal (carrier I)
+ ideality = pr₂
 
  _∈ᵢ_ : P → Idl → 𝓥 ⊔ 𝓣 ̇
  p ∈ᵢ I = p ∈ carrier I
@@ -134,7 +134,7 @@ module Ideals
    ls p q l = ∥∥-functor γ
     where
      γ : (Σ a ꞉ 𝓐 , q ∈ᵢ α a) → (Σ a ꞉ 𝓐 , p ∈ᵢ α a)
-     γ (a , u) = a , ideals-are-lower-sets (carrier (α a)) (idealness (α a))
+     γ (a , u) = a , ideals-are-lower-sets (carrier (α a)) (ideality (α a))
                      p q l u
    inh : ∃ p ꞉ P , p ∈ ∐α
    inh = ∥∥-rec ∥∥-is-a-prop γ (directed-implies-inhabited _⊑_ α δ)
@@ -144,7 +144,7 @@ module Ideals
       where
        inh' : is-inhabited-set (carrier (α a))
        inh' = directed-sets-are-inhabited (carrier (α a))
-              (ideals-are-directed-sets (carrier (α a)) (idealness (α a)))
+              (ideals-are-directed-sets (carrier (α a)) (ideality (α a)))
        h : (Σ p ꞉ P , p ∈ᵢ α a) → (Σ p ꞉ P , p ∈ ∐α)
        h (p , u) = p , ∣ a , u ∣
    ε : is-weakly-directed-set ∐α
@@ -157,7 +157,7 @@ module Ideals
     (r , r∈αc , p≤r , q≤r) ← directed-sets-are-weakly-directed
                              (carrier (α c))
                              (ideals-are-directed-sets (carrier (α c))
-                              (idealness (α c)))
+                              (ideality (α c)))
                              p q p∈αc q∈αc
     ∣ r , ∣ c , r∈αc ∣ , p≤r , q≤r ∣
 
@@ -237,7 +237,7 @@ module _
    δ = (directed-sets-are-inhabited (carrier I) I-dir) , ε
     where
      I-dir : is-directed-set (carrier I)
-     I-dir = ideals-are-directed-sets (carrier I) (idealness I)
+     I-dir = ideals-are-directed-sets (carrier I) (ideality I)
      ε : is-weakly-directed (underlying-order 𝓓) ι
      ε (p , p∈I) (q , q∈I) = do
       r , r∈I , p≤r , q≤r ← directed-sets-are-weakly-directed (carrier I) I-dir

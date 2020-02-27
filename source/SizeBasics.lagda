@@ -115,9 +115,9 @@ module _
 
 \end{code}
 
-Here are some additional resizing principles, for which I have not been able
-that they are equivalent to propositional resizing (or Ω-Resizing), but they
-are/seem related.
+Here are some additional resizing principles, for which I have not been able to
+show that they are equivalent to propositional resizing (or Ω-Resizing), but
+they are/seem related.
 
 \begin{code}
 

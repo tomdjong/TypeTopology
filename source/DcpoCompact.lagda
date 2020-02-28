@@ -178,12 +178,12 @@ algebraic'-implies-algebraic 𝓓 = ∥∥-functor γ
          → ((i : I) → compact 𝓓 (ι (β i)))
          → (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
          → (i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x
-      wb β κ (δ , lubeq) i = ≪-⊑-to-≪ 𝓓 v w
+      wb β κ (δ , ∐≡x) i = ≪-⊑-to-≪ 𝓓 v w
        where
         v : ι (β i) ≪⟨ 𝓓 ⟩ ι (β i)
         v = κ i
         w : ι (β i) ⊑⟨ 𝓓 ⟩ x
-        w = transport (λ - → ι (β i) ⊑⟨ 𝓓 ⟩ -) lubeq w'
+        w = transport (λ - → ι (β i) ⊑⟨ 𝓓 ⟩ -) ∐≡x w'
          where
           w' : ι (β i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
           w' = ∐-is-upperbound 𝓓 δ i

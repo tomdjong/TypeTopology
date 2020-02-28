@@ -4,7 +4,7 @@ Tom de Jong, 11 December 2019 -
 
 {-# OPTIONS --without-K --exact-split --safe #-}
 
-open import SpartanMLTT
+open import SpartanMLTT hiding (J)
 open import UF-PropTrunc hiding (⊥)
 
 module DcpoCompact
@@ -214,19 +214,51 @@ syntax basis-≤ 𝓓 c b b' = b ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
        → (b : basis 𝓓 c)
        → ∃ b' ꞉ basis 𝓓 c , b' ≤ᴮ⟨ 𝓓 ⟩[ c ] b
 ≪-INT₀ 𝓓 (B , ι , c) b = do
- (I , β , ≪b , (δ , ∐≡b)) ← c (ι b)
+ (I , β , ≪b , (δ , ∐β≡b)) ← c (ι b)
  i ← Directed-implies-inhabited 𝓓 δ
  ∣ (β i) , (≪b i) ∣
 
-{-
+open import UF-Size
+
 ≪-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+       → ((x y : basis 𝓓 c) → (x ≤ᴮ⟨ 𝓓 ⟩[ c ] y) has-size 𝓥)
        → (x y : basis 𝓓 c)
        → x ≤ᴮ⟨ 𝓓 ⟩[ c ] y
        → ∃ b ꞉ basis 𝓓 c , x ≤ᴮ⟨ 𝓓 ⟩[ c ] b × b ≤ᴮ⟨ 𝓓 ⟩[ c ] y
-≪-INT₁ 𝓓 c x y x≤y = {!!}
+≪-INT₁ 𝓓 (B , ι , c) ≤-small x y x≤y = ∥∥-rec ∥∥-is-a-prop γ (c (ι y))
  where
+  cd : is-a-continuous-dcpo 𝓓
+  cd = (B , ι , c)
+  γ : Σ I ꞉ 𝓥 ̇ , Σ α ꞉ (I → B) ,
+      ((i : I) → α i ≤ᴮ⟨ 𝓓 ⟩[ cd ] y) ×
+      (Σ δ ꞉ is-Directed 𝓓 (ι ∘ α) , ∐ 𝓓 δ ≡ ι y)
+    → ∃ b ꞉ B , x ≤ᴮ⟨ 𝓓 ⟩[ cd ] b × b ≤ᴮ⟨ 𝓓 ⟩[ cd ] y
+  γ (I , α , α≪y , (δ , ∐α≡y)) = {!!}
+   where
+    _≤'_ : B → B → 𝓥 ̇
+    b ≤' b' = has-size-type (≤-small b b')
+    J : 𝓥 ̇
+    J = Σ b ꞉ B , ∃ i ꞉ I , b ≤' α i
+    β : J → ⟨ 𝓓 ⟩
+    β (b , _) = ι b
+    ε : is-Directed 𝓓 β
+    ε = {!!}
+    claim₀ : ι y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+    claim₀ = {!!}
+    claim₁ : ∃ j ꞉ J , ι x ⊑⟨ 𝓓 ⟩ β j
+    claim₁ = x≤y J β ε claim₀
 
 
+{-
+
+do
+ (I , α , ≪y , (δ , ∐α≡y)) ← c (ι y)
+ v ← {!!}
+ {!!}
+
+-}
+
+{-
 ≪-int-lemma : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓
             → (x y : ⟨ 𝓓 ⟩) {𝓐 : 𝓥 ̇ } (α : 𝓐 → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
             → y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ

@@ -101,23 +101,37 @@ compact : (𝓓 : DCPO {𝓤} {𝓣}) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔
 compact 𝓓 x = x ≪⟨ 𝓓 ⟩ x
 
 is-a-continuous-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-is-a-continuous-dcpo {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , γ ι
+is-a-continuous-dcpo {𝓤} {𝓣} 𝓓 = Σ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , γ ι
  where
   γ : {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
   γ {B} ι = (x : ⟨ 𝓓 ⟩)
-          → Σ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (β-≪-x β x) × (∐β≡x β x)
+          → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (β-≪-x β x) × (∐β≡x β x)
    where
     β-≪-x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
     β-≪-x {I} β x = ((i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x)
     ∐β≡x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
     ∐β≡x β x = Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x
 
+basis : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓 → 𝓥 ̇
+basis 𝓓 = pr₁
+
+basis-of-continuous-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓
+                         → Σ B ꞉ 𝓥 ̇ , (B → ⟨ 𝓓 ⟩)
+basis-of-continuous-dcpo 𝓓 (B , ι , _) = B , ι
+
+{- basis-property : (𝓓 : DCPO {𝓤} {𝓣}) → (cd : is-a-continuous-dcpo 𝓓)
+               → (x : ⟨ 𝓓 ⟩)
+               → Σ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → ) ,
+                 ((i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x)
+                 × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
+basis-property 𝓓 (B , ι , c) = c -}
+
 is-an-algebraic-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-is-an-algebraic-dcpo {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , γ ι
+is-an-algebraic-dcpo {𝓤} {𝓣} 𝓓 = Σ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , γ ι
  where
   γ : {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
   γ {B} ι = (x : ⟨ 𝓓 ⟩)
-        → Σ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (κ β) × (β-≪-x β x) × (∐β≡x β x)
+          → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (κ β) × (β-≪-x β x) × (∐β≡x β x)
    where
     κ : {I : 𝓥 ̇ } → (I → B) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
     κ {I} β = (i : I) → compact 𝓓 (ι (β i))
@@ -129,21 +143,20 @@ is-an-algebraic-dcpo {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → �
 algebraicity-implies-continuity : (𝓓 : DCPO {𝓤} {𝓣})
                                 → is-an-algebraic-dcpo 𝓓
                                 → is-a-continuous-dcpo 𝓓
-algebraicity-implies-continuity 𝓓 = ∥∥-functor γ
+algebraicity-implies-continuity 𝓓 (B , ι , a) = B , ι , c
  where
-  γ : _
-  γ (B , ι , a) = B , ι , c
+  c : _
+  c x = ∥∥-functor γ (a x)
    where
-    c : _
-    c x = let (I , β , _ , wb , s) = a x in
-          I , β , wb , s
+    γ : _
+    γ (I , β , κ , wb , s) = I , β , wb , s
 
 is-algebraic' : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-is-algebraic' {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , γ ι
+is-algebraic' {𝓤} {𝓣} 𝓓 = Σ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , γ ι
  where
   γ : {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
   γ {B} ι = (x : ⟨ 𝓓 ⟩)
-        → Σ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (κ β) × (∐β≡x β x)
+          → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (κ β) × (∐β≡x β x)
    where
     κ : {I : 𝓥 ̇ } → (I → B) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
     κ {I} β = (i : I) → compact 𝓓 (ι (β i))
@@ -153,39 +166,85 @@ is-algebraic' {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓
 algebraic-implies-algebraic' : (𝓓 : DCPO {𝓤} {𝓣})
                              → is-an-algebraic-dcpo 𝓓
                              → is-algebraic' 𝓓
-algebraic-implies-algebraic' 𝓓 = ∥∥-functor γ
+algebraic-implies-algebraic' 𝓓 (B , ι , a) = B , ι , a'
  where
-  γ : _
-  γ (B , ι , a) = B , ι , a'
+  a' : _
+  a' x = ∥∥-functor γ (a x)
    where
-    a' : _
-    a' x = let (I , β , κ , _ , s) = a x in
-           I , β , κ , s
+    γ : _
+    γ (I , β , κ , wb , s) = I , β , κ , s
 
 algebraic'-implies-algebraic : (𝓓 : DCPO {𝓤} {𝓣})
                              → is-algebraic' 𝓓
                              → is-an-algebraic-dcpo 𝓓
-algebraic'-implies-algebraic 𝓓 = ∥∥-functor γ
+algebraic'-implies-algebraic 𝓓 (B , ι , a') = B , ι , a
  where
-  γ : _
-  γ (B , ι , a') = B , ι , a
+  a : _
+  a x = ∥∥-functor γ (a' x)
    where
-    a : _
-    a x = let (I , β , κ , s) = a' x in
-          I , β , κ , wb β κ s , s
+    γ : _
+    γ (I , β , κ , s) = I , β , κ , wb , s
      where
-      wb : {I : 𝓥 ̇ } (β : I → B)
-         → ((i : I) → compact 𝓓 (ι (β i)))
-         → (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
-         → (i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x
-      wb β κ (δ , ∐≡x) i = ≪-⊑-to-≪ 𝓓 v w
+      wb : (i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x
+      wb  i = ≪-⊑-to-≪ 𝓓 v w
        where
         v : ι (β i) ≪⟨ 𝓓 ⟩ ι (β i)
         v = κ i
         w : ι (β i) ⊑⟨ 𝓓 ⟩ x
         w = transport (λ - → ι (β i) ⊑⟨ 𝓓 ⟩ -) ∐≡x w'
          where
+          δ : is-Directed 𝓓 (ι ∘ β)
+          δ = pr₁ s
+          ∐≡x : ∐ 𝓓 δ ≡ x
+          ∐≡x = pr₂ s
           w' : ι (β i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
           w' = ∐-is-upperbound 𝓓 δ i
+
+\end{code}
+
+\begin{code}
+
+basis-≤ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+        → basis 𝓓 c → basis 𝓓 c → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+basis-≤ 𝓓 (B , ι , _) b b' = ι b ≪⟨ 𝓓 ⟩ ι b'
+
+syntax basis-≤ 𝓓 c b b' = b ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
+
+≪-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+       → (b : basis 𝓓 c)
+       → ∃ b' ꞉ basis 𝓓 c , b' ≤ᴮ⟨ 𝓓 ⟩[ c ] b
+≪-INT₀ 𝓓 (B , ι , c) b = do
+ (I , β , ≪b , (δ , ∐≡b)) ← c (ι b)
+ i ← Directed-implies-inhabited 𝓓 δ
+ ∣ (β i) , (≪b i) ∣
+
+{-
+≪-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+       → (x y : basis 𝓓 c)
+       → x ≤ᴮ⟨ 𝓓 ⟩[ c ] y
+       → ∃ b ꞉ basis 𝓓 c , x ≤ᴮ⟨ 𝓓 ⟩[ c ] b × b ≤ᴮ⟨ 𝓓 ⟩[ c ] y
+≪-INT₁ 𝓓 c x y x≤y = {!!}
+ where
+
+
+≪-int-lemma : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓
+            → (x y : ⟨ 𝓓 ⟩) {𝓐 : 𝓥 ̇ } (α : 𝓐 → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
+            → y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+            → x ≪⟨ 𝓓 ⟩ y
+            → ∃ a ꞉ 𝓐 , x ≪⟨ 𝓓 ⟩ α a
+≪-int-lemma 𝓓 c x y α δ y⊑∐ x≪y = {!!}
+ where
+--  I
+
+≪-INT₂ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+       → (b₀ b₁ b : basis 𝓓 c)
+       → b₀ ≤ᴮ⟨ 𝓓 ⟩[ c ] b
+       → b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b
+       → ∃ b' ꞉ basis 𝓓 c ,
+         b' ≤ᴮ⟨ 𝓓 ⟩[ c ] b
+       × b₀ ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
+       × b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
+≪-INT₂ 𝓓 (B , ι , c) b₀ b₁ b b₀≤b b₁≤b = {!!}
+-}
 
 \end{code}

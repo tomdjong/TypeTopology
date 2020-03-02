@@ -192,6 +192,15 @@ module _ {𝓤 𝓣 : Universe} where
 
 \end{code}
 
+To avoid some transports:
+
+\begin{code}
+
+ ≡-to-⊑ : (𝓓 : DCPO) {x y : ⟨ 𝓓 ⟩} → x ≡ y → x ⊑⟨ 𝓓 ⟩ y
+ ≡-to-⊑ 𝓓 {x} {x} refl = reflexivity 𝓓 x
+
+\end{code}
+
 We also consider dcpos with a least element.
 
 \begin{code}

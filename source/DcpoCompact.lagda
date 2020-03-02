@@ -391,18 +391,41 @@ only include basis elements in the newly constructed directed family.
    γ (b , b₁≪b , b≪b₂) =
     b , ≪-to-≤ᴮ 𝓓 c b₁ b b₁≪b , ≪-to-≤ᴮ 𝓓 c b b₂ b≪b₂
 
-{-
+\end{code}
+
+An interpolation property starting from two inequalities.
+
+≤ᴮ-INT₂ is needed so that we may take the (rounded) ideal completion of a basis
+of a conitinuous dcpo.
+
+\begin{code}
 
 ≪-INT₂ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-       → (b₀ b₁ b : basis 𝓓 c)
-       → b₀ ≤ᴮ⟨ 𝓓 ⟩[ c ] b
-       → b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b
-       → ∃ b' ꞉ basis 𝓓 c ,
-         b' ≤ᴮ⟨ 𝓓 ⟩[ c ] b
-       × b₀ ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
-       × b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
-≪-INT₂ 𝓓 (B , ι , c) b₀ b₁ b b₀≤b b₁≤b = {!!}
--}
-
+       → (x y z : ⟨ 𝓓 ⟩)
+       → x ≪⟨ 𝓓 ⟩ z
+       → y ≪⟨ 𝓓 ⟩ z
+       → ∃ b ꞉ basis 𝓓 c ,
+         x ≪⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b
+       × y ≪⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b
+       × basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ z
+≪-INT₂ 𝓓 (B , ι , ≤ , c) x y z x≪z y≪z = do
+ b₁ , x≪b₁ , b₁≪z ← ≪-INT₁ 𝓓 cd x z x≪z
+ b₂ , y≪b₂ , b₂≪z ← ≪-INT₁ 𝓓 cd y z y≪z
+ I , α , α≪z , δ , ∐α≡z ← c z
+ i₁ , b₁⊑αi₁ ← b₁≪z I (ι ∘ α) δ (≡-to-⊑ 𝓓 (∐α≡z ⁻¹))
+ i₂ , b₂⊑αi₂ ← b₂≪z I (ι ∘ α) δ (≡-to-⊑ 𝓓 (∐α≡z ⁻¹))
+ k , αi₁⊑αk , αi₂⊑αk ← Directed-implies-weakly-directed 𝓓 δ i₁ i₂
+ let b₁⊑αk = ι b₁     ⊑⟨ 𝓓 ⟩[ b₁⊑αi₁ ]
+             ι (α i₁) ⊑⟨ 𝓓 ⟩[ αi₁⊑αk ]
+             ι (α k)  ∎⟨ 𝓓 ⟩
+ let b₂⊑αk = ι b₂     ⊑⟨ 𝓓 ⟩[ b₂⊑αi₂ ]
+             ι (α i₂) ⊑⟨ 𝓓 ⟩[ αi₂⊑αk ]
+             ι (α k)  ∎⟨ 𝓓 ⟩
+ let x≪αk = ≪-⊑-to-≪ 𝓓 x≪b₁ b₁⊑αk
+ let y≪αk = ≪-⊑-to-≪ 𝓓 y≪b₂ b₂⊑αk
+ ∣ α k , x≪αk , y≪αk , α≪z k ∣
+ where
+  cd : is-a-continuous-dcpo 𝓓
+  cd = (B , ι , ≤ , c)
 
 \end{code}

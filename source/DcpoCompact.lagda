@@ -373,20 +373,25 @@ only include basis elements in the newly constructed directed family.
                   j : J
                   j = ϕ l , i , ≪-to-≤ᴮ 𝓓 cd (ϕ l) (α i) (ϕ≪αi l)
 
-
-
+≤ᴮ-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+        → (b₁ b₂ : basis 𝓓 c)
+        → b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b₂
+        → ∃ b ꞉ basis 𝓓 c ,
+           b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b
+          × b ≤ᴮ⟨ 𝓓 ⟩[ c ] b₂
+≤ᴮ-INT₁ 𝓓 c b₁ b₂ b₁≤ᴮb₂ =
+ ∥∥-functor γ (≪-INT₁ 𝓓 c (ι b₁) (ι b₂) (≤ᴮ-to-≪ 𝓓 c b₁ b₂ b₁≤ᴮb₂))
+  where
+   B : 𝓥 ̇
+   B = basis 𝓓 c
+   ι : B → ⟨ 𝓓 ⟩
+   ι = basis-to-dcpo 𝓓 c
+   γ : (Σ b ꞉ B , ι b₁ ≪⟨ 𝓓 ⟩ ι b × ι b ≪⟨ 𝓓 ⟩ ι b₂)
+     → Σ b ꞉ B , b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b × b ≤ᴮ⟨ 𝓓 ⟩[ c ] b₂
+   γ (b , b₁≪b , b≪b₂) =
+    b , ≪-to-≤ᴮ 𝓓 c b₁ b b₁≪b , ≪-to-≤ᴮ 𝓓 c b b₂ b≪b₂
 
 {-
-
-{-
-≪-int-lemma : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓
-            → (x y : ⟨ 𝓓 ⟩) {𝓐 : 𝓥 ̇ } (α : 𝓐 → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
-            → y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-            → x ≪⟨ 𝓓 ⟩ y
-            → ∃ a ꞉ 𝓐 , x ≪⟨ 𝓓 ⟩ α a
-≪-int-lemma 𝓓 c x y α δ y⊑∐ x≪y = {!!}
- where
---  I
 
 ≪-INT₂ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
        → (b₀ b₁ b : basis 𝓓 c)
@@ -397,7 +402,6 @@ only include basis elements in the newly constructed directed family.
        × b₀ ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
        × b₁ ≤ᴮ⟨ 𝓓 ⟩[ c ] b'
 ≪-INT₂ 𝓓 (B , ι , c) b₀ b₁ b b₀≤b b₁≤b = {!!}
--}
 -}
 
 

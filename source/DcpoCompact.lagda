@@ -252,7 +252,7 @@ algebraic'-implies-algebraic 𝓓 (B , ι , ≤ , a') = B , ι , ≤ , a
        → (x : ⟨ 𝓓 ⟩)
        → ∃ b ꞉ basis 𝓓 c , basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ x
 ≪-INT₀ 𝓓 (B , ι , ≤ , c) x = do
- (I , β , ≪x , (δ , ∐β≡x)) ← c x
+ (I , β , ≪x , δ , ∐β≡x) ← c x
  i ← Directed-implies-inhabited 𝓓 δ
  ∣ (β i) , ≪x i ∣
 
@@ -268,11 +268,12 @@ algebraic'-implies-algebraic 𝓓 (B , ι , ≤ , a') = B , ι , ≤ , a
   γ : (Σ b' ꞉ B , ι b' ≪⟨ 𝓓 ⟩ ι b) → Σ b' ꞉ B , b' ≤ᴮ⟨ 𝓓 ⟩[ c ] b
   γ (b' , b'≪b) = b' , ≪-to-≤ᴮ 𝓓 c b' b b'≪b
 
--- It seems that the first lemma from
--- https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf cannot work here,
--- because ≪ may be non-small when comparing non-basis elements.
+\end{code}
 
-{-
+It seems that the first lemma from
+https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf cannot work here,
+because ≪ may be non-small when comparing non-basis elements.
+
 ≪-∐-lemma : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓
            → (x y : ⟨ 𝓓 ⟩) {D : 𝓥 ̇ } (𝒹 : D → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 𝒹)
            → y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
@@ -280,9 +281,14 @@ algebraic'-implies-algebraic 𝓓 (B , ι , ≤ , a') = B , ι , ≤ , a
            → ∃ d ꞉ D , x ≪⟨ 𝓓 ⟩ 𝒹 d
 ≪-∐-lemma 𝓓 (B , ι , ≤ , c) x y {D} 𝒹 δ y⊑∐ x≪y = {!!}
  where
-  I : 𝓥 ̇
+  I : 𝓥 ̇ -- This does not type check
   I = Σ b ꞉ B , Σ d ꞉ D , ι b ≪⟨ 𝓓 ⟩ 𝒹 d
--}
+
+Below, we do follow the proof from
+https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf, but adapted so that we
+only include basis elements in the newly constructed directed family.
+
+\begin{code}
 
 ≪-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
        → (x y : ⟨ 𝓓 ⟩)
@@ -298,62 +304,76 @@ algebraic'-implies-algebraic 𝓓 (B , ι , ≤ , a') = B , ι , ≤ , a
        ((i : I) → ι (α i) ≪⟨ 𝓓 ⟩ y)
       × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ α) , ∐ 𝓓 δ ≡ y))
     → ∃ b ꞉ B , x ≪⟨ 𝓓 ⟩ ι b × ι b ≪⟨ 𝓓 ⟩ y
-  γ (I , α , α≪y , (δ , ∐α≡y)) = {!!}
+  γ (I , α , α≪y , δ , ∐α≡y) = ∥∥-functor s t
    where
     J : 𝓥 ̇
     J = Σ b ꞉ B , Σ i ꞉ I , b ≤ᴮ⟨ 𝓓 ⟩[ cd ] α i
-    β : J → ⟨ 𝓓 ⟩
-    β = ι ∘ pr₁
-    ε : is-Directed 𝓓 β
-    ε = J-inh , β-wdirected
+    s : (Σ j ꞉ J , x ⊑⟨ 𝓓 ⟩ ι (pr₁ j))
+      → Σ b ꞉ B , x ≪⟨ 𝓓 ⟩ ι b × ι b ≪⟨ 𝓓 ⟩ y
+    s ((b , i , b≤ᴮαi) , x⊑b) = α i , ≪₁ , ≪₂
      where
-      J-inh : ∥ J ∥
-      J-inh = do
-       i ← Directed-implies-inhabited 𝓓 δ
-       (b , b≤ᴮαi) ← ≤ᴮ-INT₀ 𝓓 cd (α i)
-       ∣ b , i , b≤ᴮαi ∣
-      β-wdirected : is-weakly-directed (underlying-order 𝓓) β
-      β-wdirected (b₁ , i₁ , b₁≤ᴮαi₁) (b₂ , i₂ , b₂≤ᴮαi₂) = do
-       (k , αi₁⊑αk , αi₂⊑αk) ← Directed-implies-weakly-directed 𝓓 δ i₁ i₂
-       let b₁≪αk = ≪-⊑-to-≪ 𝓓 (≤ᴮ-to-≪ 𝓓 cd b₁ (α i₁) b₁≤ᴮαi₁) αi₁⊑αk
-       let b₂≪αk = ≪-⊑-to-≪ 𝓓 (≤ᴮ-to-≪ 𝓓 cd b₂ (α i₂) b₂≤ᴮαi₂) αi₂⊑αk
-       (L , ϕ , ϕ≪αk , (ε , ∐ϕ≡αk)) ← c (ι (α k))
-       (l₁ , b₁⊑ϕl₁) ← b₁≪αk L (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (∐ϕ≡αk ⁻¹))
-       (l₂ , b₂⊑ϕl₂) ← b₂≪αk L (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (∐ϕ≡αk ⁻¹))
-       (m , ϕl₁⊑ϕm , ϕl₂⊑ϕm) ← Directed-implies-weakly-directed 𝓓 ε l₁ l₂
-       let ϕm≤ᴮαk = ≪-to-≤ᴮ 𝓓 cd (ϕ m) (α k) (ϕ≪αk m)
-       let b₁⊑ϕm = ι b₁     ⊑⟨ 𝓓 ⟩[ b₁⊑ϕl₁ ]
-                   ι (ϕ l₁) ⊑⟨ 𝓓 ⟩[ ϕl₁⊑ϕm ]
-                   ι (ϕ m)  ∎⟨ 𝓓 ⟩
-       let b₂⊑ϕm = ι b₂     ⊑⟨ 𝓓 ⟩[ b₂⊑ϕl₂ ]
-                   ι (ϕ l₂) ⊑⟨ 𝓓 ⟩[ ϕl₂⊑ϕm ]
-                   ι (ϕ m)  ∎⟨ 𝓓 ⟩
-       ∣ (ϕ m , k , ϕm≤ᴮαk) , b₁⊑ϕm , b₂⊑ϕm ∣
+      ≪₁ : x ≪⟨ 𝓓 ⟩ ι (α i)
+      ≪₁ = ⊑-≪-to-≪ 𝓓 x⊑b (≤ᴮ-to-≪ 𝓓 cd b (α i) b≤ᴮαi)
+      ≪₂ : ι (α i) ≪⟨ 𝓓 ⟩ y
+      ≪₂ = α≪y i
+    t : ∃ j ꞉ J , x ⊑⟨ 𝓓 ⟩ ι (pr₁ j)
+    t = x≪y J β ε y⊑∐β
+     where
+      β : J → ⟨ 𝓓 ⟩
+      β = ι ∘ pr₁
+      ε : is-Directed 𝓓 β
+      ε = J-inh , β-wdirected
+       where
+        J-inh : ∥ J ∥
+        J-inh = do
+         i ← Directed-implies-inhabited 𝓓 δ
+         (b , b≤ᴮαi) ← ≤ᴮ-INT₀ 𝓓 cd (α i)
+         ∣ b , i , b≤ᴮαi ∣
+        β-wdirected : is-weakly-directed (underlying-order 𝓓) β
+        β-wdirected (b₁ , i₁ , b₁≤ᴮαi₁) (b₂ , i₂ , b₂≤ᴮαi₂) = do
+         (k , αi₁⊑αk , αi₂⊑αk) ← Directed-implies-weakly-directed 𝓓 δ i₁ i₂
+         let b₁≪αk = ≪-⊑-to-≪ 𝓓 (≤ᴮ-to-≪ 𝓓 cd b₁ (α i₁) b₁≤ᴮαi₁) αi₁⊑αk
+         let b₂≪αk = ≪-⊑-to-≪ 𝓓 (≤ᴮ-to-≪ 𝓓 cd b₂ (α i₂) b₂≤ᴮαi₂) αi₂⊑αk
+         (L , ϕ , ϕ≪αk , (ε , ∐ϕ≡αk)) ← c (ι (α k))
+         (l₁ , b₁⊑ϕl₁) ← b₁≪αk L (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (∐ϕ≡αk ⁻¹))
+         (l₂ , b₂⊑ϕl₂) ← b₂≪αk L (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (∐ϕ≡αk ⁻¹))
+         (m , ϕl₁⊑ϕm , ϕl₂⊑ϕm) ← Directed-implies-weakly-directed 𝓓 ε l₁ l₂
+         let ϕm≤ᴮαk = ≪-to-≤ᴮ 𝓓 cd (ϕ m) (α k) (ϕ≪αk m)
+         let b₁⊑ϕm = ι b₁     ⊑⟨ 𝓓 ⟩[ b₁⊑ϕl₁ ]
+                     ι (ϕ l₁) ⊑⟨ 𝓓 ⟩[ ϕl₁⊑ϕm ]
+                     ι (ϕ m)  ∎⟨ 𝓓 ⟩
+         let b₂⊑ϕm = ι b₂     ⊑⟨ 𝓓 ⟩[ b₂⊑ϕl₂ ]
+                     ι (ϕ l₂) ⊑⟨ 𝓓 ⟩[ ϕl₂⊑ϕm ]
+                     ι (ϕ m)  ∎⟨ 𝓓 ⟩
+         ∣ (ϕ m , k , ϕm≤ᴮαk) , b₁⊑ϕm , b₂⊑ϕm ∣
+      y⊑∐β = y      ⊑⟨ 𝓓 ⟩[ ≡-to-⊑ 𝓓 (∐α≡y ⁻¹) ]
+             ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩[ h ]
+             ∐ 𝓓 ε ∎⟨ 𝓓 ⟩
+       where
+        h = ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) ub
+         where
+          ub : (i : I) → (ι ∘ α) i ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+          ub i = ∥∥-rec (prop-valuedness 𝓓 (ι (α i)) (∐ 𝓓 ε))
+                 g (c (ι (α i)))
+           where
+            g : (Σ L ꞉ 𝓥 ̇ , Σ ϕ ꞉ (L → B) ,
+                 ((l : L) → ι (ϕ l) ≪⟨ 𝓓 ⟩ ι (α i))
+                × (Σ φ ꞉ is-Directed 𝓓 (ι ∘ ϕ) , ∐ 𝓓 φ ≡ ι (α i)))
+              → ι (α i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+            g (L , ϕ , ϕ≪αi , φ , ∐ϕ≡αi) = ι (α i)  ⊑⟨ 𝓓 ⟩[ ⊑₁ ]
+                                              ∐ 𝓓 φ ⊑⟨ 𝓓 ⟩[ ⊑₂ ]
+                                              ∐ 𝓓 ε ∎⟨ 𝓓 ⟩
+             where
+              ⊑₁ = ≡-to-⊑ 𝓓 (∐ϕ≡αi ⁻¹)
+              ⊑₂ = ∐-is-lowerbound-of-upperbounds 𝓓 φ (∐ 𝓓 ε) ub'
+               where
+                ub' : (l : L) → ι (ϕ l) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+                ub' l = ∐-is-upperbound 𝓓 ε j
+                 where
+                  j : J
+                  j = ϕ l , i , ≪-to-≤ᴮ 𝓓 cd (ϕ l) (α i) (ϕ≪αi l)
 
 
-{-
- where
-  cd : is-a-continuous-dcpo 𝓓
-  cd = (B , ι , c)
-  γ : Σ I ꞉ 𝓥 ̇ , Σ α ꞉ (I → B) ,
-      ((i : I) → α i ≤ᴮ⟨ 𝓓 ⟩[ cd ] y) ×
-      (Σ δ ꞉ is-Directed 𝓓 (ι ∘ α) , ∐ 𝓓 δ ≡ ι y)
-    → ∃ b ꞉ B , x ≤ᴮ⟨ 𝓓 ⟩[ cd ] b × b ≤ᴮ⟨ 𝓓 ⟩[ cd ] y
-  γ (I , α , α≪y , (δ , ∐α≡y)) = {!!}
-   where
-    _≤'_ : B → B → 𝓥 ̇
-    b ≤' b' = has-size-type (≤-small b b')
-    J : 𝓥 ̇
-    J = Σ b ꞉ B , ∃ i ꞉ I , b ≤' α i
-    β : J → ⟨ 𝓓 ⟩
-    β (b , _) = ι b
-    ε : is-Directed 𝓓 β
-    ε = {!!}
-    claim₀ : ι y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
-    claim₀ = {!!}
-    claim₁ : ∃ j ꞉ J , ι x ⊑⟨ 𝓓 ⟩ β j
-    claim₁ = x≤y J β ε claim₀
--}
 
 
 {-

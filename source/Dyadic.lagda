@@ -116,8 +116,6 @@ right-monotone = id
 
 \end{code}
 
-Can this be done with less cases?
-
 \begin{code}
 
 ≺-to-¬≺ : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
@@ -180,6 +178,14 @@ Can this be done with less cases?
     d : x ≡ midpoint → 𝟘
     d = ≺-to-≢ x≺mp
 ≺-to-¬≺ (right x) (right y) = ≺-to-¬≺ x y
+
+\end{code}
+
+Can this be done with less cases?
+
+At the very least, we should introduce a cases₃ constructions.
+
+\begin{code}
 
 ≺-is-transitive : (x y z : 𝔻) → x ≺ y → y ≺ z → x ≺ z
 ≺-is-transitive midpoint y midpoint = ≺-to-¬≺ midpoint y
@@ -336,10 +342,6 @@ Can this be done with less cases?
     d refl = x≺mp
 ≺-is-transitive (right x) (right y) (right z) = ≺-is-transitive x y z
 
-\end{code}
-
-\begin{code}
-
 ≺-is-linear : (x y : 𝔻) → x ≺ y + (x ≡ y) + (y ≺ x)
 ≺-is-linear midpoint midpoint = inr (inl refl)
 ≺-is-linear midpoint (left y) = cases a b (≺-is-linear midpoint y)
@@ -403,11 +405,174 @@ Can this be done with less cases?
  where
   a : x ≺ y
     → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-  a = {!!}
+  a x≺y = cases c d (≺-is-linear x midpoint)
+   where
+    c : x ≺ midpoint
+      → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+    c = inl ∘ inl ∘ inl
+    d : (x ≡ midpoint) + (midpoint ≺ x)
+      → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+    d = cases e f
+     where
+      e : x ≡ midpoint
+        → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+      e x≡mp = inl (inl (inr (x≡mp ⁻¹)))
+      f : midpoint ≺ x
+        → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+      f mp≺x = inl (inr (inl (≺-is-transitive midpoint x y mp≺x x≺y)))
   b : (x ≡ y) + (y ≺ x)
     → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-  b = {!!}
-≺-is-linear (right x) y = {!!}
+  b = cases c d
+   where
+    c : x ≡ y
+      → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+    c refl = cases e f (≺-is-linear x midpoint)
+     where
+      e : x ≺ midpoint
+        → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
+      e = inl ∘ inl ∘ inl
+      f : (x ≡ midpoint) + (midpoint ≺ x)
+        → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
+      f = cases g h
+       where
+        g : x ≡ midpoint
+          → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
+        g x≡mp = inl (inl (inr (x≡mp ⁻¹)))
+        h : midpoint ≺ x
+          → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
+        h mp≺x = inl (inr (inl mp≺x))
+    d : y ≺ x
+      → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+    d y≺x = cases e f (≺-is-linear y midpoint)
+     where
+      e : y ≺ midpoint
+        → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+      e y≺mp = cases g h (≺-is-linear x midpoint)
+       where
+        g : x ≺ midpoint
+          → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+        g = inl ∘ inl ∘ inl
+        h : (x ≡ midpoint) + (midpoint ≺ x)
+          → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+        h = cases i j
+         where
+          i : x ≡ midpoint
+            → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+          i x≡mp = inl (inl (inr (x≡mp ⁻¹)))
+          j : midpoint ≺ x
+            → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+          j mp≺x = inr (inr (y≺mp , mp≺x))
+      f : (y ≡ midpoint) + (midpoint ≺ y)
+        → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+      f = cases g h
+       where
+        g : y ≡ midpoint
+          → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+        g y≡mp = inl (inr (inr y≡mp))
+        h : midpoint ≺ y
+          → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
+        h mp≺y = inl (inr (inl mp≺y))
+≺-is-linear (right x) midpoint = cases a b (≺-is-linear x midpoint)
+ where
+  a : x ≺ midpoint
+    → (right x ≺ midpoint) + (right x ≡ midpoint) + (midpoint ≺ right x)
+  a = inl
+  b : (x ≡ midpoint) + (midpoint ≺ x)
+    → (right x ≺ midpoint) + (right x ≡ midpoint) + (midpoint ≺ right x)
+  b = cases c d
+   where
+    c : x ≡ midpoint
+      → (right x ≺ midpoint) + (right x ≡ midpoint) + (midpoint ≺ right x)
+    c = inr ∘ inr ∘ inr
+    d : midpoint ≺ x
+      → (right x ≺ midpoint) + (right x ≡ midpoint) + (midpoint ≺ right x)
+    d mp≺x = inr (inr (inl mp≺x))
+≺-is-linear (right x) (left y) = cases a b (≺-is-linear x y)
+ where
+  a : x ≺ y
+    → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+  a x≺y = cases c d (≺-is-linear y midpoint)
+   where
+    c : y ≺ midpoint
+      → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+    c y≺mp = inr (inr (inl (inl y≺mp)))
+    d : (y ≡ midpoint) + (midpoint ≺ y)
+      → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+    d = cases e f
+     where
+      e : y ≡ midpoint
+        → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+      e y≡mp = inr (inr (inl (inr (y≡mp ⁻¹))))
+      f : midpoint ≺ y
+        → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+      f mp≺y = cases g h (≺-is-linear x midpoint)
+       where
+        g : x ≺ midpoint
+          → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+        g x≺mp = inl (x≺mp , mp≺y)
+        h : (x ≡ midpoint) + (midpoint ≺ x)
+          → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+        h = cases i j
+         where
+          i : x ≡ midpoint
+            → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+          i = inr ∘ inr ∘ inr ∘ inr
+          j : midpoint ≺ x
+            → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+          j mp≺x = inr (inr (inr (inl mp≺x)))
+  b : (x ≡ y) + (y ≺ x)
+    → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+  b = cases c d
+   where
+    c : x ≡ y
+      → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+    c refl = cases e f (≺-is-linear x midpoint)
+     where
+      e : x ≺ midpoint
+        → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
+      e x≺mp = inr (inr (inl (inl x≺mp)))
+      f : (x ≡ midpoint) + (midpoint ≺ x)
+        → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
+      f = cases g h
+       where
+        g : x ≡ midpoint
+          → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
+        g = inr ∘ inr ∘ inr ∘ inr
+        h : midpoint ≺ x
+          → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
+        h mp≺x = inr (inr (inr (inl mp≺x)))
+    d : y ≺ x
+      → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+    d y≺x = cases e f (≺-is-linear x midpoint)
+     where
+      e : x ≺ midpoint
+        → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+      e x≺mp = inr (inr (inl (inl (≺-is-transitive y x midpoint y≺x x≺mp))))
+      f : (x ≡ midpoint) + (midpoint ≺ x)
+        → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+      f = cases g h
+       where
+        g : x ≡ midpoint
+          → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+        g = inr ∘ inr ∘ inr ∘ inr
+        h : midpoint ≺ x
+          → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
+        h mp≺x = inr (inr (inr (inl mp≺x)))
+≺-is-linear (right x) (right y) = cases a b (≺-is-linear x y)
+ where
+  a : x ≺ y
+    → (right x ≺ right y) + (right x ≡ right y) + (right y ≺ right x)
+  a = inl
+  b : (x ≡ y) + (y ≺ x)
+    → (right x ≺ right y) + (right x ≡ right y) + (right y ≺ right x)
+  b = cases c d
+   where
+    c : x ≡ y
+      → (right x ≺ right y) + (right x ≡ right y) + (right y ≺ right x)
+    c x≡y = inr (inl (ap right x≡y))
+    d : y ≺ x
+      → (right x ≺ right y) + (right x ≡ right y) + (right y ≺ right x)
+    d = inr ∘ inr
 
 \end{code}
 

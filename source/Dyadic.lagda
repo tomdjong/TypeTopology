@@ -578,22 +578,33 @@ At the very least, we should introduce a cases₃ constructions.
 
 \begin{code}
 
-{-
 left-≺ : (x : 𝔻) → left x ≺ x
-left-≺ midpoint  = *
+left-≺ midpoint  = inr refl
 left-≺ (left x)  = left-≺ x
-left-≺ (right x) = *
-
-≺-sandwich : (x : 𝔻) → (right (left x) ≺ x) × (x ≺ left (right x))
-≺-sandwich midpoint = * , *
-≺-sandwich (left x) = {!!} , {!!}
-≺-sandwich (right x) = {!!}
+left-≺ (right x) = cases₃ a b c h
+ where
+  a : x ≺ midpoint → left (right x) ≺ right x
+  a = inl ∘ inl
+  b : x ≡ midpoint → left (right x) ≺ right x
+  b = inr ∘ inr
+  c : midpoint ≺ x → left (right x) ≺ right x
+  c = inr ∘ inl
+  h : (x ≺ midpoint) + (x ≡ midpoint) + (midpoint ≺ x)
+  h = ≺-is-linear x midpoint
 
 ≺-right : (x : 𝔻) → x ≺ right x
-≺-right midpoint  = *
-≺-right (left x)  = *
+≺-right midpoint  = inr refl
+≺-right (left x)  = cases₃ a b c h
+ where
+  a : x ≺ midpoint → left x ≺ right (left x)
+  a = inl ∘ inl
+  b : x ≡ midpoint → left x ≺ right (left x)
+  b x≡mp = inl (inr (x≡mp ⁻¹))
+  c : midpoint ≺ x → left x ≺ right (left x)
+  c = inr ∘ inl
+  h : (x ≺ midpoint) + (x ≡ midpoint) + (midpoint ≺ x)
+  h = ≺-is-linear x midpoint
 ≺-right (right x) = ≺-right x
--}
 
 \end{code}
 

@@ -108,124 +108,72 @@ right-monotone = id
 ≺-to-≢ {right x}  {left y}   _ p   = left-is-not-right (p ⁻¹)
 ≺-to-≢ {right x}  {right y}  x≺y   = contrapositive right-lc (≺-to-≢ x≺y)
 
-_≻_ : 𝔻 → 𝔻 → 𝓤₀ ̇
-x ≻ y = ¬ (x ≺ y)
+≡-to-¬≺ : {x y : 𝔻} → x ≡ y → ¬ (x ≺ y)
+≡-to-¬≺ x≡y x≺y = ≺-to-≢ x≺y x≡y
 
-≺-to-≢-and-≻ : (x y : 𝔻) → x ≺ y → (x ≢ y) × y ≻ x
-≺-to-≢-and-≻ midpoint midpoint = 𝟘-induction
-≺-to-≢-and-≻ midpoint (left y) mp≺y = midpoint-is-not-left , cases a b
+≡-to-¬≺' : {x y : 𝔻} → x ≡ y → ¬ (y ≺ x)
+≡-to-¬≺' x≡y y≺x = ≺-to-≢ y≺x (x≡y ⁻¹)
+
+≺-to-¬≺ : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
+≺-to-¬≺ midpoint midpoint = 𝟘-induction
+≺-to-¬≺ midpoint (left y) mp≺y = cases a b
  where
-  a : y ≺ midpoint → 𝟘
-  a = pr₂ (≺-to-≢-and-≻  midpoint y mp≺y)
-  b : midpoint ≡ y → 𝟘
-  b = pr₁ (≺-to-≢-and-≻  midpoint y mp≺y)
-≺-to-≢-and-≻ midpoint (right y) = cases a b
+  a : ¬ (y ≺ midpoint)
+  a = ≺-to-¬≺ midpoint y mp≺y
+  b : midpoint ≢ y
+  b = ≺-to-≢ mp≺y
+≺-to-¬≺ midpoint (right y) = cases a b
  where
-  a : midpoint ≺ y → (midpoint ≢ right y) × ¬ (right y ≺ midpoint)
-  a mp≺y = midpoint-is-not-right , pr₂ (≺-to-≢-and-≻ midpoint y mp≺y)
-  b : y ≡ midpoint → (midpoint ≢ right y) × ¬ (right y ≺ midpoint)
-  b y≡mp = midpoint-is-not-right , h
-   where
-    h : ¬ (right y ≺ midpoint)
-    h y≺mp = pr₁ (≺-to-≢-and-≻ y midpoint y≺mp) y≡mp
-≺-to-≢-and-≻ (left x) midpoint = cases a b
+  a : midpoint ≺ y → ¬ (y ≺ midpoint)
+  a = ≺-to-¬≺ midpoint y
+  b : y ≡ midpoint → ¬ (right y ≺ midpoint)
+  b = ≡-to-¬≺
+≺-to-¬≺ (left x) midpoint = cases a b
  where
-  a : x ≺ midpoint → (left x ≢ midpoint) × (midpoint ≻ left x)
-  a x≺mp = (λ p → midpoint-is-not-left (p ⁻¹)) , h
-   where
-    h : midpoint ≺ x → 𝟘
-    h mp≺x = pr₂ (≺-to-≢-and-≻ x midpoint x≺mp) mp≺x
-  b : midpoint ≡ x → (left x ≢ midpoint) × (midpoint ≻ left x)
-  b mp≡x = (λ p → midpoint-is-not-left (p ⁻¹)) , h
-   where
-    h : midpoint ≺ x → 𝟘
-    h mp≺x = pr₁ (≺-to-≢-and-≻ midpoint x mp≺x) mp≡x
-≺-to-≢-and-≻ (left x) (left y) x≺y = a , b
+  a : x ≺ midpoint → ¬ (midpoint ≺ left x)
+  a = ≺-to-¬≺ x midpoint
+  b : midpoint ≡ x → ¬ (midpoint ≺ left x)
+  b = ≡-to-¬≺
+≺-to-¬≺ (left x) (left y) = ≺-to-¬≺ x y
+≺-to-¬≺ (left x) (right y) = cases a b
  where
-  a : left x ≢ left y
-  a lx≡ly = pr₁ (≺-to-≢-and-≻ x y x≺y) (left-lc lx≡ly)
-  b : left y ≻ left x
-  b y≺x = pr₂ (≺-to-≢-and-≻ x y x≺y) y≺x
-≺-to-≢-and-≻ (left x) (right y) = cases a b
- where
-  a : (x ≺ midpoint) + (midpoint ≡ x)
-    → (left x ≢ right y) × (right y ≻ left x)
+  a : (x ≺ midpoint) + (midpoint ≡ x) → ¬ (right y ≺ left x)
   a = cases c d
    where
-    c : x ≺ midpoint → (left x ≢ right y) × (right y ≻ left x)
-    c x≺mp = left-is-not-right , h
-     where
-      h : right y ≻ left x
-      h (y≺mp , mp≺x) = pr₂ (≺-to-≢-and-≻ x midpoint x≺mp) mp≺x
-    d : midpoint ≡ x → (left x ≢ right y) × (right y ≻ left x)
-    d mp≡x = left-is-not-right , h
-     where
-      h : right y ≻ left x
-      h (y≺mp , mp≺x) = pr₁ (≺-to-≢-and-≻ midpoint x mp≺x) mp≡x
-  b : (midpoint ≺ y) + (y ≡ midpoint) →
-        (left x ≢ right y) × (right y ≻ left x)
+    c : x ≺ midpoint → ¬ (right y ≺ left x)
+    c x≺mp (_ , mp≺x) = ≺-to-¬≺ x midpoint x≺mp mp≺x
+    d : midpoint ≡ x → ¬ (right y ≺ left x)
+    d mp≡x (_ , mp≺x) = ≡-to-¬≺ mp≡x mp≺x
+  b : (midpoint ≺ y) + (y ≡ midpoint) → ¬ (right y ≺ left x)
   b = cases c d
    where
-    c : midpoint ≺ y → (left x ≢ right y) × (right y ≻ left x)
-    c mp≺y = left-is-not-right , h
-     where
-      h : right y ≻ left x
-      h (y≺mp , mp≺x) = pr₂ (≺-to-≢-and-≻ midpoint y mp≺y) y≺mp
-    d : y ≡ midpoint → (left x ≢ right y) × (right y ≻ left x)
-    d y≡mp = left-is-not-right , h
-     where
-      h : right y ≻ left x
-      h (y≺mp , mp≺x)= pr₁ (≺-to-≢-and-≻ y midpoint y≺mp) y≡mp
-≺-to-≢-and-≻ (right x) midpoint x≺mp =
- (λ p → midpoint-is-not-right (p ⁻¹)) , cases a b
-  where
-   a : midpoint ≻ x
-   a = pr₂ (≺-to-≢-and-≻ x midpoint x≺mp)
-   b : x ≢ midpoint
-   b = pr₁ (≺-to-≢-and-≻ x midpoint x≺mp)
-≺-to-≢-and-≻ (right x) (left y) (x≺mp , mp≺y) =
- (λ p → left-is-not-right (p ⁻¹)) , cases a b
-  where
-   a : (y ≺ midpoint) + (midpoint ≡ y) → 𝟘
-   a = cases c d
-    where
-     c : y ≺ midpoint → 𝟘
-     c = pr₂ (≺-to-≢-and-≻ midpoint y mp≺y)
-     d : midpoint ≡ y → 𝟘
-     d = pr₁ (≺-to-≢-and-≻ midpoint y mp≺y)
-   b : (midpoint ≺ x) + (x ≡ midpoint) → 𝟘
-   b = cases c d
-    where
-     c : midpoint ≺ x → 𝟘
-     c = pr₂ (≺-to-≢-and-≻ x midpoint x≺mp)
-     d : x ≡ midpoint → 𝟘
-     d = pr₁ (≺-to-≢-and-≻ x midpoint x≺mp)
-≺-to-≢-and-≻ (right x) (right y) x≺y = a , b
+    c : midpoint ≺ y → ¬ (right y ≺ left x)
+    c mp≺y (y≺mp , _) = ≺-to-¬≺ midpoint y mp≺y y≺mp
+    d : y ≡ midpoint → ¬ (right y ≺ left x)
+    d y≡mp (y≺mp , _) = ≡-to-¬≺ y≡mp y≺mp
+≺-to-¬≺ (right x) midpoint x≺mp = cases a b
  where
-  a : right x ≢ right y
-  a rx≡ry = pr₁ (≺-to-≢-and-≻ x y x≺y) (right-lc rx≡ry)
-  b : right y ≻ right x
-  b y≺x = pr₂ (≺-to-≢-and-≻ x y x≺y) y≺x
-
-{-
-≺-to-¬≺-swapped : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
-≺-to-¬≺-swapped midpoint midpoint = 𝟘-induction
-≺-to-¬≺-swapped (midpoint) (left y) mp≺y = cases a b
+  a : midpoint ≺ x → 𝟘
+  a = ≺-to-¬≺ x midpoint x≺mp
+  b : x ≡ midpoint → 𝟘
+  b = ≺-to-≢ x≺mp
+≺-to-¬≺ (right x) (left y) (x≺mp , mp≺y) = cases a b
  where
-  a : y ≺ midpoint → 𝟘
-  a = ≺-to-¬≺-swapped midpoint y mp≺y
-  b : midpoint ≡ y → 𝟘
-  b = ≺-to-≢ mp≺y
-≺-to-¬≺-swapped midpoint (right y) = cases a b
- where
-  a : midpoint ≡ y → ¬ (right y ≺ midpoint)
-  a mp≡y y≺mp = ≺-to-≢ y≺mp (mp≡y ⁻¹)
-  b : midpoint ≺ y → ¬ (right y ≺ midpoint)
-  b = ≺-to-¬≺-swapped midpoint y
-≺-to-¬≺-swapped (left x) midpoint leftx≺mp = {!!}
-≺-to-¬≺-swapped (left x) (left y) x≺y = ≺-to-¬≺-swapped x y x≺y
-≺-to-¬≺-swapped (left x) (right y) = {!!}
-≺-to-¬≺-swapped (right x) y = {!!}
+  a : (y ≺ midpoint) + (midpoint ≡ y) → 𝟘
+  a = cases c d
+   where
+    c : y ≺ midpoint → 𝟘
+    c = ≺-to-¬≺ midpoint y mp≺y
+    d : midpoint ≡ y → 𝟘
+    d = ≺-to-≢ mp≺y
+  b : (midpoint ≺ x) + (x ≡ midpoint) → 𝟘
+  b = cases c d
+   where
+    c : midpoint ≺ x → 𝟘
+    c = ≺-to-¬≺ x midpoint x≺mp
+    d : x ≡ midpoint → 𝟘
+    d = ≺-to-≢ x≺mp
+≺-to-¬≺ (right x) (right y) = ≺-to-¬≺ x y
 
 ≺-is-transitive : {x y z : 𝔻} → x ≺ y → y ≺ z → x ≺ z
 ≺-is-transitive {midpoint} {y} {midpoint} = {!!}

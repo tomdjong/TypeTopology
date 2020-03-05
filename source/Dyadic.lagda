@@ -659,11 +659,11 @@ left-≺ (right x) = cases₃ a b c h
       e y≺mp = cases₃ i j k (≺-is-linear y (left midpoint))
        where
         i : y ≺ left midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-        i = {!!}
+        i y≺lmp = right (left y) , inl (inr refl) , left-≺ y
         j : y ≡ left midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-        j refl = {!!} , {!!} , {!!}
+        j refl = right (left (left midpoint)) , inl (inr refl) , inr refl
         k : left midpoint ≺ y → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-        k lmp≺y = y , lmp≺y , {!≺-right y!}
+        k lmp≺y = y , lmp≺y , ≺-right y
       f : y ≡ midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
       f refl = midpoint , inr refl , inr refl
       g : midpoint ≺ y → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
@@ -724,78 +724,22 @@ left-≺ (right x) = cases₃ a b c h
   z≺y : z ≺ y
   z≺y = pr₂ (pr₂ IH)
 
-{-
-test : (x : 𝔻) → left x ≺ left (right (left x)) × left (right (left x)) ≺ x
-test midpoint = {!!} , {!!}
-test (left x) = {!!}
-test (right x) = {!!}
+\end{code}
 
-≺-sandwich : (x : 𝔻)
-           → (Σ y ꞉ 𝔻 , left x ≺ y × y ≺ x)
-           × (Σ z ꞉ 𝔻 , x ≺ z × z ≺ right x)
-≺-sandwich midpoint =
- (right (left midpoint) , inl (inr refl) , inr refl) ,
- (left (right midpoint) , inr refl , inr (inr refl))
-≺-sandwich (left x) =
- (left y , lx≺y , y≺x) , left z , {!!} , {!!} -- left z , x≺z , cases₃ a b c (≺-is-linear z midpoint)
-  where
-   IH : (Σ y ꞉ 𝔻 , left x ≺ y × y ≺ x)
-      × (Σ z ꞉ 𝔻 , x ≺ z × z ≺ right x)
-   IH = ≺-sandwich x
-   y : 𝔻
-   y = pr₁ (pr₁ IH)
-   lx≺y : left x ≺ y
-   lx≺y = pr₁ (pr₂ (pr₁ IH))
-   y≺x : y ≺ x
-   y≺x = pr₂ (pr₂ (pr₁ IH))
-   z : 𝔻
-   z = pr₁ (pr₂ IH)
-   x≺z : x ≺ z
-   x≺z = pr₁ (pr₂ (pr₂ IH))
-   z≺rx : z ≺ right x
-   z≺rx = pr₂ (pr₂ (pr₂ IH))
-   a : z ≺ midpoint → left z ≺ right (left x)
-   a = inl ∘ inl
-   b : z ≡ midpoint → left z ≺ right (left x)
-   b z≡mp = inl (inr (z≡mp ⁻¹))
-   c : midpoint ≺ z → left z ≺ right (left x)
-   c mp≺z = cases₃ {!!} {!z≺rx!} {!!} (≺-is-linear x midpoint)
-≺-sandwich (right x) = {!!}
-
-{-right y , cases₃ a b c (≺-is-linear y midpoint)
- where
-  IH : (Σ y ꞉ 𝔻 , left x ≺ y × y ≺ x)
-  IH = ≺-sandwich x
-  y : 𝔻
-  y = pr₁ IH
-  lx≺y : left x ≺ y
-  lx≺y = pr₁ (pr₂ IH)
-  y≺x : y ≺ x
-  y≺x = pr₂ (pr₂ IH)
-  a : y ≺ midpoint → (left (right x) ≺ right y) × (right y ≺ right x)
-  a y≺mp = {!!}
-  b : y ≡ midpoint → (left (right x) ≺ right y) × (right y ≺ right x)
-  b y≡mp = inr (inr y≡mp) , y≺x
-  c : midpoint ≺ y → (left (right x) ≺ right y) × (right y ≺ right x)
-  c mp≺y = (inr (inl mp≺y)) , y≺x -}
--}
-
-{-
+\begin{code}
 
 open import UF-PropTrunc
 
 module _ (pt : propositional-truncations-exist) where
  open PropositionalTruncation pt
 
- ≺-has-no-lowest-point : (x : 𝔻) → ∃ y ꞉ 𝔻 , y ≺ x
- ≺-has-no-lowest-point x = ∣ (left x) , (left-≺ x) ∣
+ ≺-has-no-left-endpoint : (x : 𝔻) → ∃ y ꞉ 𝔻 , y ≺ x
+ ≺-has-no-left-endpoint x = ∣ left x , left-≺ x ∣
+
+ ≺-has-no-right-endpoint : (x : 𝔻) → ∃ y ꞉ 𝔻 , x ≺ y
+ ≺-has-no-right-endpoint x = ∣ right x , ≺-right x ∣
 
  ≺-is-dense : (x y : 𝔻) → x ≺ y → ∃ z ꞉ 𝔻 , x ≺ z × z ≺ y
- ≺-is-dense midpoint midpoint = 𝟘-induction
- ≺-is-dense midpoint (left y) mp≺y = {!!}
- ≺-is-dense midpoint (right y) = {!!}
- ≺-is-dense (left x) y = {!!}
- ≺-is-dense (right x) y = {!!}
--}
+ ≺-is-dense x y x≺y = ∣ ≺-density x y x≺y ∣
 
 \end{code}

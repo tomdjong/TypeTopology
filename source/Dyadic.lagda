@@ -610,6 +610,121 @@ left-≺ (right x) = cases₃ a b c h
 
 \begin{code}
 
+≺-density : (x y : 𝔻) → x ≺ y → Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
+≺-density midpoint midpoint = 𝟘-induction
+≺-density midpoint (left y) mp≺y = left z , mp≺z , z≺y
+ where
+  IH : Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ y
+  IH = ≺-density midpoint y mp≺y
+  z : 𝔻
+  z = pr₁ IH
+  mp≺z : midpoint ≺ z
+  mp≺z = pr₁ (pr₂ IH)
+  z≺y : z ≺ y
+  z≺y = pr₂ (pr₂ IH)
+≺-density midpoint (right y) = cases a b
+ where
+  a : midpoint ≺ y → Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ right y
+  a mp≺y = y , mp≺y , ≺-right y
+  b : y ≡ midpoint → Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ right y
+  b refl = left (right midpoint) , inr refl , inr (inr refl)
+≺-density (left x) midpoint = cases a b
+ where
+  a : x ≺ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ midpoint
+  a x≺mp = x , left-≺ x , x≺mp
+  b : midpoint ≡ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ midpoint
+  b refl = right (left midpoint) , inl (inr refl) , inr refl
+≺-density (left x) (left y) x≺y = left z , x≺z , z≺y
+ where
+  IH : Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
+  IH = ≺-density x y x≺y
+  z : 𝔻
+  z = pr₁ IH
+  x≺z : x ≺ z
+  x≺z = pr₁ (pr₂ IH)
+  z≺y : z ≺ y
+  z≺y = pr₂ (pr₂ IH)
+≺-density (left x) (right y) = cases a b
+ where
+  a : (x ≺ midpoint) + (midpoint ≡ x)
+    → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+  a = cases c d
+   where
+    c : x ≺ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    c x≺mp = left midpoint , x≺mp , inl (inr refl)
+    d : midpoint ≡ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    d refl = cases₃ e f g (≺-is-linear y midpoint)
+     where
+      e : y ≺ midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+      e y≺mp = cases₃ i j k (≺-is-linear y (left midpoint))
+       where
+        i : y ≺ left midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+        i = {!!}
+        j : y ≡ left midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+        j refl = {!!} , {!!} , {!!}
+        k : left midpoint ≺ y → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+        k lmp≺y = y , lmp≺y , {!≺-right y!}
+      f : y ≡ midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+      f refl = midpoint , inr refl , inr refl
+      g : midpoint ≺ y → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+      g mp≺y = y , h , ≺-right y
+       where
+        h : left midpoint ≺ y
+        h = ≺-is-transitive (left midpoint) midpoint y (left-≺ midpoint) mp≺y
+  b : (midpoint ≺ y) + (y ≡ midpoint)
+    → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+  b = cases c d
+   where
+    c : midpoint ≺ y → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    c mp≺y = right midpoint , inr (inr refl) , mp≺y
+    d : y ≡ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    d refl = cases₃ e f g (≺-is-linear x midpoint)
+     where
+      e : x ≺ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+      e x≺mp = left midpoint , x≺mp , inr (inr refl)
+      f : x ≡ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+      f refl = midpoint , inr refl , inr refl
+      g : midpoint ≺ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+      g mp≺x = cases₃ i j k (≺-is-linear x (right midpoint))
+       where
+         i : x ≺ right midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+         i x≺rmp = x , left-≺ x , x≺rmp
+         j : x ≡ right midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+         j refl = left (right (left (right midpoint))) , inr refl , inr (inr refl)
+         k : right midpoint ≺ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+         k rmp≺x = left (right x) , ≺-right x , inr (inr refl)
+≺-density (right x) midpoint x≺mp = right z , x≺z , z≺mp
+ where
+  IH : Σ z ꞉ 𝔻 , x ≺ z × z ≺ midpoint
+  IH = ≺-density x midpoint x≺mp
+  z : 𝔻
+  z = pr₁ IH
+  x≺z : x ≺ z
+  x≺z = pr₁ (pr₂ IH)
+  z≺mp : z ≺ midpoint
+  z≺mp = pr₂ (pr₂ IH)
+≺-density (right x) (left y) (x≺mp , mp≺y) = left z , (x≺mp , mp≺z) , z≺y
+ where
+  IH : Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ y
+  IH = ≺-density midpoint y mp≺y
+  z : 𝔻
+  z = pr₁ IH
+  mp≺z : midpoint ≺ z
+  mp≺z = pr₁ (pr₂ IH)
+  z≺y : z ≺ y
+  z≺y = pr₂ (pr₂ IH)
+≺-density (right x) (right y) x≺y = right z , x≺z , z≺y
+ where
+  IH : Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
+  IH = ≺-density x y x≺y
+  z : 𝔻
+  z = pr₁ IH
+  x≺z : x ≺ z
+  x≺z = pr₁ (pr₂ IH)
+  z≺y : z ≺ y
+  z≺y = pr₂ (pr₂ IH)
+
+{-
 test : (x : 𝔻) → left x ≺ left (right (left x)) × left (right (left x)) ≺ x
 test midpoint = {!!} , {!!}
 test (left x) = {!!}
@@ -663,17 +778,9 @@ test (right x) = {!!}
   b y≡mp = inr (inr y≡mp) , y≺x
   c : midpoint ≺ y → (left (right x) ≺ right y) × (right y ≺ right x)
   c mp≺y = (inr (inl mp≺y)) , y≺x -}
+-}
 
 {-
-≺-density : (x y : 𝔻) → x ≺ y → Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
-≺-density midpoint midpoint = 𝟘-induction
-≺-density midpoint (left y) mp≺y = (pr₁ h) , {!!}
- where
-  h : Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ y
-  h = ≺-density midpoint y mp≺y
-≺-density midpoint (right y) = {!!}
-≺-density (left x) y = {!!}
-≺-density (right x) y = {!!}
 
 open import UF-PropTrunc
 

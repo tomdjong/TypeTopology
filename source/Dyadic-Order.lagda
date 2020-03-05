@@ -514,7 +514,8 @@ a few cases did I have to consult the translation to see what was required.
 
 \end{code}
 
-As a preparation for density, we record the following facts.
+As a preparation for density (and ≺ having no endpoints), we record the
+following facts.
 
 \begin{code}
 

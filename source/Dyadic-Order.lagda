@@ -652,3 +652,32 @@ cases: the combination with pattern matching gives us two-line proofs.
  ∣ right z , x≺z , z≺y ∣
 
 \end{code}
+
+Linearity and density of ≺ yield an easy proof of the binary interpolation
+property (as required for the (rounded) ideal completion).
+
+\begin{code}
+
+≺-interpolation₂ : (x₀ x₁ y : 𝔻)
+                 → x₀ ≺ y
+                 → x₁ ≺ y
+                 → ∃ z ꞉ 𝔻 ,
+                   x₀ ≺ z
+                 × x₁ ≺ z
+                 × z ≺ y
+≺-interpolation₂ x₀ x₁ y x₀≺y x₁≺y = cases₃ a b c (≺-is-linear x₀ x₁)
+ where
+  a : x₀ ≺ x₁ → ∃ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+  a x₀≺x₁ = do
+   z , x₁≺z , z≺y ← ≺-is-dense x₁ y x₁≺y
+   ∣ z , ≺-is-transitive x₀ x₁ z x₀≺x₁ x₁≺z , x₁≺z , z≺y ∣
+  b : x₀ ≡ x₁ → ∃ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+  b refl = do
+   z , x₀≺z , z≺y ← ≺-is-dense x₀ y x₀≺y
+   ∣ z , x₀≺z , x₀≺z , z≺y ∣
+  c : x₁ ≺ x₀ → ∃ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+  c x₁≺x₀ = do
+   z , x₀≺z , z≺y ← ≺-is-dense x₀ y x₀≺y
+   ∣ z , x₀≺z , ≺-is-transitive x₁ x₀ z x₁≺x₀ x₀≺z , z≺y ∣
+
+\end{code}

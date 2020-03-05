@@ -166,7 +166,7 @@ Surjections can be characterized as follows, modulo size:
 
 \end{code}
 
-Added 13 February 2020 by Tom de Jong
+Added 13 February 2020 by Tom de Jong.
 
 \begin{code}
 

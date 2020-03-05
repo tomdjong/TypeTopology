@@ -31,10 +31,10 @@ r : (-1,1) → (-1,1)
 r x = (x+1)/2 if x ≥ 0
       x/2     if x < 0
 
-Some (ordered) values to give an impression:
+Some values (ordered) to give an impression:
 
--1                  0                 1
-        -1/2                1/2       -- l 0 and r 0
+                   0                  -- just 0
+        -1/2                1/2       -- l 0 = -1/2 and r 0 = 1/2
    -3/4      -1/4      1/4       3/4  -- l (l 0), r (l 0), l (r 0) and r (r 0)
                      1/8      5/8     -- l (1/4) and r (1/4)
 

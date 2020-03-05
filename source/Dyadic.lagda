@@ -10,7 +10,15 @@ open import One-Properties
 open import UF-Miscelanea
 open import UF-Subsingletons
 
-module Dyadic where
+open import UF-PropTrunc
+open import UF-Subsingletons-FunExt
+
+module Dyadic
+        (pt : propositional-truncations-exist)
+        (fe : funext 𝓤₀ 𝓤₀)
+       where
+
+open PropositionalTruncation pt
 
 data 𝔻 : 𝓤₀ ̇ where
   midpoint : 𝔻
@@ -93,7 +101,7 @@ midpoint ≺ left y   = midpoint ≺ y
 left x   ≺ left y   = x ≺ y
 right x  ≺ left y   = x ≺ midpoint × midpoint ≺ y
 midpoint ≺ right y  = midpoint ≺ y + (y ≡ midpoint)
-left x   ≺ right y  = (x ≺ midpoint + (midpoint ≡ x)) +
+left x   ≺ right y  = (x ≺ midpoint + (midpoint ≡ x)) ∨
                       (midpoint ≺ y + (y ≡ midpoint))
 right x  ≺ right y  = x ≺ y
 
@@ -135,12 +143,7 @@ right-monotone = id
 ≺-is-prop-valued (left x) midpoint =
  +-is-prop (≺-is-prop-valued x midpoint) 𝔻-is-a-set ≺-to-≢'
 ≺-is-prop-valued (left x) (left y) = ≺-is-prop-valued x y
-≺-is-prop-valued (left x) (right y) = {!!}
-{-
- +-is-prop
-  (+-is-prop (≺-is-prop-valued x midpoint) 𝔻-is-a-set ≺-to-≢')
-  (+-is-prop (≺-is-prop-valued midpoint y) 𝔻-is-a-set ≺-to-≢')
-  {!!} -}
+≺-is-prop-valued (left x) (right y) = ∥∥-is-a-prop
 ≺-is-prop-valued (right x) midpoint = ≺-is-prop-valued x midpoint
 ≺-is-prop-valued (right x) (left y) =
  ×-is-prop (≺-is-prop-valued x midpoint) (≺-is-prop-valued midpoint y)
@@ -150,7 +153,6 @@ right-monotone = id
 
 \begin{code}
 
-{-
 ≺-to-¬≺ : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
 ≺-to-¬≺ midpoint midpoint = 𝟘-induction
 ≺-to-¬≺ midpoint (left y) mp≺y = cases a b
@@ -172,7 +174,7 @@ right-monotone = id
   b : midpoint ≡ x → ¬ (midpoint ≺ left x)
   b = ≡-to-¬≺
 ≺-to-¬≺ (left x) (left y) = ≺-to-¬≺ x y
-≺-to-¬≺ (left x) (right y) = cases a b
+≺-to-¬≺ (left x) (right y) = ∥∥-rec (¬-is-prop fe) (cases a b)
  where
   a : (x ≺ midpoint) + (midpoint ≡ x) → ¬ (right y ≺ left x)
   a = cases c d
@@ -194,7 +196,7 @@ right-monotone = id
   a = ≺-to-¬≺ x midpoint x≺mp
   b : x ≡ midpoint → 𝟘
   b = ≺-to-≢ x≺mp
-≺-to-¬≺ (right x) (left y) (x≺mp , mp≺y) = cases a b
+≺-to-¬≺ (right x) (left y) (x≺mp , mp≺y) = ∥∥-rec 𝟘-is-prop (cases a b)
  where
   a : (y ≺ midpoint) + (midpoint ≡ y) → 𝟘
   a = cases c d
@@ -225,24 +227,25 @@ right-monotone = id
   a y≺mp = inl (≺-is-transitive x y midpoint x≺y y≺mp)
   b : midpoint ≡ y → left x ≺ midpoint
   b refl = inl x≺y
-≺-is-transitive (left x) (right y) midpoint = cases a b
- where
-  a : (x ≺ midpoint) + (midpoint ≡ x)
-    → right y ≺ midpoint → left x ≺ midpoint
-  a = cases c d
-   where
-    c : x ≺ midpoint → right y ≺ midpoint → left x ≺ midpoint
-    c x≺mp _ = inl x≺mp
-    d : midpoint ≡ x → right y ≺ midpoint → left x ≺ midpoint
-    d mp≡x _ = inr mp≡x
-  b : (midpoint ≺ y) + (y ≡ midpoint)
-    → right y ≺ midpoint → left x ≺ midpoint
-  b = cases c d
-   where
-    c : midpoint ≺ y → right y ≺ midpoint → left x ≺ midpoint
-    c mp≺y y≺mp = 𝟘-induction (≺-to-¬≺ midpoint y mp≺y y≺mp)
-    d : y ≡ midpoint → right y ≺ midpoint → left x ≺ midpoint
-    d y≡mp y≺mp = 𝟘-induction (≺-to-≢ y≺mp y≡mp)
+≺-is-transitive (left x) (right y) midpoint =
+ ∥∥-rec (Π-is-prop fe (λ _ → ≺-is-prop-valued (left x) midpoint)) (cases a b)
+  where
+   a : (x ≺ midpoint) + (midpoint ≡ x)
+     → right y ≺ midpoint → left x ≺ midpoint
+   a = cases c d
+    where
+     c : x ≺ midpoint → right y ≺ midpoint → left x ≺ midpoint
+     c x≺mp _ = inl x≺mp
+     d : midpoint ≡ x → right y ≺ midpoint → left x ≺ midpoint
+     d mp≡x _ = inr mp≡x
+   b : (midpoint ≺ y) + (y ≡ midpoint)
+     → right y ≺ midpoint → left x ≺ midpoint
+   b = cases c d
+    where
+     c : midpoint ≺ y → right y ≺ midpoint → left x ≺ midpoint
+     c mp≺y y≺mp = 𝟘-induction (≺-to-¬≺ midpoint y mp≺y y≺mp)
+     d : y ≡ midpoint → right y ≺ midpoint → left x ≺ midpoint
+     d y≡mp y≺mp = 𝟘-induction (≺-to-≢ y≺mp y≡mp)
 ≺-is-transitive (right x) midpoint midpoint _ = 𝟘-induction
 ≺-is-transitive (right x) (left y) midpoint (x≺mp , _) _ = x≺mp
 ≺-is-transitive (right x) (right y) midpoint = ≺-is-transitive x y midpoint
@@ -261,46 +264,48 @@ right-monotone = id
   b : midpoint ≡ x → midpoint ≺ left z → left x ≺ left z
   b refl = id
 ≺-is-transitive (left x) (left y) (left z) = ≺-is-transitive x y z
-≺-is-transitive (left x) (right y) (left z) = cases a b
- where
-  a : (x ≺ midpoint) + (midpoint ≡ x)
-    → right y ≺ left z → left x ≺ left z
-  a = cases c d
-   where
-    c : x ≺ midpoint → right y ≺ left z → left x ≺ left z
-    c x≺mp (_ , mp≺z) = ≺-is-transitive x midpoint z x≺mp mp≺z
-    d : midpoint ≡ x → right y ≺ left z → left x ≺ left z
-    d refl = pr₂
-  b : (midpoint ≺ y) + (y ≡ midpoint)
-    → right y ≺ left z → left x ≺ left z
-  b = cases c d
-   where
-    c : midpoint ≺ y → right y ≺ left z → left x ≺ left z
-    c mp≺y (y≺mp , _) = 𝟘-induction (≺-to-¬≺ midpoint y mp≺y y≺mp)
-    d : y ≡ midpoint → right y ≺ left z → left x ≺ left z
-    d y≡mp (y≺mp , _) = 𝟘-induction (≺-to-≢ y≺mp y≡mp)
+≺-is-transitive (left x) (right y) (left z) =
+ ∥∥-rec (Π-is-prop fe (λ _ → ≺-is-prop-valued x z)) (cases a b)
+  where
+   a : (x ≺ midpoint) + (midpoint ≡ x)
+     → right y ≺ left z → left x ≺ left z
+   a = cases c d
+    where
+     c : x ≺ midpoint → right y ≺ left z → left x ≺ left z
+     c x≺mp (_ , mp≺z) = ≺-is-transitive x midpoint z x≺mp mp≺z
+     d : midpoint ≡ x → right y ≺ left z → left x ≺ left z
+     d refl = pr₂
+   b : (midpoint ≺ y) + (y ≡ midpoint)
+     → right y ≺ left z → left x ≺ left z
+   b = cases c d
+    where
+     c : midpoint ≺ y → right y ≺ left z → left x ≺ left z
+     c mp≺y (y≺mp , _) = 𝟘-induction (≺-to-¬≺ midpoint y mp≺y y≺mp)
+     d : y ≡ midpoint → right y ≺ left z → left x ≺ left z
+     d y≡mp (y≺mp , _) = 𝟘-induction (≺-to-≢ y≺mp y≡mp)
 ≺-is-transitive (right x) midpoint (left z) x≺mp mp≺z = x≺mp , mp≺z
 ≺-is-transitive (right x) (left y) (left z) (x≺mp , mp≺y) y≺z =
  x≺mp , (≺-is-transitive midpoint y z mp≺y y≺z)
 ≺-is-transitive (right x) (right y) (left z) x≺y (y≺mp , mp≺z) =
  (≺-is-transitive x y midpoint x≺y y≺mp) , mp≺z
 ≺-is-transitive midpoint midpoint (right z) = 𝟘-induction
-≺-is-transitive midpoint (left y) (right z) mp≺y = cases a b
- where
-  a : (y ≺ midpoint) + (midpoint ≡ y) → midpoint ≺ right z
-  a = cases c d
-   where
-    c : y ≺ midpoint → midpoint ≺ right z
-    c y≺mp = 𝟘-induction (≺-to-¬≺ y midpoint y≺mp mp≺y)
-    d : midpoint ≡ y → midpoint ≺ right z
-    d mp≡y = 𝟘-induction (≺-to-≢ mp≺y mp≡y)
-  b : (midpoint ≺ z) + (z ≡ midpoint) → midpoint ≺ right z
-  b = cases c d
-   where
-    c : midpoint ≺ z → midpoint ≺ right z
-    c = inl
-    d : z ≡ midpoint → midpoint ≺ right z
-    d = inr
+≺-is-transitive midpoint (left y) (right z) mp≺y =
+ ∥∥-rec (≺-is-prop-valued midpoint (right z)) (cases a b)
+  where
+   a : (y ≺ midpoint) + (midpoint ≡ y) → midpoint ≺ right z
+   a = cases c d
+    where
+     c : y ≺ midpoint → midpoint ≺ right z
+     c y≺mp = 𝟘-induction (≺-to-¬≺ y midpoint y≺mp mp≺y)
+     d : midpoint ≡ y → midpoint ≺ right z
+     d mp≡y = 𝟘-induction (≺-to-≢ mp≺y mp≡y)
+   b : (midpoint ≺ z) + (z ≡ midpoint) → midpoint ≺ right z
+   b = cases c d
+    where
+     c : midpoint ≺ z → midpoint ≺ right z
+     c = inl
+     d : z ≡ midpoint → midpoint ≺ right z
+     d = inr
 ≺-is-transitive midpoint (right y) (right z) = cases a b
  where
   a : midpoint ≺ y → right y ≺ right z → midpoint ≺ right z
@@ -310,65 +315,68 @@ right-monotone = id
 ≺-is-transitive (left x) midpoint (right z) = cases a b
  where
   a : x ≺ midpoint → midpoint ≺ right z → left x ≺ right z
-  a x≺mp _ = inl (inl x≺mp)
+  a x≺mp _ = ∣ inl (inl x≺mp) ∣
   b : midpoint ≡ x → midpoint ≺ right z → left x ≺ right z
-  b mp≡x _ = inl (inr mp≡x)
-≺-is-transitive (left x) (left y) (right z) x≺y = cases a b
- where
-  a : (y ≺ midpoint) + (midpoint ≡ y) → left x ≺ right z
-  a = cases c d
-   where
-    c : y ≺ midpoint → left x ≺ right z
-    c y≺mp = inl (inl (≺-is-transitive x y midpoint x≺y y≺mp))
-    d : midpoint ≡ y → left x ≺ right z
-    d refl = inl (inl x≺y)
-  b : (midpoint ≺ z) + (z ≡ midpoint) → left x ≺ right z
-  b = cases c d
-   where
-    c : midpoint ≺ z → left x ≺ right z
-    c mp≺z = inr (inl mp≺z)
-    d : z ≡ midpoint → left x ≺ right z
-    d z≡mp = inr (inr z≡mp)
-≺-is-transitive (left x) (right y) (right z) = cases a b
- where
-  a : (x ≺ midpoint) + (midpoint ≡ x) →
-        right y ≺ right z → left x ≺ right z
-  a = cases c d
-   where
-    c : x ≺ midpoint → right y ≺ right z → left x ≺ right z
-    c x≺mp _ = inl (inl x≺mp)
-    d : midpoint ≡ x → right y ≺ right z → left x ≺ right z
-    d mp≡x _ = inl (inr mp≡x)
-  b : (midpoint ≺ y) + (y ≡ midpoint) →
-        right y ≺ right z → left x ≺ right z
-  b = cases c d
-   where
-    c : midpoint ≺ y → right y ≺ right z → left x ≺ right z
-    c mp≺y y≺z = inr (inl (≺-is-transitive midpoint y z mp≺y y≺z))
-    d : y ≡ midpoint → right y ≺ right z → left x ≺ right z
-    d refl mp≺z = inr (inl mp≺z)
+  b mp≡x _ = ∣ inl (inr mp≡x) ∣
+≺-is-transitive (left x) (left y) (right z) x≺y =
+ ∥∥-rec (≺-is-prop-valued (left x) (right z)) (cases a b)
+  where
+   a : (y ≺ midpoint) + (midpoint ≡ y) → left x ≺ right z
+   a = cases c d
+    where
+     c : y ≺ midpoint → left x ≺ right z
+     c y≺mp = ∣ inl (inl (≺-is-transitive x y midpoint x≺y y≺mp)) ∣
+     d : midpoint ≡ y → left x ≺ right z
+     d refl = ∣ inl (inl x≺y) ∣
+   b : (midpoint ≺ z) + (z ≡ midpoint) → left x ≺ right z
+   b = cases c d
+    where
+     c : midpoint ≺ z → left x ≺ right z
+     c mp≺z = ∣ inr (inl mp≺z) ∣
+     d : z ≡ midpoint → left x ≺ right z
+     d z≡mp = ∣ inr (inr z≡mp) ∣
+≺-is-transitive (left x) (right y) (right z) =
+ ∥∥-rec (Π-is-prop fe (λ _ → ≺-is-prop-valued (left x) (right z))) (cases a b)
+  where
+   a : (x ≺ midpoint) + (midpoint ≡ x) →
+         right y ≺ right z → left x ≺ right z
+   a = cases c d
+    where
+     c : x ≺ midpoint → right y ≺ right z → left x ≺ right z
+     c x≺mp _ = ∣ inl (inl x≺mp) ∣
+     d : midpoint ≡ x → right y ≺ right z → left x ≺ right z
+     d mp≡x _ = ∣ inl (inr mp≡x) ∣
+   b : (midpoint ≺ y) + (y ≡ midpoint) →
+         right y ≺ right z → left x ≺ right z
+   b = cases c d
+    where
+     c : midpoint ≺ y → right y ≺ right z → left x ≺ right z
+     c mp≺y y≺z = ∣ inr (inl (≺-is-transitive midpoint y z mp≺y y≺z)) ∣
+     d : y ≡ midpoint → right y ≺ right z → left x ≺ right z
+     d refl mp≺z = ∣ inr (inl mp≺z) ∣
 ≺-is-transitive (right x) midpoint (right z) x≺mp = cases a b
  where
   a : midpoint ≺ z → right x ≺ right z
   a = ≺-is-transitive x midpoint z x≺mp
   b : z ≡ midpoint → right x ≺ right z
   b refl = x≺mp
-≺-is-transitive (right x) (left y) (right z) (x≺mp , mp≺y) = cases a b
- where
-  a : (y ≺ midpoint) + (midpoint ≡ y) → right x ≺ right z
-  a = cases c d
-   where
-    c : y ≺ midpoint → right x ≺ right z
-    c y≺mp = 𝟘-induction (≺-to-¬≺ midpoint y mp≺y y≺mp)
-    d : midpoint ≡ y → right x ≺ right z
-    d mp≡y = 𝟘-induction (≺-to-≢ mp≺y mp≡y)
-  b : (midpoint ≺ z) + (z ≡ midpoint) → right x ≺ right z
-  b =  cases c d
-   where
-    c : midpoint ≺ z → right x ≺ right z
-    c = ≺-is-transitive x midpoint z x≺mp
-    d : z ≡ midpoint → right x ≺ right z
-    d refl = x≺mp
+≺-is-transitive (right x) (left y) (right z) (x≺mp , mp≺y) =
+ ∥∥-rec (≺-is-prop-valued (right x) (right z)) (cases a b)
+  where
+   a : (y ≺ midpoint) + (midpoint ≡ y) → right x ≺ right z
+   a = cases c d
+    where
+     c : y ≺ midpoint → right x ≺ right z
+     c y≺mp = 𝟘-induction (≺-to-¬≺ midpoint y mp≺y y≺mp)
+     d : midpoint ≡ y → right x ≺ right z
+     d mp≡y = 𝟘-induction (≺-to-≢ mp≺y mp≡y)
+   b : (midpoint ≺ z) + (z ≡ midpoint) → right x ≺ right z
+   b =  cases c d
+    where
+     c : midpoint ≺ z → right x ≺ right z
+     c = ≺-is-transitive x midpoint z x≺mp
+     d : z ≡ midpoint → right x ≺ right z
+     d refl = x≺mp
 ≺-is-transitive (right x) (right y) (right z) = ≺-is-transitive x y z
 
 \end{code}
@@ -426,26 +434,26 @@ right-monotone = id
    where
     d : x ≺ midpoint
       → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-    d = inl ∘ inl ∘ inl
+    d x≺mp = inl ∣ inl (inl x≺mp) ∣
     e : x ≡ midpoint
       → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-    e x≡mp = inl (inl (inr (x≡mp ⁻¹)))
+    e x≡mp = inl ∣ inl (inr (x≡mp ⁻¹)) ∣
     f : midpoint ≺ x
       → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-    f mp≺x = inl (inr (inl (≺-is-transitive midpoint x y mp≺x x≺y)))
+    f mp≺x = inl ∣ inr (inl (≺-is-transitive midpoint x y mp≺x x≺y)) ∣
   b : x ≡ y
     → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
   b refl = cases₃ d e f (≺-is-linear x midpoint)
    where
     d : x ≺ midpoint
       → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
-    d = inl ∘ inl ∘ inl
+    d x≺mp = inl ∣ inl (inl x≺mp) ∣
     e : x ≡ midpoint
       → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
-    e x≡mp = inl (inl (inr (x≡mp ⁻¹)))
+    e x≡mp = inl ∣ inl (inr (x≡mp ⁻¹)) ∣
     f : midpoint ≺ x
       → (left x ≺ right x) + (left x ≡ right x) + (right x ≺ left x)
-    f mp≺x = inl (inr (inl mp≺x))
+    f mp≺x = inl ∣ inr (inl mp≺x) ∣
   c : y ≺ x
     → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
   c y≺x = cases₃ d e f (≺-is-linear y midpoint)
@@ -456,19 +464,19 @@ right-monotone = id
      where
       g : x ≺ midpoint
         → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-      g = inl ∘ inl ∘ inl
+      g x≺mp = inl ∣ inl (inl x≺mp) ∣
       h : x ≡ midpoint
         → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-      h x≡mp = inl (inl (inr (x≡mp ⁻¹)))
+      h x≡mp = inl ∣ inl (inr (x≡mp ⁻¹)) ∣
       k : midpoint ≺ x
         → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
       k mp≺x = inr (inr (y≺mp , mp≺x))
     e : y ≡ midpoint
       → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-    e y≡mp = inl (inr (inr y≡mp))
+    e y≡mp = inl ∣ inr (inr (y≡mp)) ∣
     f : midpoint ≺ y
       → (left x ≺ right y) + (left x ≡ right y) + (right y ≺ left x)
-    f mp≺y = inl (inr (inl mp≺y))
+    f mp≺y = inl ∣ inr (inl mp≺y) ∣
 ≺-is-linear (right x) midpoint = cases₃ a b c (≺-is-linear x midpoint)
  where
   a : x ≺ midpoint
@@ -488,10 +496,10 @@ right-monotone = id
    where
     d : y ≺ midpoint
       → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-    d y≺mp = inr (inr (inl (inl y≺mp)))
+    d y≺mp = inr (inr ∣ inl (inl y≺mp) ∣)
     e : y ≡ midpoint
       → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-    e y≡mp = inr (inr (inl (inr (y≡mp ⁻¹))))
+    e y≡mp = inr (inr ∣ inl (inr (y≡mp ⁻¹)) ∣)
     f : midpoint ≺ y
       → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
     f mp≺y = cases₃ g h k (≺-is-linear x midpoint)
@@ -501,36 +509,36 @@ right-monotone = id
       g x≺mp = inl (x≺mp , mp≺y)
       h : x ≡ midpoint
         → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-      h = inr ∘ inr ∘ inr ∘ inr
+      h x≡mp = inr (inr ∣ inr (inr x≡mp) ∣)
       k : midpoint ≺ x
         → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-      k mp≺x = inr (inr (inr (inl mp≺x)))
+      k mp≺x = inr (inr ∣ inr (inl mp≺x) ∣)
   b : x ≡ y
     → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
   b refl = cases₃ d e f (≺-is-linear x midpoint)
    where
     d : x ≺ midpoint
       → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
-    d x≺mp = inr (inr (inl (inl x≺mp)))
+    d x≺mp = inr (inr ∣ inl (inl x≺mp) ∣)
     e : x ≡ midpoint
       → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
-    e = inr ∘ inr ∘ inr ∘ inr
+    e x≡mp = inr (inr ∣ inr (inr x≡mp) ∣)
     f : midpoint ≺ x
       → (right x ≺ left x) + (right x ≡ left x) + (left x ≺ right x)
-    f mp≺x = inr (inr (inr (inl mp≺x)))
+    f mp≺x = inr (inr ∣ inr (inl mp≺x) ∣)
   c : y ≺ x
     → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
   c y≺x = cases₃ d e f (≺-is-linear x midpoint)
    where
     d : x ≺ midpoint
       → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-    d x≺mp = inr (inr (inl (inl (≺-is-transitive y x midpoint y≺x x≺mp))))
+    d x≺mp = inr (inr ∣ inl (inl (≺-is-transitive y x midpoint y≺x x≺mp)) ∣)
     e : x ≡ midpoint
       → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-    e = inr ∘ inr ∘ inr ∘ inr
+    e x≡mp = inr (inr ∣ inr (inr x≡mp) ∣)
     f : midpoint ≺ x
       → (right x ≺ left y) + (right x ≡ left y) + (left y ≺ right x)
-    f mp≺x = inr (inr (inr (inl mp≺x)))
+    f mp≺x = inr (inr ∣ inr (inl mp≺x) ∣)
 ≺-is-linear (right x) (right y) = cases₃ a b c (≺-is-linear x y)
  where
   a : x ≺ y
@@ -553,11 +561,11 @@ left-≺ (left x)  = left-≺ x
 left-≺ (right x) = cases₃ a b c h
  where
   a : x ≺ midpoint → left (right x) ≺ right x
-  a = inl ∘ inl
+  a = ∣_∣ ∘ inl ∘ inl
   b : x ≡ midpoint → left (right x) ≺ right x
-  b = inr ∘ inr
+  b = ∣_∣ ∘ inr ∘ inr
   c : midpoint ≺ x → left (right x) ≺ right x
-  c = inr ∘ inl
+  c = ∣_∣ ∘ inr ∘ inl
   h : (x ≺ midpoint) + (x ≡ midpoint) + (midpoint ≺ x)
   h = ≺-is-linear x midpoint
 
@@ -566,11 +574,11 @@ left-≺ (right x) = cases₃ a b c h
 ≺-right (left x)  = cases₃ a b c h
  where
   a : x ≺ midpoint → left x ≺ right (left x)
-  a = inl ∘ inl
+  a = ∣_∣ ∘ inl ∘ inl
   b : x ≡ midpoint → left x ≺ right (left x)
-  b x≡mp = inl (inr (x≡mp ⁻¹))
+  b x≡mp = ∣ inl (inr (x≡mp ⁻¹)) ∣
   c : midpoint ≺ x → left x ≺ right (left x)
-  c = inr ∘ inl
+  c = ∣_∣ ∘ inr ∘ inl
   h : (x ≺ midpoint) + (x ≡ midpoint) + (midpoint ≺ x)
   h = ≺-is-linear x midpoint
 ≺-right (right x) = ≺-right x
@@ -579,137 +587,93 @@ left-≺ (right x) = cases₃ a b c h
 
 \begin{code}
 
-≺-density : (x y : 𝔻) → x ≺ y → Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
-≺-density midpoint midpoint = 𝟘-induction
-≺-density midpoint (left y) mp≺y = left z , mp≺z , z≺y
+≺-has-no-left-endpoint : (x : 𝔻) → ∃ y ꞉ 𝔻 , y ≺ x
+≺-has-no-left-endpoint x = ∣ left x , left-≺ x ∣
+
+≺-has-no-right-endpoint : (x : 𝔻) → ∃ y ꞉ 𝔻 , x ≺ y
+≺-has-no-right-endpoint x = ∣ right x , ≺-right x ∣
+
+≺-is-dense : (x y : 𝔻) → x ≺ y → ∃ z ꞉ 𝔻 , x ≺ z × z ≺ y
+≺-is-dense midpoint midpoint = 𝟘-induction
+≺-is-dense midpoint (left y) mp≺y = do
+ z , mp≺z , z≺y ← ≺-is-dense midpoint y mp≺y
+ ∣ left z , mp≺z , z≺y ∣
+≺-is-dense midpoint (right y) = cases a b
  where
-  IH : Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ y
-  IH = ≺-density midpoint y mp≺y
-  z : 𝔻
-  z = pr₁ IH
-  mp≺z : midpoint ≺ z
-  mp≺z = pr₁ (pr₂ IH)
-  z≺y : z ≺ y
-  z≺y = pr₂ (pr₂ IH)
-≺-density midpoint (right y) = cases a b
+  a : midpoint ≺ y → ∃ z ꞉ 𝔻 , midpoint ≺ z × z ≺ right y
+  a mp≺y = ∣ y , mp≺y , ≺-right y ∣
+  b : y ≡ midpoint → ∃ z ꞉ 𝔻 , midpoint ≺ z × z ≺ right y
+  b refl = ∣ left (right midpoint) , inr refl , ∣ inr (inr refl) ∣ ∣
+≺-is-dense (left x) midpoint = cases a b
  where
-  a : midpoint ≺ y → Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ right y
-  a mp≺y = y , mp≺y , ≺-right y
-  b : y ≡ midpoint → Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ right y
-  b refl = left (right midpoint) , inr refl , inr (inr refl)
-≺-density (left x) midpoint = cases a b
- where
-  a : x ≺ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ midpoint
-  a x≺mp = x , left-≺ x , x≺mp
-  b : midpoint ≡ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ midpoint
-  b refl = right (left midpoint) , inl (inr refl) , inr refl
-≺-density (left x) (left y) x≺y = left z , x≺z , z≺y
- where
-  IH : Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
-  IH = ≺-density x y x≺y
-  z : 𝔻
-  z = pr₁ IH
-  x≺z : x ≺ z
-  x≺z = pr₁ (pr₂ IH)
-  z≺y : z ≺ y
-  z≺y = pr₂ (pr₂ IH)
-≺-density (left x) (right y) = cases a b
+  a : x ≺ midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ midpoint
+  a x≺mp = ∣ x , left-≺ x , x≺mp ∣
+  b : midpoint ≡ x → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ midpoint
+  b refl = ∣ right (left midpoint) , ∣ inl (inr refl) ∣ , inr refl ∣
+≺-is-dense (left x) (left y) x≺y = do
+ z , x≺z , z≺y ← ≺-is-dense x y x≺y
+ ∣ left z , x≺z , z≺y ∣
+≺-is-dense (left x) (right y) = ∥∥-rec ∥∥-is-a-prop {!cases a b!}
  where
   a : (x ≺ midpoint) + (midpoint ≡ x)
-    → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
   a = cases c d
    where
-    c : x ≺ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
-    c x≺mp = left midpoint , x≺mp , inl (inr refl)
-    d : midpoint ≡ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    c : x ≺ midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    c x≺mp = ∣ left midpoint , x≺mp , ∣ inl (inr refl) ∣ ∣
+    d : midpoint ≡ x → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
     d refl = cases₃ e f g (≺-is-linear y midpoint)
      where
-      e : y ≺ midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+      e : y ≺ midpoint → ∃ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
       e y≺mp = cases₃ i j k (≺-is-linear y (left midpoint))
        where
-        i : y ≺ left midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-        i y≺lmp = right (left y) , inl (inr refl) , left-≺ y
-        j : y ≡ left midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-        j refl = right (left (left midpoint)) , inl (inr refl) , inr refl
-        k : left midpoint ≺ y → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-        k lmp≺y = y , lmp≺y , ≺-right y
-      f : y ≡ midpoint → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-      f refl = midpoint , inr refl , inr refl
-      g : midpoint ≺ y → Σ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
-      g mp≺y = y , h , ≺-right y
+        i : y ≺ left midpoint → ∃ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+        i y≺lmp = ∣ right (left y) , ∣ inl (inr refl) ∣ , left-≺ y ∣
+        j : y ≡ left midpoint → ∃ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+        j refl = ∣ right (left (left midpoint)) , ∣ inl (inr refl) ∣ , inr refl ∣
+        k : left midpoint ≺ y → ∃ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+        k lmp≺y = ∣ y , lmp≺y , ≺-right y ∣
+      f : y ≡ midpoint → ∃ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+      f refl = ∣ midpoint , inr refl , inr refl ∣
+      g : midpoint ≺ y → ∃ z ꞉ 𝔻 , left midpoint ≺ z × z ≺ right y
+      g mp≺y = ∣ y , h , ≺-right y ∣
        where
         h : left midpoint ≺ y
         h = ≺-is-transitive (left midpoint) midpoint y (left-≺ midpoint) mp≺y
   b : (midpoint ≺ y) + (y ≡ midpoint)
-    → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
   b = cases c d
    where
-    c : midpoint ≺ y → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
-    c mp≺y = right midpoint , inr (inr refl) , mp≺y
-    d : y ≡ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    c : midpoint ≺ y → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
+    c mp≺y = ∣ right midpoint , ∣ inr (inr refl) ∣ , mp≺y ∣
+    d : y ≡ midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right y
     d refl = cases₃ e f g (≺-is-linear x midpoint)
      where
-      e : x ≺ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
-      e x≺mp = left midpoint , x≺mp , inr (inr refl)
-      f : x ≡ midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
-      f refl = midpoint , inr refl , inr refl
-      g : midpoint ≺ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+      e : x ≺ midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+      e x≺mp = ∣ left midpoint , x≺mp , ∣ inr (inr refl) ∣ ∣
+      f : x ≡ midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+      f refl = ∣ midpoint , inr refl , inr refl ∣
+      g : midpoint ≺ x → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
       g mp≺x = cases₃ i j k (≺-is-linear x (right midpoint))
        where
-         i : x ≺ right midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
-         i x≺rmp = x , left-≺ x , x≺rmp
-         j : x ≡ right midpoint → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
-         j refl = left (right (left (right midpoint))) , inr refl , inr (inr refl)
-         k : right midpoint ≺ x → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
-         k rmp≺x = left (right x) , ≺-right x , inr (inr refl)
-≺-density (right x) midpoint x≺mp = right z , x≺z , z≺mp
- where
-  IH : Σ z ꞉ 𝔻 , x ≺ z × z ≺ midpoint
-  IH = ≺-density x midpoint x≺mp
-  z : 𝔻
-  z = pr₁ IH
-  x≺z : x ≺ z
-  x≺z = pr₁ (pr₂ IH)
-  z≺mp : z ≺ midpoint
-  z≺mp = pr₂ (pr₂ IH)
-≺-density (right x) (left y) (x≺mp , mp≺y) = left z , (x≺mp , mp≺z) , z≺y
- where
-  IH : Σ z ꞉ 𝔻 , midpoint ≺ z × z ≺ y
-  IH = ≺-density midpoint y mp≺y
-  z : 𝔻
-  z = pr₁ IH
-  mp≺z : midpoint ≺ z
-  mp≺z = pr₁ (pr₂ IH)
-  z≺y : z ≺ y
-  z≺y = pr₂ (pr₂ IH)
-≺-density (right x) (right y) x≺y = right z , x≺z , z≺y
- where
-  IH : Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
-  IH = ≺-density x y x≺y
-  z : 𝔻
-  z = pr₁ IH
-  x≺z : x ≺ z
-  x≺z = pr₁ (pr₂ IH)
-  z≺y : z ≺ y
-  z≺y = pr₂ (pr₂ IH)
+         i : x ≺ right midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+         i x≺rmp = ∣ x , left-≺ x , x≺rmp ∣
+         j : x ≡ right midpoint → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+         j refl = ∣ left (right (left (right midpoint))) , inr refl , ∣ inr (inr refl) ∣ ∣
+         k : right midpoint ≺ x → ∃ z ꞉ 𝔻 , left x ≺ z × z ≺ right midpoint
+         k rmp≺x = ∣ left (right x) , ≺-right x , ∣ inr (inr refl) ∣ ∣
+≺-is-dense (right x) midpoint x≺mp = do
+ z , x≺z , z≺mp ← ≺-is-dense x midpoint x≺mp
+ ∣ right z , x≺z , z≺mp ∣
+≺-is-dense (right x) (left y) (x≺mp , mp≺y) = do
+ z , mp≺z , z≺y ← ≺-is-dense midpoint y mp≺y
+ ∣ left z , (x≺mp , mp≺z) , z≺y ∣
+≺-is-dense (right x) (right y) x≺y = do
+ z , x≺z , z≺y ← ≺-is-dense x y x≺y
+ ∣ right z , x≺z , z≺y ∣
 
 \end{code}
 
 \begin{code}
 
-open import UF-PropTrunc
-
-module _ (pt : propositional-truncations-exist) where
- open PropositionalTruncation pt
-
- ≺-has-no-left-endpoint : (x : 𝔻) → ∃ y ꞉ 𝔻 , y ≺ x
- ≺-has-no-left-endpoint x = ∣ left x , left-≺ x ∣
-
- ≺-has-no-right-endpoint : (x : 𝔻) → ∃ y ꞉ 𝔻 , x ≺ y
- ≺-has-no-right-endpoint x = ∣ right x , ≺-right x ∣
-
- ≺-is-dense : (x y : 𝔻) → x ≺ y → ∃ z ꞉ 𝔻 , x ≺ z × z ≺ y
- ≺-is-dense x y x≺y = ∣ ≺-density x y x≺y ∣
-
--}
 \end{code}

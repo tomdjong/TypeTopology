@@ -7,6 +7,8 @@ Tom de Jong, 3 March 2020
 open import SpartanMLTT
 open import DiscreteAndSeparated
 open import One-Properties
+open import UF-Miscelanea
+open import UF-Subsingletons
 
 module Dyadic where
 
@@ -76,6 +78,9 @@ right-lc = ap f
   b : ¬ (x ≡ y) → decidable (right x ≡ right y)
   b = inr ∘ contrapositive right-lc
 
+𝔻-is-a-set : is-set 𝔻
+𝔻-is-a-set = discrete-types-are-sets 𝔻-is-discrete
+
 \end{code}
 
 \begin{code}
@@ -109,6 +114,9 @@ right-monotone = id
 ≺-to-≢ {right x}  {left y}   _   p = left-is-not-right (p ⁻¹)
 ≺-to-≢ {right x}  {right y}  x≺y   = contrapositive right-lc (≺-to-≢ x≺y)
 
+≺-to-≢' : {x y : 𝔻} → y ≺ x → x ≢ y
+≺-to-≢' y≺x p = ≺-to-≢ y≺x (p ⁻¹)
+
 ≡-to-¬≺ : {x y : 𝔻} → x ≡ y → ¬ (x ≺ y)
 ≡-to-¬≺ x≡y x≺y = ≺-to-≢ x≺y x≡y
 
@@ -119,6 +127,30 @@ right-monotone = id
 
 \begin{code}
 
+≺-is-prop-valued : (x y : 𝔻) → is-prop (x ≺ y)
+≺-is-prop-valued midpoint midpoint = 𝟘-is-prop
+≺-is-prop-valued midpoint (left y) = ≺-is-prop-valued midpoint y
+≺-is-prop-valued midpoint (right y) =
+ +-is-prop (≺-is-prop-valued midpoint y) 𝔻-is-a-set ≺-to-≢'
+≺-is-prop-valued (left x) midpoint =
+ +-is-prop (≺-is-prop-valued x midpoint) 𝔻-is-a-set ≺-to-≢'
+≺-is-prop-valued (left x) (left y) = ≺-is-prop-valued x y
+≺-is-prop-valued (left x) (right y) = {!!}
+{-
+ +-is-prop
+  (+-is-prop (≺-is-prop-valued x midpoint) 𝔻-is-a-set ≺-to-≢')
+  (+-is-prop (≺-is-prop-valued midpoint y) 𝔻-is-a-set ≺-to-≢')
+  {!!} -}
+≺-is-prop-valued (right x) midpoint = ≺-is-prop-valued x midpoint
+≺-is-prop-valued (right x) (left y) =
+ ×-is-prop (≺-is-prop-valued x midpoint) (≺-is-prop-valued midpoint y)
+≺-is-prop-valued (right x) (right y) = ≺-is-prop-valued x y
+
+\end{code}
+
+\begin{code}
+
+{-
 ≺-to-¬≺ : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
 ≺-to-¬≺ midpoint midpoint = 𝟘-induction
 ≺-to-¬≺ midpoint (left y) mp≺y = cases a b
@@ -679,4 +711,5 @@ module _ (pt : propositional-truncations-exist) where
  ≺-is-dense : (x y : 𝔻) → x ≺ y → ∃ z ꞉ 𝔻 , x ≺ z × z ≺ y
  ≺-is-dense x y x≺y = ∣ ≺-density x y x≺y ∣
 
+-}
 \end{code}

@@ -101,26 +101,34 @@ module PropositionalTruncation (pt : propositional-truncations-exist) where
  a-prop-is-equivalent-to-its-truncation i =
   logically-equivalent-props-are-equivalent ∥∥-is-a-prop i (∥∥-rec i id) ∣_∣
 
+\end{code}
+
+Added 19/12/2019 by Tom de Jong.
+
+The following allows us to use Agda's do-notation with the ∥∥-monad.
+
+Note that the Kleisli laws hold trivially, because ∥ X ∥ is a proposition for
+any type X.
+
+It is quite convenient when dealing with multiple, successive ∥∥-rec calls.
+
+Agda's do-notation is powerful, because it can be combined with pattern
+matching, i.e. if
+  w ꞉ ∥ fiber f y ∥,
+then
+  x , p ← w
+is allowed in the do-block.
+
+(Note that in Haskell, you would write "return" for our function ∣_∣.)
+
+\begin{code}
+
  _>>=_ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } → ∥ X ∥ → (X → ∥ Y ∥) → ∥ Y ∥
  s >>= f = ∥∥-rec ∥∥-is-a-prop f s
 
- law₁ : {X : 𝓤 ̇ } (x : X) (f : X → ∥ X ∥) → ∣ x ∣ >>= f ≡ f x
- law₁ x f = ∥∥-is-a-prop (∣ x ∣ >>= f) (f x)
+\end{code}
 
- law₂ : {X : 𝓤 ̇ } (s : ∥ X ∥) → s >>= ∣_∣ ≡ s
- law₂ s = ∥∥-is-a-prop (s >>= ∣_∣) s
-
- law₃ : {X : 𝓤 ̇ } {Y : 𝓥 ̇ } {Z : 𝓦 ̇ }
-      → (s : ∥ X ∥)
-      → (f : X → ∥ Y ∥)
-      → (g : Y → ∥ Z ∥)
-      → s >>= (\x → f x >>= g) ≡ (s >>= f) >>= g
- law₃ s f g = ∥∥-is-a-prop (s >>= (λ x → f x >>= g)) ((s >>= f) >>= g)
-
- return = ∣_∣
-
- -- bind = _>>=_
- -- syntax bind e₁ (λ x → e₂) = x ← e₁ ؛ e₂
+\begin{code}
 
  infixr 0 _∨_
 

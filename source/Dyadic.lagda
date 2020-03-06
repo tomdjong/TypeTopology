@@ -24,19 +24,16 @@ Start with the point 0 in the middle (represented by midpoint below).
 Define two functions (represented by left and right below):
 
 l : (-1,1) → (-1,1)
-l x = x/2     if x > 0
-      (x-1)/2 if x ≤ 0
+l x = (x-1)/2
 
 r : (-1,1) → (-1,1)
-r x = (x+1)/2 if x ≥ 0
-      x/2     if x < 0
+r x = (x+1)/2
 
 Some values (ordered) to give an impression:
 
                    0                  -- just 0
         -1/2                1/2       -- l 0 = -1/2 and r 0 = 1/2
-   -3/4      -1/4      1/4       3/4  -- l (l 0), r (l 0), l (r 0) and r (r 0)
-                     1/8      5/8     -- l (1/4) and r (1/4)
+   -3/4      -1/4      1/4       3/4  -- l (l 0), l (r 0), r (l 0) and r (r 0)
 
 In this module we just define the type and prove that it has decidable
 equality. The order on 𝔻 is defined in the separate module Dyadic-Order.

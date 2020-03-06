@@ -263,24 +263,19 @@ algebraicity-implies-continuity 𝓓 = ∥∥-functor γ
 
 \begin{code}
 
-{-
-≪-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+≪-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
        → (x : ⟨ 𝓓 ⟩)
-       → ∃ b ꞉ basis 𝓓 c , basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ x
-≪-INT₀ 𝓓 (B , ι , ≺ , c) x = do
+       → ∃ b ꞉ B , ι b ≪⟨ 𝓓 ⟩ x
+≪-INT₀ 𝓓 (≺ , c) x = do
  (I , β , ≪x , δ , ∐β≡x) ← c x
  i ← Directed-implies-inhabited 𝓓 δ
  ∣ (β i) , ≪x i ∣
 
-≪ᴮ-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-        → (b : basis 𝓓 c)
-        → ∃ b' ꞉ basis 𝓓 c , b' ≪ᴮ⟨ 𝓓 ⟩[ c ] b
-≪ᴮ-INT₀ 𝓓 c b = ∥∥-functor γ (≪-INT₀ 𝓓 c (ι b))
+≪ᴮ-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
+          (b : B)
+        → ∃ b' ꞉ B , b' ≪ᴮ⟨ 𝓓 ⟩[ c ] b
+≪ᴮ-INT₀ 𝓓 {B} {ι} c b = ∥∥-functor γ (≪-INT₀ 𝓓 c (ι b))
  where
-  B : 𝓥 ̇
-  B = basis 𝓓 c
-  ι : B → ⟨ 𝓓 ⟩
-  ι = basis-to-dcpo 𝓓 c
   γ : (Σ b' ꞉ B , ι b' ≪⟨ 𝓓 ⟩ ι b) → Σ b' ꞉ B , b' ≪ᴮ⟨ 𝓓 ⟩[ c ] b
   γ (b' , b'≪b) = b' , ≪-to-≪ᴮ 𝓓 c b' b b'≪b
 
@@ -306,16 +301,14 @@ only include basis elements in the newly constructed directed family.
 
 \begin{code}
 
-≪-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
+≪-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
        → (x y : ⟨ 𝓓 ⟩)
        → x ≪⟨ 𝓓 ⟩ y
-       → ∃ b ꞉ basis 𝓓 c ,
-           x ≪⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b
-         × basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ y
-≪-INT₁ 𝓓 (B , ι , ≺ , c) x y x≪y = ∥∥-rec ∥∥-is-a-prop γ (c y)
+       → ∃ b ꞉ B , x ≪⟨ 𝓓 ⟩ ι b × ι b ≪⟨ 𝓓 ⟩ y
+≪-INT₁ 𝓓 {B} {ι} (≺ , c) x y x≪y = ∥∥-rec ∥∥-is-a-prop γ (c y)
  where
-  cd : is-a-continuous-dcpo 𝓓
-  cd = (B , ι , ≺ , c)
+  cd : is-a-basis 𝓓 ι
+  cd = (≺ , c)
   γ : (Σ I ꞉ 𝓥 ̇ , Σ α ꞉ (I → B) ,
        ((i : I) → ι (α i) ≪⟨ 𝓓 ⟩ y)
       × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ α) , ∐ 𝓓 δ ≡ y))
@@ -389,19 +382,13 @@ only include basis elements in the newly constructed directed family.
                   j : J
                   j = ϕ l , i , ≪-to-≪ᴮ 𝓓 cd (ϕ l) (α i) (ϕ≪αi l)
 
-≪ᴮ-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-        → (b₁ b₂ : basis 𝓓 c)
+≪ᴮ-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
+        → (b₁ b₂ : B)
         → b₁ ≪ᴮ⟨ 𝓓 ⟩[ c ] b₂
-        → ∃ b ꞉ basis 𝓓 c ,
-           b₁ ≪ᴮ⟨ 𝓓 ⟩[ c ] b
-          × b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₂
-≪ᴮ-INT₁ 𝓓 c b₁ b₂ b₁≪ᴮb₂ =
+        → ∃ b ꞉ B , b₁ ≪ᴮ⟨ 𝓓 ⟩[ c ] b × b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₂
+≪ᴮ-INT₁ 𝓓 {B} {ι} c b₁ b₂ b₁≪ᴮb₂ =
  ∥∥-functor γ (≪-INT₁ 𝓓 c (ι b₁) (ι b₂) (≪ᴮ-to-≪ 𝓓 c b₁ b₂ b₁≪ᴮb₂))
   where
-   B : 𝓥 ̇
-   B = basis 𝓓 c
-   ι : B → ⟨ 𝓓 ⟩
-   ι = basis-to-dcpo 𝓓 c
    γ : (Σ b ꞉ B , ι b₁ ≪⟨ 𝓓 ⟩ ι b × ι b ≪⟨ 𝓓 ⟩ ι b₂)
      → Σ b ꞉ B , b₁ ≪ᴮ⟨ 𝓓 ⟩[ c ] b × b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₂
    γ (b , b₁≪b , b≪b₂) =
@@ -412,10 +399,11 @@ only include basis elements in the newly constructed directed family.
 An interpolation property starting from two inequalities.
 
 ≪ᴮ-INT₂ shows that a basis of a continuous dcpo satisifies the axioms of an
-"abstract basis" as set out in IdealCompletion.lagda
+"abstract basis" as set out in IdealCompletion.
 
 \begin{code}
 
+{-
 ≪-INT₂ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
        → (x y z : ⟨ 𝓓 ⟩)
        → x ≪⟨ 𝓓 ⟩ z

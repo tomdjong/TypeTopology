@@ -14,11 +14,11 @@ open import UF-Subsingletons
 
 \end{code}
 
-We inductively define an order ≺ on 𝔻 and prove that it is transitive, linear,
-dense and without endpoints.
+We inductively define an order ≺ on 𝔻 and prove that it is transitive and linear.
 
-Moreover, we want ≺ to be proposition-valued and for this we will need ∨, the
-truncated +-type, as defined in UF-PropTrunc.
+In Dyadic-Order-PropTrunc, we prove that it is dense and has no endpoints.
+(These statements need ∃, so they depend on propositional truncation and are
+therefore in a separate module).
 
 \begin{code}
 

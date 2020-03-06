@@ -5,7 +5,7 @@ Tom de Jong, late February - early March 2020
 {-# OPTIONS --without-K --exact-split --safe #-}
 
 open import SpartanMLTT hiding (J)
-open import UF-PropTrunc hiding (⊥)
+open import UF-PropTrunc
 
 module DcpoCompact
         (pt : propositional-truncations-exist)
@@ -14,9 +14,6 @@ module DcpoCompact
        where
 
 open PropositionalTruncation pt
-
--- open import UF-Subsingletons hiding (⊥)
--- open import UF-Subsingletons-FunExt
 
 open import Dcpo pt fe 𝓥
 
@@ -100,8 +97,8 @@ syntax approximates 𝓓 x y = x ≪⟨ 𝓓 ⟩ y
          z      ⊑⟨ 𝓓 ⟩[ z⊑∐α ]
          ∐ 𝓓 δ ∎⟨ 𝓓 ⟩
 
-compact : (𝓓 : DCPO {𝓤} {𝓣}) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-compact 𝓓 x = x ≪⟨ 𝓓 ⟩ x
+is-compact : (𝓓 : DCPO {𝓤} {𝓣}) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+is-compact 𝓓 x = x ≪⟨ 𝓓 ⟩ x
 
 \end{code}
 
@@ -110,81 +107,74 @@ compact 𝓓 x = x ≪⟨ 𝓓 ⟩ x
 open import UF-Equiv
 open import UF-Size
 
-is-a-continuous-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-is-a-continuous-dcpo {𝓤} {𝓣} 𝓓 =
- Σ B ꞉ 𝓥 ̇ ,
- Σ ι ꞉ (B → ⟨ 𝓓 ⟩) ,
- ((b₀ b₁ : B) → (ι b₀ ≪⟨ 𝓓 ⟩ ι b₁) has-size 𝓥) × γ ι
-  where
-   γ : {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-   γ {B} ι = (x : ⟨ 𝓓 ⟩)
-           → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (β≪x β x) × (∐β≡x β x)
-    where
+≪-small-on-B : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+≪-small-on-B 𝓓 {B} ι = (b b' : B) → (ι b ≪⟨ 𝓓 ⟩ ι b') has-size 𝓥
+
+is-a-basis : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+is-a-basis {𝓤} {𝓣} 𝓓 {B} ι = ≪-small-on-B 𝓓 ι × γ ι
+ where
+  γ : {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+  γ {B} ι = (x : ⟨ 𝓓 ⟩) → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (β≪x β x) × (∐β≡x β x)
+   where
      β≪x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
      β≪x {I} β x = ((i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x)
      ∐β≡x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
      ∐β≡x β x = Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x
 
-basis : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓 → 𝓥 ̇
-basis 𝓓 = pr₁
+is-a-continuous-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+is-a-continuous-dcpo {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , is-a-basis 𝓓 ι
 
-basis-to-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-              → basis 𝓓 c → ⟨ 𝓓 ⟩
-basis-to-dcpo 𝓓 (B , ι , _) = ι
+basis-≪ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+        → is-a-basis 𝓓 ι
+        → B → B → 𝓥 ̇
+basis-≪ 𝓓 (≺ , _) b b' = has-size-type (≺ b b')
 
-basis-≪ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-        → basis 𝓓 c → basis 𝓓 c → 𝓥 ̇
-basis-≪ 𝓓 (B , ι , ≺ , _) b b' = has-size-type (≺ b b')
+syntax basis-≪ 𝓓 isb b b' = b ≪ᴮ⟨ 𝓓 ⟩[ isb ] b'
 
-syntax basis-≪ 𝓓 c b b' = b ≪ᴮ⟨ 𝓓 ⟩[ c ] b'
-
-≪ᴮ-to-≪ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓) (b b' : basis 𝓓 c)
-        → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b' → basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b'
-≪ᴮ-to-≪ 𝓓 c b b' b≪ᴮb' = ⌜ e ⌝ b≪ᴮb'
+≪ᴮ-to-≪ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+          (c : is-a-basis 𝓓 ι) (b b' : B)
+        → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b' → ι b ≪⟨ 𝓓 ⟩ ι b'
+≪ᴮ-to-≪ 𝓓 {B} {ι} c b b' b≪ᴮb' = ⌜ e ⌝ b≪ᴮb'
  where
-  ι : basis 𝓓 c → ⟨ 𝓓 ⟩
-  ι = basis-to-dcpo 𝓓 c
   e : b ≪ᴮ⟨ 𝓓 ⟩[ c ] b' ≃ ι b ≪⟨ 𝓓 ⟩ ι b'
   e = has-size-equiv (≺ b b')
    where
-    ≺ : (b b' : basis 𝓓 c)
-      → (ι b ≪⟨ 𝓓 ⟩ ι b') has-size 𝓥
-    ≺ = pr₁ (pr₂ (pr₂ c))
+    ≺ : ≪-small-on-B 𝓓 ι
+    ≺ = pr₁ c
 
-≪-to-≪ᴮ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓) (b b' : basis 𝓓 c)
-        → basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b' → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b'
-≪-to-≪ᴮ 𝓓 c b b' b≪b' = ⌜ ≃-sym e ⌝ b≪b'
+≪-to-≪ᴮ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+          (c : is-a-basis 𝓓 ι) (b b' : B)
+        → ι b ≪⟨ 𝓓 ⟩ ι b' → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b'
+≪-to-≪ᴮ 𝓓 {B} {ι} c b b' b≪b' = ⌜ ≃-sym e ⌝ b≪b'
  where
-  ι : basis 𝓓 c → ⟨ 𝓓 ⟩
-  ι = basis-to-dcpo 𝓓 c
   e : b ≪ᴮ⟨ 𝓓 ⟩[ c ] b' ≃ ι b ≪⟨ 𝓓 ⟩ ι b'
   e = has-size-equiv (≺ b b')
    where
-    ≺ : (b b' : basis 𝓓 c)
-      → (ι b ≪⟨ 𝓓 ⟩ ι b') has-size 𝓥
-    ≺ = pr₁ (pr₂ (pr₂ c))
+    ≺ : ≪-small-on-B 𝓓 ι
+    ≺ = pr₁ c
 
-≪ᴮ-is-prop-valued : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-                    {b b' : basis 𝓓 c}
+≪ᴮ-is-prop-valued : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                    (c : is-a-basis 𝓓 ι) {b b' : B}
                   → is-prop (b ≪ᴮ⟨ 𝓓 ⟩[ c ] b')
-≪ᴮ-is-prop-valued 𝓓 (B , ι , ≺ , _) {b} {b'} =
+≪ᴮ-is-prop-valued 𝓓 {B} {ι} (≺ , _) {b} {b'} =
  equiv-to-prop (has-size-equiv (≺ b b')) (≪-is-prop-valued 𝓓)
 
 \end{code}
 
 \begin{code}
 
-⊑-in-terms-of-≪ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓) {x y : ⟨ 𝓓 ⟩}
+⊑-in-terms-of-≪ : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩}
                 → x ⊑⟨ 𝓓 ⟩ y
-                → (b : basis 𝓓 c)
-                → basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ x → basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ y
-⊑-in-terms-of-≪ 𝓓 (B , ι , _) x⊑y b b≪x = ≪-⊑-to-≪ 𝓓 b≪x x⊑y
+                → (z : ⟨ 𝓓 ⟩)
+                → z ≪⟨ 𝓓 ⟩ x → z ≪⟨ 𝓓 ⟩ y
+⊑-in-terms-of-≪ 𝓓 x⊑y z z≪x = ≪-⊑-to-≪ 𝓓 z≪x x⊑y
 
-⊑-in-terms-of-≪' : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓) {x y : ⟨ 𝓓 ⟩}
-                 → ((b : basis 𝓓 c)
-                   → basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ x → basis-to-dcpo 𝓓 c b ≪⟨ 𝓓 ⟩ y)
+⊑-in-terms-of-≪' : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                 → is-a-basis 𝓓 ι
+                 → {x y : ⟨ 𝓓 ⟩}
+                 → ((b : B) → ι b ≪⟨ 𝓓 ⟩ x → ι b ≪⟨ 𝓓 ⟩ y)
                  → x ⊑⟨ 𝓓 ⟩ y
-⊑-in-terms-of-≪' 𝓓 (B , ι , ≺ , c) {x} {y} ≪-hyp =
+⊑-in-terms-of-≪' 𝓓 {B} {ι} (_ , c) {x} {y} ≪-hyp =
  ∥∥-rec (prop-valuedness 𝓓 x y) γ (c x)
   where
    γ : (Σ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) ,
@@ -204,49 +194,43 @@ syntax basis-≪ 𝓓 c b b' = b ≪ᴮ⟨ 𝓓 ⟩[ c ] b'
 
 \begin{code}
 
-basis-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-        → basis 𝓓 c → basis 𝓓 c → 𝓥 ̇
-basis-⊑ 𝓓 c b₁ b₂ = (b : basis 𝓓 c) → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₁ → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₂
+basis-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+        → is-a-basis 𝓓 ι
+        → B → B → 𝓥 ̇
+basis-⊑ 𝓓 {B} {ι} c b₁ b₂ = (b : B) → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₁ → b ≪ᴮ⟨ 𝓓 ⟩[ c ] b₂
 
 syntax basis-⊑ 𝓓 c b b' = b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b'
 
-⊑ᴮ-to-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓) {b b' : basis 𝓓 c}
-        → b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b' → basis-to-dcpo 𝓓 c b ⊑⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b'
-⊑ᴮ-to-⊑ 𝓓 c {b₁} {b₂} b₁⊑ᴮb₂ = ⊑-in-terms-of-≪' 𝓓 c γ
+⊑ᴮ-to-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+          (c : is-a-basis 𝓓 ι) {b b' : B}
+        → b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b' → ι b ⊑⟨ 𝓓 ⟩ ι b'
+⊑ᴮ-to-⊑ 𝓓 {B} {ι} c {b₁} {b₂} b₁⊑ᴮb₂ = ⊑-in-terms-of-≪' 𝓓 c γ
  where
-  B : 𝓥 ̇
-  B = basis 𝓓 c
-  ι : B → ⟨ 𝓓 ⟩
-  ι = basis-to-dcpo 𝓓 c
   γ : (b : B) → ι b ≪⟨ 𝓓 ⟩ ι b₁ → ι b ≪⟨ 𝓓 ⟩ ι b₂
   γ b b≪b₁ = ≪ᴮ-to-≪ 𝓓 c b b₂ (b₁⊑ᴮb₂ b (≪-to-≪ᴮ 𝓓 c b b₁ b≪b₁))
 
-⊑-to-⊑ᴮ : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓) {b b' : basis 𝓓 c}
-        → basis-to-dcpo 𝓓 c b ⊑⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b'
+⊑-to-⊑ᴮ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+          (c : is-a-basis 𝓓 ι) {b b' : B}
+        → ι b ⊑⟨ 𝓓 ⟩ ι b'
         → b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b'
-⊑-to-⊑ᴮ 𝓓 c {b₁} {b₂} b₁⊑b₂ b b≪ᴮb₁ = ≪-to-≪ᴮ 𝓓 c b b₂ γ
+⊑-to-⊑ᴮ 𝓓 {B} {ι} c {b₁} {b₂} b₁⊑b₂ b b≪ᴮb₁ = ≪-to-≪ᴮ 𝓓 c b b₂ γ
  where
-  ι : basis 𝓓 c → ⟨ 𝓓 ⟩
-  ι = basis-to-dcpo 𝓓 c
   γ : ι b ≪⟨ 𝓓 ⟩ ι b₂
-  γ = ⊑-in-terms-of-≪ 𝓓 c b₁⊑b₂ b (≪ᴮ-to-≪ 𝓓 c b b₁ b≪ᴮb₁)
+  γ = ⊑-in-terms-of-≪ 𝓓 b₁⊑b₂ (ι b) (≪ᴮ-to-≪ 𝓓 c b b₁ b≪ᴮb₁)
 
-⊑ᴮ-is-prop-valued : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-                    {b b' : basis 𝓓 c}
+⊑ᴮ-is-prop-valued : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                    (c : is-a-basis 𝓓 ι) {b b' : B}
                   → is-prop (b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b')
-⊑ᴮ-is-prop-valued 𝓓 (B , ι , ≺ , _) {b₁} {b₂} =
+⊑ᴮ-is-prop-valued 𝓓 {B} {ι} (≺ , _) {b₁} {b₂} =
  Π-is-prop fe
  λ b → Π-is-prop fe
  λ b≪b₁ → equiv-to-prop (has-size-equiv (≺ b b₂)) (≪-is-prop-valued 𝓓)
 
-⊑-is-small-on-basis : (𝓓 : DCPO {𝓤} {𝓣}) (c : is-a-continuous-dcpo 𝓓)
-                      {b b' : basis 𝓓 c}
-                    → (basis-to-dcpo 𝓓 c b ⊑⟨ 𝓓 ⟩ basis-to-dcpo 𝓓 c b')
-                      has-size 𝓥
-⊑-is-small-on-basis 𝓓 c {b₁} {b₂} = (b₁ ⊑ᴮ⟨ 𝓓 ⟩[ c ] b₂) , γ
+⊑-is-small-on-basis : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                      (c : is-a-basis 𝓓 ι) {b b' : B}
+                    → (ι b ⊑⟨ 𝓓 ⟩ ι b') has-size 𝓥
+⊑-is-small-on-basis 𝓓 {B} {ι} c {b₁} {b₂} = (b₁ ⊑ᴮ⟨ 𝓓 ⟩[ c ] b₂) , γ
  where
-  ι : basis 𝓓 c → ⟨ 𝓓 ⟩
-  ι = basis-to-dcpo 𝓓 c
   γ : (b₁ ⊑ᴮ⟨ 𝓓 ⟩[ c ] b₂) ≃ ι b₁ ⊑⟨ 𝓓 ⟩ ι b₂
   γ = logically-equivalent-props-are-equivalent
        (⊑ᴮ-is-prop-valued 𝓓 c)
@@ -258,6 +242,7 @@ syntax basis-⊑ 𝓓 c b b' = b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b'
 
 \begin{code}
 
+{-
 is-an-algebraic-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 is-an-algebraic-dcpo {𝓤} {𝓣} 𝓓 =
  Σ B ꞉ 𝓥 ̇ ,
@@ -269,7 +254,7 @@ is-an-algebraic-dcpo {𝓤} {𝓣} 𝓓 =
            → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (κ β) × (β-≪-x β x) × (∐β≡x β x)
     where
      κ : {I : 𝓥 ̇ } → (I → B) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-     κ {I} β = (i : I) → compact 𝓓 (ι (β i))
+     κ {I} β = (i : I) → is-compact 𝓓 (ι (β i))
      β-≪-x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
      β-≪-x {I} β x = ((i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x)
      ∐β≡x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
@@ -297,7 +282,7 @@ is-algebraic' {𝓤} {𝓣} 𝓓 =
            → ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , (κ β) × (∐β≡x β x)
     where
      κ : {I : 𝓥 ̇ } → (I → B) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-     κ {I} β = (i : I) → compact 𝓓 (ι (β i))
+     κ {I} β = (i : I) → is-compact 𝓓 (ι (β i))
      ∐β≡x : {I : 𝓥 ̇ } → (I → B) → ⟨ 𝓓 ⟩ → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
      ∐β≡x β x = Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x
 
@@ -550,5 +535,7 @@ An interpolation property starting from two inequalities.
     b , ≪-to-≪ᴮ 𝓓 c b₁ b b₁≪b ,
         ≪-to-≪ᴮ 𝓓 c b₂ b b₂≪b ,
         ≪-to-≪ᴮ 𝓓 c b  b₃ b≪b₃
+
+-}
 
 \end{code}

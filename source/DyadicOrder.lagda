@@ -26,7 +26,7 @@ prove the Σ-versions for two reasons:
 
 \begin{code}
 
-module Dyadic-Order where
+module DyadicOrder where
 
 \end{code}
 

@@ -1,8 +1,8 @@
-Tom de Jong, 6 March 2020
+Tom de Jong, 7 March 2020
 
 As suggested by Martin Escardo.
 
-No endpoints, density and binary interpolation formulated using ∃.
+No endpoints, density and binary interpolation for (𝔻 , ≺) formulated using ∃.
 
 \begin{code}
 
@@ -10,10 +10,10 @@ No endpoints, density and binary interpolation formulated using ∃.
 
 open import SpartanMLTT
 open import Dyadic
-open import Dyadic-Order
+open import DyadicOrder
 open import UF-PropTrunc
 
-module Dyadic-Order-PropTrunc (pt : propositional-truncations-exist) where
+module DyadicOrder-PropTrunc (pt : propositional-truncations-exist) where
 
 open PropositionalTruncation pt
 

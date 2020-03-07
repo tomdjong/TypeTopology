@@ -14,11 +14,15 @@ open import UF-Subsingletons
 
 \end{code}
 
-We inductively define an order ≺ on 𝔻 and prove that it is transitive and linear.
+We inductively define an order ≺ on 𝔻 and prove that it is transitive and
+linear.
 
-In Dyadic-Order-PropTrunc, we prove that it is dense and has no endpoints.
-(These statements need ∃, so they depend on propositional truncation and are
-therefore in a separate module).
+We also show that is is "dense" and "has no endpoints", but formulated using Σ
+rather than ∃. Although the proper formulation would use ∃ (to ensure that being
+dense and having no endpoints is property, rather than structure), we still
+prove the Σ-versions for two reasons:
+- we can easily prove them and derive the ∃-versions from them;
+- so that this module does not depend on propositional truncation.
 
 \begin{code}
 
@@ -162,5 +166,26 @@ left-≺ (right x) = *
 ≺-right midpoint = *
 ≺-right (left x) = *
 ≺-right (right x) = ≺-right x
+
+≺-has-no-left-endpoint-Σ : (x : 𝔻) → Σ y ꞉ 𝔻 , y ≺ x
+≺-has-no-left-endpoint-Σ x = left x , left-≺ x
+
+≺-has-no-right-endpoint-Σ : (x : 𝔻) → Σ y ꞉ 𝔻 , x ≺ y
+≺-has-no-right-endpoint-Σ x = right x , ≺-right x
+
+≺-is-dense-Σ : (x y : 𝔻) → x ≺ y → Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
+≺-is-dense-Σ midpoint (right y) _ = right (left y) , * , left-≺ y
+≺-is-dense-Σ (left x) midpoint _ = left (right x) , ≺-right x , *
+≺-is-dense-Σ (left x) (left y) x≺y = γ (≺-is-dense-Σ x y x≺y)
+ where
+  γ : (Σ z ꞉ 𝔻 , x ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ left y
+  γ (z , x≺z , z≺y) = left z , x≺z , z≺y
+≺-is-dense-Σ (left x) (right y) _ = midpoint , * , *
+≺-is-dense-Σ (right x) midpoint = 𝟘-induction
+≺-is-dense-Σ (right x) (left y) = 𝟘-induction
+≺-is-dense-Σ (right x) (right y) x≺y = γ (≺-is-dense-Σ x y x≺y)
+ where
+  γ : (Σ z ꞉ 𝔻 , x ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , right x ≺ z × z ≺ right y
+  γ (z , x≺z , z≺y) = right z , x≺z , z≺y
 
 \end{code}

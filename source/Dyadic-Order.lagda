@@ -113,8 +113,17 @@ right-monotone = id
   x≢y : x ≢ y
   x≢y = contrapositive (ap right) rx≢ry
 
-≺-trichotomy : (x y : 𝔻) → x ≺ y + (x ≡ y) + (y ≺ x)
-≺-trichotomy x y = cases a b (𝔻-is-discrete x y)
+\end{code}
+
+Discreteness of 𝔻 and linearity of ≺ imply that ≺ is trichotomous, i.e. for
+every x y : 𝔻 , x ≺ y or x ≡ y or y ≺ x holds. The lemmas after
+≺-is-trichotomous show that exactly one of these is the case, as witnessed by
+trichotomy-is-a-singleton.
+
+\begin{code}
+
+≺-is-trichotomous : (x y : 𝔻) → x ≺ y + (x ≡ y) + (y ≺ x)
+≺-is-trichotomous x y = cases a b (𝔻-is-discrete x y)
  where
   a : x ≡ y → (x ≺ y) + (x ≡ y) + (y ≺ x)
   a = inr ∘ inl
@@ -157,6 +166,30 @@ right-monotone = id
 ≺-to-¬≺ (right x) (left y)   = 𝟘-induction
 ≺-to-¬≺ (right x) (right y)  = ≺-to-¬≺ x y
 
+trichotomy-is-a-singleton : {x y : 𝔻} → is-singleton (x ≺ y + (x ≡ y) + y ≺ x)
+trichotomy-is-a-singleton {x} {y} =
+ pointed-props-are-singletons (≺-is-trichotomous x y) γ
+  where
+   γ : is-prop (x ≺ y + (x ≡ y) + y ≺ x)
+   γ = +-is-prop (≺-is-prop-valued x y) h g
+    where
+     h : is-prop ((x ≡ y) + y ≺ x)
+     h = +-is-prop 𝔻-is-a-set (≺-is-prop-valued y x) ≡-to-¬≺'
+     g : x ≺ y → ¬ ((x ≡ y) + y ≺ x)
+     g x≺y = cases a b
+      where
+       a : x ≢ y
+       a = ≺-to-≢ x≺y
+       b : ¬ (y ≺ x)
+       b = ≺-to-¬≺ x y x≺y
+
+\end{code}
+
+Next, we prove that ≺ has no endpoints and is dense (although formulated with Σ,
+as explained at the top of this file).
+
+\begin{code}
+
 left-≺ : (x : 𝔻) → left x ≺ x
 left-≺ midpoint = *
 left-≺ (left x) = left-≺ x
@@ -187,5 +220,35 @@ left-≺ (right x) = *
  where
   γ : (Σ z ꞉ 𝔻 , x ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , right x ≺ z × z ≺ right y
   γ (z , x≺z , z≺y) = right z , x≺z , z≺y
+
+\end{code}
+
+Binary interpolation is a generalisation of density, which can, in our case, be
+proved from density using trichotomy of ≺.
+
+We will need this property to construct the (rounded) ideal completion of
+(𝔻 , ≺).
+
+\begin{code}
+
+≺-interpolation₂-Σ : (x₀ x₁ y : 𝔻) → x₀ ≺ y → x₁ ≺ y
+                   → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+≺-interpolation₂-Σ x₀ x₁ y x₀≺y x₁≺y = cases₃ a b c (≺-is-trichotomous x₀ x₁)
+ where
+  a : x₀ ≺ x₁ → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+  a x₀≺x₁ = γ (≺-is-dense-Σ x₁ y x₁≺y)
+   where
+    γ : (Σ z ꞉ 𝔻 , x₁ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+    γ (z , x₁≺z , z≺y) = z , ≺-is-transitive x₀ x₁ z x₀≺x₁ x₁≺z , x₁≺z , z≺y
+  b : x₀ ≡ x₁ → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+  b refl = γ (≺-is-dense-Σ x₁ y x₁≺y)
+   where
+    γ : (Σ z ꞉ 𝔻 , x₁ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+    γ (z , x₁≺z , z≺y) = z , x₁≺z , x₁≺z , z≺y
+  c : x₁ ≺ x₀ → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+  c x₁≺x₀ = γ (≺-is-dense-Σ x₀ y x₀≺y)
+   where
+    γ : (Σ z ꞉ 𝔻 , x₀ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
+    γ (z , x₀≺z , z≺y) = z , x₀≺z , ≺-is-transitive x₁ x₀ z x₁≺x₀ x₀≺z , z≺y
 
 \end{code}

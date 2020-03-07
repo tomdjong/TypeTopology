@@ -169,16 +169,6 @@ It seems that the first lemma from
 https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf cannot work here,
 because ≪ may be non-small when comparing non-basis elements.
 
-≪-∐-lemma : (𝓓 : DCPO {𝓤} {𝓣}) → is-a-continuous-dcpo 𝓓
-           → (x y : ⟨ 𝓓 ⟩) {D : 𝓥 ̇ } (𝒹 : D → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 𝒹)
-           → y ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
-           → x ≪⟨ 𝓓 ⟩ y
-           → ∃ d ꞉ D , x ≪⟨ 𝓓 ⟩ 𝒹 d
-≪-∐-lemma 𝓓 (B , ι , ≺ , c) x y {D} 𝒹 δ y⊑∐ x≪y = {!!}
- where
-  I : 𝓥 ̇ -- This does not type check
-  I = Σ b ꞉ B , Σ d ꞉ D , ι b ≪⟨ 𝓓 ⟩ 𝒹 d
-
 Below, we do follow the proof (of the second lemma) from
 https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf, but adapted so that we
 only include basis elements in the newly constructed directed family.

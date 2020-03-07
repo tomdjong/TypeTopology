@@ -26,16 +26,16 @@ open PropositionalTruncation pt
 
 module Ideals
         {P : 𝓤 ̇ }
-        (_≤_ : P → P → 𝓥 ⊔ 𝓣 ̇ )
-        (≤-prop-valued : {p q : P} → is-prop (p ≤ q))
-        (INT₂ : {q₀ q₁ p : P} → q₀ ≤ p → q₁ ≤ p
-              → ∃ r ꞉ P , r ≤ p × q₀ ≤ r × q₁ ≤ r)
-        (INT₀ : (p : P) → ∃ q ꞉ P , q ≤ p)
-        (≤-trans : {p q r : P} → p ≤ q → q ≤ r → p ≤ r)
+        (_≺_ : P → P → 𝓥 ⊔ 𝓣 ̇ )
+        (≺-prop-valued : {p q : P} → is-prop (p ≺ q))
+        (INT₂ : {q₀ q₁ p : P} → q₀ ≺ p → q₁ ≺ p
+              → ∃ r ꞉ P , q₀ ≺ r × q₁ ≺ r × r ≺ p)
+        (INT₀ : (p : P) → ∃ q ꞉ P , q ≺ p)
+        (≺-trans : {p q r : P} → p ≺ q → q ≺ r → p ≺ r)
        where
 
  is-lower-set : 𝓟 (𝓥 ⊔ 𝓣) P → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
- is-lower-set A = (p q : P) → p ≤ q → q ∈ A → p ∈ A
+ is-lower-set A = (p q : P) → p ≺ q → q ∈ A → p ∈ A
 
  being-a-lower-set-is-a-prop : (I :  𝓟 (𝓥 ⊔ 𝓣) P) → is-prop (is-lower-set I)
  being-a-lower-set-is-a-prop I = Π-is-prop fe
@@ -54,7 +54,7 @@ module Ideals
  is-weakly-directed-set : 𝓟 (𝓥 ⊔ 𝓣) P → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
  is-weakly-directed-set A = (p q : P) → p ∈ A → q ∈ A
                           → ∃ r ꞉ P , r ∈ A
-                          × p ≤ r × q ≤ r
+                          × p ≺ r × q ≺ r
 
  being-a-weakly-directed-set-is-a-prop : (I : 𝓟 (𝓥 ⊔ 𝓣) P)
                                        → is-prop (is-weakly-directed-set I)
@@ -112,15 +112,17 @@ module Ideals
  p ∈ᵢ I = p ∈ carrier I
 
  ↓_ : P → Idl
- ↓ p = (λ (q : P) → (q ≤ p) , ≤-prop-valued) ,
+ ↓ p = (λ (q : P) → (q ≺ p) , ≺-prop-valued) ,
        ls , inh , δ
   where
-   ls : is-lower-set (λ q → (q ≤ p) , ≤-prop-valued)
-   ls p q = ≤-trans
-   inh : ∃ q ꞉ P , q ≤ p
+   ls : is-lower-set (λ q → (q ≺ p) , ≺-prop-valued)
+   ls p q = ≺-trans
+   inh : ∃ q ꞉ P , q ≺ p
    inh = INT₀ p
-   δ : is-weakly-directed-set (λ q → (q ≤ p) , ≤-prop-valued)
-   δ q₀ q₁ u v = INT₂ u v
+   δ : is-weakly-directed-set (λ q → (q ≺ p) , ≺-prop-valued)
+   δ q₀ q₁ q₀≺p q₁≺p = do
+    r , q₀≺r , q₁≺r , r≺p ← INT₂ q₀≺p q₁≺p
+    ∣ r , r≺p , q₀≺r , q₁≺r ∣
 
  _⊑_ : Idl → Idl → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
  I ⊑ J = carrier I ⊆ carrier J
@@ -154,12 +156,12 @@ module Ideals
     (c , αa⊆αc , αb⊆αc) ← directed-implies-weakly-directed _⊑_ α δ a b
     let p∈αc = αa⊆αc p p∈αa
     let q∈αc = αb⊆αc q q∈αb
-    (r , r∈αc , p≤r , q≤r) ← directed-sets-are-weakly-directed
+    (r , r∈αc , p≺r , q≺r) ← directed-sets-are-weakly-directed
                              (carrier (α c))
                              (ideals-are-directed-sets (carrier (α c))
                               (ideality (α c)))
                              p q p∈αc q∈αc
-    ∣ r , ∣ c , r∈αc ∣ , p≤r , q≤r ∣
+    ∣ r , ∣ c , r∈αc ∣ , p≺r , q≺r ∣
 
  Idl-DCPO : DCPO {𝓥 ⁺ ⊔ 𝓣 ⁺ ⊔ 𝓤} {𝓥 ⊔ 𝓤 ⊔ 𝓣}
  Idl-DCPO = Idl , _⊑_ , γ
@@ -199,9 +201,9 @@ module Ideals
  open import UF-Size
 
  ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
-                      → P has-size 𝓥 → ((p q : P) → (p ≤ q) has-size 𝓥)
+                      → P has-size 𝓥 → ((p q : P) → (p ≺ q) has-size 𝓥)
                       → Idl → ⟨ 𝓓 ⟩
- ∐-from-Idl-to-a-dcpo 𝓓 P-small ≤-small I = {!!}
+ ∐-from-Idl-to-a-dcpo 𝓓 P-small ≺-small I = {!!}
   where
    J : 𝓥 ̇
    J = has-size-type {!!}
@@ -215,19 +217,19 @@ This can be phrased of has-size (i.e. "essentially small").
 
 module _
         {P : 𝓥 ̇ }
-        (_≤_ : P → P → 𝓥 ̇ )
-        (≤-prop-valued : {p q : P} → is-prop (p ≤ q))
-        (INT₂ : {q₀ q₁ p : P} → q₀ ≤ p → q₁ ≤ p
-              → ∃ r ꞉ P , r ≤ p × q₀ ≤ r × q₁ ≤ r)
-        (INT₀ : (p : P) → ∃ q ꞉ P , q ≤ p)
-        (≤-trans : {p q r : P} → p ≤ q → q ≤ r → p ≤ r)
+        (_≺_ : P → P → 𝓥 ̇ )
+        (≺-prop-valued : {p q : P} → is-prop (p ≺ q))
+        (INT₂ : {q₀ q₁ p : P} → q₀ ≺ p → q₁ ≺ p
+              → ∃ r ꞉ P , q₀ ≺ r × q₁ ≺ r × r ≺ p)
+        (INT₀ : (p : P) → ∃ q ꞉ P , q ≺ p)
+        (≺-trans : {p q r : P} → p ≺ q → q ≺ r → p ≺ r)
        where
 
- open Ideals {𝓥} {𝓥} {P}_≤_ ≤-prop-valued INT₂ INT₀ ≤-trans
+ open Ideals {𝓥} {𝓥} {P}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
 
  ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
                       → (f : P → ⟨ 𝓓 ⟩)
-                      → ({p q : P} → p ≤ q → f p ⊑⟨ 𝓓 ⟩ f q)
+                      → ({p q : P} → p ≺ q → f p ⊑⟨ 𝓓 ⟩ f q)
                       → Idl → ⟨ 𝓓 ⟩
  ∐-from-Idl-to-a-dcpo 𝓓 f f-monotone I = ∐ 𝓓 {𝕋 (carrier I)} {ι} δ
   where
@@ -240,8 +242,8 @@ module _
      I-dir = ideals-are-directed-sets (carrier I) (ideality I)
      ε : is-weakly-directed (underlying-order 𝓓) ι
      ε (p , p∈I) (q , q∈I) = do
-      r , r∈I , p≤r , q≤r ← directed-sets-are-weakly-directed (carrier I) I-dir
+      r , r∈I , p≺r , q≺r ← directed-sets-are-weakly-directed (carrier I) I-dir
                             p q p∈I q∈I
-      ∣ (r , r∈I) , (f-monotone p≤r , f-monotone q≤r) ∣
+      ∣ (r , r∈I) , (f-monotone p≺r , f-monotone q≺r) ∣
 
 \end{code}

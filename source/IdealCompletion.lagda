@@ -111,19 +111,6 @@ module Ideals
  _∈ᵢ_ : P → Idl → 𝓥 ⊔ 𝓣 ̇
  p ∈ᵢ I = p ∈ carrier I
 
- ↓_ : P → Idl
- ↓ p = (λ (q : P) → (q ≺ p) , ≺-prop-valued) ,
-       ls , inh , δ
-  where
-   ls : is-lower-set (λ q → (q ≺ p) , ≺-prop-valued)
-   ls p q = ≺-trans
-   inh : ∃ q ꞉ P , q ≺ p
-   inh = INT₀ p
-   δ : is-weakly-directed-set (λ q → (q ≺ p) , ≺-prop-valued)
-   δ q₀ q₁ q₀≺p q₁≺p = do
-    r , q₀≺r , q₁≺r , r≺p ← INT₂ q₀≺p q₁≺p
-    ∣ r , r≺p , q₀≺r , q₁≺r ∣
-
  _⊑_ : Idl → Idl → 𝓥 ⊔ 𝓤 ⊔ 𝓣 ̇
  I ⊑ J = carrier I ⊆ carrier J
 
@@ -196,54 +183,5 @@ module Ideals
         where
          h : (Σ a ꞉ 𝓐 , p ∈ᵢ α a) → p ∈ᵢ I
          h (a , p∈αa) = ub a p p∈αa
-
- {-
- open import UF-Size
-
- ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
-                      → P has-size 𝓥 → ((p q : P) → (p ≺ q) has-size 𝓥)
-                      → Idl → ⟨ 𝓓 ⟩
- ∐-from-Idl-to-a-dcpo 𝓓 P-small ≺-small I = {!!}
-  where
-   J : 𝓥 ̇
-   J = has-size-type {!!}
- -}
-
-\end{code}
-
-This can be phrased of has-size (i.e. "essentially small").
-
-\begin{code}
-
-module _
-        {P : 𝓥 ̇ }
-        (_≺_ : P → P → 𝓥 ̇ )
-        (≺-prop-valued : {p q : P} → is-prop (p ≺ q))
-        (INT₂ : {q₀ q₁ p : P} → q₀ ≺ p → q₁ ≺ p
-              → ∃ r ꞉ P , q₀ ≺ r × q₁ ≺ r × r ≺ p)
-        (INT₀ : (p : P) → ∃ q ꞉ P , q ≺ p)
-        (≺-trans : {p q r : P} → p ≺ q → q ≺ r → p ≺ r)
-       where
-
- open Ideals {𝓥} {𝓥} {P}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
-
- ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
-                      → (f : P → ⟨ 𝓓 ⟩)
-                      → ({p q : P} → p ≺ q → f p ⊑⟨ 𝓓 ⟩ f q)
-                      → Idl → ⟨ 𝓓 ⟩
- ∐-from-Idl-to-a-dcpo 𝓓 f f-monotone I = ∐ 𝓓 {𝕋 (carrier I)} {ι} δ
-  where
-   ι : 𝕋 (carrier I) → ⟨ 𝓓 ⟩
-   ι (p , p∈I) = f p
-   δ : is-Directed 𝓓 ι
-   δ = (directed-sets-are-inhabited (carrier I) I-dir) , ε
-    where
-     I-dir : is-directed-set (carrier I)
-     I-dir = ideals-are-directed-sets (carrier I) (ideality I)
-     ε : is-weakly-directed (underlying-order 𝓓) ι
-     ε (p , p∈I) (q , q∈I) = do
-      r , r∈I , p≺r , q≺r ← directed-sets-are-weakly-directed (carrier I) I-dir
-                            p q p∈I q∈I
-      ∣ (r , r∈I) , (f-monotone p≺r , f-monotone q≺r) ∣
 
 \end{code}

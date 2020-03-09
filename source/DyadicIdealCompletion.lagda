@@ -78,9 +78,8 @@ Idl-𝔻-has-no-compact-elements I κ = ∥∥-rec 𝟘-is-prop γ g
 Idl-𝔻-is-not-algebraic : ¬ (is-an-algebraic-dcpo Idl-𝔻)
 Idl-𝔻-is-not-algebraic = ∥∥-rec 𝟘-is-prop γ
  where
-  γ : ¬ (Σ B ꞉ 𝓤₀ ̇ ,
-         Σ ι ꞉ (B → ⟨ Idl-𝔻 ⟩) , is-a-basis Idl-𝔻 ι
-                               × ((b : B) → is-compact Idl-𝔻 (ι b)))
+  γ : ¬ (Σ B ꞉ 𝓤₀ ̇ , Σ ι ꞉ (B → ⟨ Idl-𝔻 ⟩) ,
+         is-a-basis Idl-𝔻 ι × ((b : B) → is-compact Idl-𝔻 (ι b)))
   γ (B , ι , (≺ , c) , κ) = ∥∥-rec 𝟘-is-prop g B-inh
    where
     g : ¬ B

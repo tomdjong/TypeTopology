@@ -185,6 +185,103 @@ only include basis elements in the newly constructed directed family.
 
 -- TO DO: Split and improve this proof
 
+≪-INT₂-aux : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
+             {I : 𝓥 ̇ } (α : I → B)
+           → 𝓥 ̇
+≪-INT₂-aux 𝓓 {B} {ι} c {I} α = Σ b ꞉ B , Σ i ꞉ I , b ≪ᴮ⟨ 𝓓 ⟩[ c ] α i
+
+≪-INT₂-aux-map : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                 (c : is-a-basis 𝓓 ι) {I : 𝓥 ̇ } (α : I → B)
+               → ≪-INT₂-aux 𝓓 c α → ⟨ 𝓓 ⟩
+≪-INT₂-aux-map 𝓓 {B} {ι} c α = ι ∘ pr₁
+
+≪-INT₂-aux-is-directed : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                         (c : is-a-basis 𝓓 ι) {I : 𝓥 ̇ } (α : I → B)
+                       → is-Directed 𝓓 (ι ∘ α)
+                       → is-Directed 𝓓 (≪-INT₂-aux-map 𝓓 c α)
+≪-INT₂-aux-is-directed 𝓓 {B} {ι} cd {I} α δ = s , ε
+ where
+  J : 𝓥 ̇
+  J = ≪-INT₂-aux 𝓓 cd α
+  β : J → ⟨ 𝓓 ⟩
+  β = ≪-INT₂-aux-map 𝓓 cd α
+  s : ∥ J ∥
+  s = ∥∥-rec ∥∥-is-a-prop γ (Directed-implies-inhabited 𝓓 δ)
+   where
+    γ : I → ∥ J ∥
+    γ i = ∥∥-functor g (≪ᴮ-INT₀ 𝓓 cd (α i))
+     where
+      g : (Σ b ꞉ B , b ≪ᴮ⟨ 𝓓 ⟩[ cd ] α i) → J
+      g (b , u) = b , i , u
+  ε : is-weakly-directed (underlying-order 𝓓) β
+  ε (b₁ , i₁ , u₁) (b₂ , i₂ , u₂) = do
+   l₃ , l₁ , l₂ ← t
+   𝓐 , ϕ , wb , ε , e ← c (ι (α l₃))
+   let v₁ = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 cd b₁ (α i₁) u₁) l₁
+   let v₂ = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 cd b₂ (α i₂) u₂) l₂
+   a₁ , m₁ ← v₁ 𝓐 (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (e ⁻¹))
+   a₂ , m₂ ← v₂ 𝓐 (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (e ⁻¹))
+   (a₃ , n₁ , n₂) ← Directed-implies-weakly-directed 𝓓 ε a₁ a₂
+   let w = ≪-to-≪ᴮ 𝓓 cd (ϕ a₃) (α l₃) (wb a₃)
+   let k₁ = ι b₁     ⊑⟨ 𝓓 ⟩[ m₁ ]
+            ι (ϕ a₁) ⊑⟨ 𝓓 ⟩[ n₁ ]
+            ι (ϕ a₃) ∎⟨ 𝓓 ⟩
+   let k₂ = ι b₂     ⊑⟨ 𝓓 ⟩[ m₂ ]
+            ι (ϕ a₂) ⊑⟨ 𝓓 ⟩[ n₂ ]
+            ι (ϕ a₃) ∎⟨ 𝓓 ⟩
+   ∣ (ϕ a₃ , l₃ , w) , k₁ , k₂ ∣
+   where
+   t : ∃ k ꞉ I , ι (α i₁) ⊑⟨ 𝓓 ⟩ ι (α k) × ι (α i₂) ⊑⟨ 𝓓 ⟩ ι (α k)
+   t = Directed-implies-weakly-directed 𝓓 δ i₁ i₂
+   c : (x : ⟨ 𝓓 ⟩) → approximate-from-basis 𝓓 ι x
+   c = pr₂ cd
+
+≪-INT₂-aux-⊑-∐ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
+                 (c : is-a-basis 𝓓 ι) {I : 𝓥 ̇ } (α : I → B)
+               → (δ : is-Directed 𝓓 (ι ∘ α))
+               → ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ ∐ 𝓓 (≪-INT₂-aux-is-directed 𝓓 c α δ)
+≪-INT₂-aux-⊑-∐ 𝓓 {B} {ι} cd {I} α δ =
+ ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) ub
+  where
+   ε : is-Directed 𝓓 (≪-INT₂-aux-map 𝓓 cd α)
+   ε = ≪-INT₂-aux-is-directed 𝓓 cd α δ
+   ub : (i : I) → ι (α i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+   ub i = ∥∥-rec (prop-valuedness 𝓓 (ι (α i)) (∐ 𝓓 ε)) g (c (ι (α i)))
+    where
+     c : (x : ⟨ 𝓓 ⟩) → approximate-from-basis 𝓓 ι x
+     c = pr₂ cd
+     g : approximate-from-basis-Σ 𝓓 ι (ι (α i)) → ι (α i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+     g (J , β , wb , φ , e) = ι (α i) ⊑⟨ 𝓓 ⟩[ ≡-to-⊑ 𝓓 (e ⁻¹) ]
+                              ∐ 𝓓 φ ⊑⟨ 𝓓 ⟩[ l ]
+                              ∐ 𝓓 ε ∎⟨ 𝓓 ⟩
+      where
+       l = ∐-is-lowerbound-of-upperbounds {!!} {!!} {!!} {!!}
+
+{-
+       h = ∐-is-lowerbound-of-upperbounds 𝓓 δ (∐ 𝓓 ε) ub
+         where
+          ub : (i : I) → (ι ∘ α) i ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+          ub i = ∥∥-rec (prop-valuedness 𝓓 (ι (α i)) (∐ 𝓓 ε))
+                 g (c (ι (α i)))
+           where
+            g : (Σ L ꞉ 𝓥 ̇ , Σ ϕ ꞉ (L → B) ,
+                 ((l : L) → ι (ϕ l) ≪⟨ 𝓓 ⟩ ι (α i))
+                × (Σ φ ꞉ is-Directed 𝓓 (ι ∘ ϕ) , ∐ 𝓓 φ ≡ ι (α i)))
+              → ι (α i) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+            g (L , ϕ , ϕ≪αi , φ , ∐ϕ≡αi) = ι (α i)  ⊑⟨ 𝓓 ⟩[ ⊑₁ ]
+                                              ∐ 𝓓 φ ⊑⟨ 𝓓 ⟩[ ⊑₂ ]
+                                              ∐ 𝓓 ε ∎⟨ 𝓓 ⟩
+             where
+              ⊑₁ = ≡-to-⊑ 𝓓 (∐ϕ≡αi ⁻¹)
+              ⊑₂ = ∐-is-lowerbound-of-upperbounds 𝓓 φ (∐ 𝓓 ε) ub'
+               where
+                ub' : (l : L) → ι (ϕ l) ⊑⟨ 𝓓 ⟩ ∐ 𝓓 ε
+                ub' l = ∐-is-upperbound 𝓓 ε j
+                 where
+                  j : J
+                  j = ϕ l , i , ≪-to-≪ᴮ 𝓓 cd (ϕ l) (α i) (ϕ≪αi l)
+-}
+
 ≪-INT₁ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
          (x y : ⟨ 𝓓 ⟩) → x ≪⟨ 𝓓 ⟩ y
        → ∃ b ꞉ B , x ≪⟨ 𝓓 ⟩ ι b × ι b ≪⟨ 𝓓 ⟩ y
@@ -224,7 +321,7 @@ only include basis elements in the newly constructed directed family.
          (k , αi₁⊑αk , αi₂⊑αk) ← Directed-implies-weakly-directed 𝓓 δ i₁ i₂
          let b₁≪αk = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 cd b₁ (α i₁) b₁≪ᴮαi₁) αi₁⊑αk
          let b₂≪αk = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 cd b₂ (α i₂) b₂≪ᴮαi₂) αi₂⊑αk
-         (L , ϕ , ϕ≪αk , (ε , ∐ϕ≡αk)) ← c (ι (α k))
+         (L , ϕ , ϕ≪αk , ε , ∐ϕ≡αk) ← c (ι (α k))
          (l₁ , b₁⊑ϕl₁) ← b₁≪αk L (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (∐ϕ≡αk ⁻¹))
          (l₂ , b₂⊑ϕl₂) ← b₂≪αk L (ι ∘ ϕ) ε (≡-to-⊑ 𝓓 (∐ϕ≡αk ⁻¹))
          (m , ϕl₁⊑ϕm , ϕl₂⊑ϕm) ← Directed-implies-weakly-directed 𝓓 ε l₁ l₂

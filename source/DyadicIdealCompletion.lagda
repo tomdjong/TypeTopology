@@ -53,6 +53,10 @@ open SmallIdeals
  ≺-has-no-left-endpoint
  (λ {x} {y} {z} → ≺-is-transitive x y z)
 
+\end{code}
+
+\begin{code}
+
 Idl-𝔻 : DCPO {𝓤₁} {𝓤₀}
 Idl-𝔻 = Idl-DCPO
 
@@ -60,10 +64,14 @@ Idl-𝔻-is-continuous : is-a-continuous-dcpo Idl-𝔻
 Idl-𝔻-is-continuous = Idl-is-continuous
 
 Idl-𝔻-has-no-compact-elements : (I : Idl) → ¬ (is-compact Idl-DCPO I)
-Idl-𝔻-has-no-compact-elements I κ = {!!}
+Idl-𝔻-has-no-compact-elements I κ = ∥∥-rec 𝟘-is-prop γ g
  where
-  γ : ∃ x ꞉ 𝔻 , x ∈ᵢ I × I ⊑ (↓ x)
-  γ = Idl-≪-in-terms-of-⊑ I I κ
-
+  γ : ¬ (Σ x ꞉ 𝔻 , x ∈ᵢ I × I ⊑ (↓ x))
+  γ (x , x∈I , I⊑↓x) = ≺-to-≢ {x} {x} x≺x refl
+   where
+    x≺x : x ≺ x
+    x≺x = I⊑↓x x x∈I
+  g : ∃ x ꞉ 𝔻 , x ∈ᵢ I × I ⊑ (↓ x)
+  g = Idl-≪-in-terms-of-⊑ I I κ
 
 \end{code}

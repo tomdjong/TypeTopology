@@ -19,6 +19,7 @@ module DyadicIdealCompletion
 open PropositionalTruncation pt
 
 open import Dcpo pt fe 𝓤₀
+open import DcpoAlgebraic pt fe 𝓤₀
 open import DcpoApproximation pt fe 𝓤₀
 open import DcpoBasis pt fe 𝓤₀
 open import DyadicOrder-PropTrunc pt
@@ -73,5 +74,21 @@ Idl-𝔻-has-no-compact-elements I κ = ∥∥-rec 𝟘-is-prop γ g
     x≺x = I⊑↓x x x∈I
   g : ∃ x ꞉ 𝔻 , x ∈ᵢ I × I ⊑ (↓ x)
   g = Idl-≪-in-terms-of-⊑ I I κ
+
+Idl-𝔻-is-not-algebraic : ¬ (is-an-algebraic-dcpo Idl-𝔻)
+Idl-𝔻-is-not-algebraic = ∥∥-rec 𝟘-is-prop γ
+ where
+  γ : ¬ (Σ B ꞉ 𝓤₀ ̇ ,
+         Σ ι ꞉ (B → ⟨ Idl-𝔻 ⟩) , is-a-basis Idl-𝔻 ι
+                               × ((b : B) → is-compact Idl-𝔻 (ι b)))
+  γ (B , ι , (≺ , c) , κ) = ∥∥-rec 𝟘-is-prop g B-inh
+   where
+    g : ¬ B
+    g b = Idl-𝔻-has-no-compact-elements (ι b) (κ b)
+    B-inh : ∥ B ∥
+    B-inh = do
+     𝓐 , α , _ , (δ , _) ← c (↓ midpoint)
+     a ← Directed-implies-inhabited Idl-DCPO {𝓐} {ι ∘ α} δ
+     ∣ α a ∣
 
 \end{code}

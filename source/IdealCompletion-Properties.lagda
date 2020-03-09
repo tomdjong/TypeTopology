@@ -214,10 +214,13 @@ module SmallIdeals
    γ : (I : Idl)
      → ∃ 𝓐 ꞉ 𝓥 ̇ , Σ α ꞉ (𝓐 → P) ,
          ((a : 𝓐) → (↓ (α a)) ≪⟨ Idl-DCPO ⟩ I)
-       × (Σ δ ꞉ is-Directed Idl-DCPO (↓_ ∘ α) , ∐ Idl-DCPO {𝓐} {↓_ ∘ α} δ ≡ I)
-   γ I = ∣ 𝕋 (carrier I) , pr₁ , g , ↓-of-ideal-is-directed I , ((Idl-∐-≡ I) ⁻¹) ∣
+       × (Σ δ ꞉ is-Directed Idl-DCPO (↓_ ∘ α) ,
+           ∐ Idl-DCPO {𝓐} {↓_ ∘ α} δ ≡ I)
+   γ I = ∣ 𝕋 (carrier I) , pr₁ , g , δ , ((Idl-∐-≡ I) ⁻¹) ∣
     where
      g : (i : 𝕋 (carrier I)) → (↓ pr₁ i) ≪⟨ Idl-DCPO ⟩ I
      g (i , i∈I) = Idl-≪-in-terms-of-⊑' (↓ i) I ∣ i , i∈I , (λ x → id) ∣
+     δ : is-Directed Idl-DCPO (↓-of-ideal I)
+     δ = ↓-of-ideal-is-directed I
 
 \end{code}

@@ -164,12 +164,6 @@ syntax basis-⊑ 𝓓 c b b' = b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b'
     g : I → Σ b ꞉ B , ι b ≪⟨ 𝓓 ⟩ x
     g i = β i , wb i
 
-{- do
- (I , β , wb , δ , e) ← c x
- i ← Directed-implies-inhabited 𝓓 δ
- ∣ (β i) , wb i ∣
--}
-
 ≪ᴮ-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
           (b : B) → ∃ b' ꞉ B , b' ≪ᴮ⟨ 𝓓 ⟩[ c ] b
 ≪ᴮ-INT₀ 𝓓 {B} {ι} c b = ∥∥-functor γ (≪-INT₀ 𝓓 c (ι b))
@@ -188,7 +182,6 @@ https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf, but adapted so that we
 only include basis elements in the newly constructed directed family.
 
 \begin{code}
-
 
 -- TO DO: Split and improve this proof
 

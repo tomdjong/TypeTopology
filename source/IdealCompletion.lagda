@@ -137,18 +137,27 @@ module Ideals
        h : (Σ p ꞉ P , p ∈ᵢ α a) → (Σ p ꞉ P , p ∈ ∐α)
        h (p , u) = p , ∣ a , u ∣
    ε : is-weakly-directed-set ∐α
-   ε p q p∈∐α q∈∐α = do
-    (a , p∈αa) ← p∈∐α
-    (b , q∈αb) ← q∈∐α
-    (c , αa⊆αc , αb⊆αc) ← directed-implies-weakly-directed _⊑_ α δ a b
-    let p∈αc = αa⊆αc p p∈αa
-    let q∈αc = αb⊆αc q q∈αb
-    (r , r∈αc , p≺r , q≺r) ← directed-sets-are-weakly-directed
-                             (carrier (α c))
-                             (ideals-are-directed-sets (carrier (α c))
-                              (ideality (α c)))
-                             p q p∈αc q∈αc
-    ∣ r , ∣ c , r∈αc ∣ , p≺r , q≺r ∣
+   ε p q i j = ∥∥-rec₂ ∥∥-is-a-prop γ i j
+    where
+     γ : (Σ a ꞉ 𝓐 , p ∈ᵢ α a)
+       → (Σ b ꞉ 𝓐 , q ∈ᵢ α b)
+       → ∃ r ꞉ P , r ∈ ∐α × p ≺ r × q ≺ r
+     γ (a , ia) (b , jb) =
+      ∥∥-rec ∥∥-is-a-prop g (directed-implies-weakly-directed _⊑_ α δ a b)
+       where
+        g : (Σ c ꞉ 𝓐 , α a ⊑ α c × α b ⊑ α c)
+          → ∃ r ꞉ P , r ∈ ∐α × p ≺ r × q ≺ r
+        g (c , l , m) = do
+         (r , k , u , v) ← directed-sets-are-weakly-directed (carrier (α c))
+                           (ideals-are-directed-sets (carrier (α c))
+                            (ideality (α c)))
+                           p q ic jc
+         ∣ r , ∣ c , k ∣ , u , v ∣
+         where
+         ic : p ∈ᵢ α c
+         ic = l p ia
+         jc : q ∈ᵢ α c
+         jc = m q jb
 
  Idl-DCPO : DCPO {𝓥 ⁺ ⊔ 𝓣 ⁺ ⊔ 𝓤} {𝓥 ⊔ 𝓤 ⊔ 𝓣}
  Idl-DCPO = Idl , _⊑_ , γ
@@ -174,12 +183,12 @@ module Ideals
                     (λ K → being-an-ideal-is-a-prop K)
                     (⊆-antisymmetry pe fe fe (carrier I) (carrier J) u v)
      dc : is-directed-complete _⊑_
-     dc 𝓐 α δ = (Idl-∐ α δ) , ub , lb-of-ubs
+     dc 𝓐 α δ = (Idl-∐ α δ) , ub , lb
       where
        ub : (a : 𝓐) → α a ⊑ Idl-∐ α δ
        ub a p p∈αa = ∣ a , p∈αa ∣
-       lb-of-ubs : is-lowerbound-of-upperbounds _⊑_ (Idl-∐ α δ) α
-       lb-of-ubs I ub p p∈∐α = ∥∥-rec (∈-is-a-prop (carrier I) p) h p∈∐α
+       lb : is-lowerbound-of-upperbounds _⊑_ (Idl-∐ α δ) α
+       lb I ub p p∈∐α = ∥∥-rec (∈-is-a-prop (carrier I) p) h p∈∐α
         where
          h : (Σ a ꞉ 𝓐 , p ∈ᵢ α a) → p ∈ᵢ I
          h (a , p∈αa) = ub a p p∈αa

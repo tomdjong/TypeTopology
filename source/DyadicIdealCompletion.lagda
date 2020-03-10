@@ -86,7 +86,7 @@ Idl-𝔻-is-not-algebraic = ∥∥-rec 𝟘-is-prop γ
     g b = Idl-𝔻-has-no-compact-elements (ι b) (κ b)
     B-inh : ∥ B ∥
     B-inh = do
-     𝓐 , α , _ , (δ , _) ← c (↓ midpoint)
+     𝓐 , α , _ , (δ , _) ← c (↓ center)
      a ← Directed-implies-inhabited Idl-DCPO {𝓐} {ι ∘ α} δ
      ∣ α a ∣
 

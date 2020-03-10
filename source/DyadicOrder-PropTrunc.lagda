@@ -24,10 +24,10 @@ open PropositionalTruncation pt
 ≺-has-no-right-endpoint x = ∣ ≺-has-no-right-endpoint-Σ x ∣
 
 ≺-is-dense : {x y : 𝔻} → x ≺ y → ∃ z ꞉ 𝔻 , x ≺ z × z ≺ y
-≺-is-dense {x} {y} x≺y = ∣ ≺-is-dense-Σ x y x≺y ∣
+≺-is-dense {x} {y} l = ∣ ≺-is-dense-Σ x y l ∣
 
-≺-interpolation₂ : (x₀ x₁ y : 𝔻) → x₀ ≺ y → x₁ ≺ y
-                 → ∃ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-≺-interpolation₂ x₀ x₁ y x₀≺y x₁≺y = ∣ ≺-interpolation₂-Σ x₀ x₁ y x₀≺y x₁≺y ∣
+≺-interpolation₂ : (x₁ x₂ y : 𝔻) → x₁ ≺ y → x₂ ≺ y
+                 → ∃ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+≺-interpolation₂ x₁ x₂ y l₁ l₂ = ∣ ≺-interpolation₂-Σ x₁ x₂ y l₁ l₂ ∣
 
 \end{code}

@@ -35,15 +35,15 @@ We defined ≺ by using the translation (from 𝔻 to (-1,1)) as set out in Dyad
 \begin{code}
 
 _≺_ : 𝔻 → 𝔻 → 𝓤₀ ̇
-midpoint ≺ midpoint = 𝟘
-midpoint ≺ left y   = 𝟘
-midpoint ≺ right y  = 𝟙
-left x   ≺ midpoint = 𝟙
-left x   ≺ left y   = x ≺ y
-left x   ≺ right y  = 𝟙
-right x  ≺ midpoint = 𝟘
-right x  ≺ left y   = 𝟘
-right x  ≺ right y  = x ≺ y
+center  ≺ center  = 𝟘
+center  ≺ left y  = 𝟘
+center  ≺ right y = 𝟙
+left x  ≺ center  = 𝟙
+left x  ≺ left y  = x ≺ y
+left x  ≺ right y = 𝟙
+right x ≺ center  = 𝟘
+right x ≺ left y  = 𝟘
+right x ≺ right y = x ≺ y
 
 \end{code}
 
@@ -63,50 +63,50 @@ right-monotone = id
 \begin{code}
 
 ≺-is-prop-valued : (x y : 𝔻) → is-prop (x ≺ y)
-≺-is-prop-valued midpoint  midpoint  = 𝟘-is-prop
-≺-is-prop-valued midpoint  (left y)  = 𝟘-is-prop
-≺-is-prop-valued midpoint  (right y) = 𝟙-is-prop
-≺-is-prop-valued (left x)  midpoint  = 𝟙-is-prop
+≺-is-prop-valued center    center    = 𝟘-is-prop
+≺-is-prop-valued center    (left y)  = 𝟘-is-prop
+≺-is-prop-valued center    (right y) = 𝟙-is-prop
+≺-is-prop-valued (left x)  center    = 𝟙-is-prop
 ≺-is-prop-valued (left x)  (left y)  = ≺-is-prop-valued x y
 ≺-is-prop-valued (left x)  (right y) = 𝟙-is-prop
-≺-is-prop-valued (right x) midpoint  = 𝟘-is-prop
+≺-is-prop-valued (right x) center    = 𝟘-is-prop
 ≺-is-prop-valued (right x) (left y)  = 𝟘-is-prop
 ≺-is-prop-valued (right x) (right y) = ≺-is-prop-valued x y
 
 ≺-is-transitive : (x y z : 𝔻) → x ≺ y → y ≺ z → x ≺ z
-≺-is-transitive midpoint midpoint z = 𝟘-induction
-≺-is-transitive midpoint (left y) midpoint = 𝟘-induction
-≺-is-transitive midpoint (left y) (left z) = 𝟘-induction
-≺-is-transitive midpoint (left y) (right z) = 𝟘-induction
-≺-is-transitive midpoint (right y) midpoint _ = id
-≺-is-transitive midpoint (right y) (left z) _ = id
-≺-is-transitive midpoint (right y) (right z) _ _ = *
-≺-is-transitive (left x) midpoint midpoint _ _ = *
-≺-is-transitive (left x) midpoint (left z) _ = 𝟘-induction
-≺-is-transitive (left x) midpoint (right z) _ = id
-≺-is-transitive (left x) (left y) midpoint _ = id
+≺-is-transitive center center z = 𝟘-induction
+≺-is-transitive center (left y) center = 𝟘-induction
+≺-is-transitive center (left y) (left z) = 𝟘-induction
+≺-is-transitive center (left y) (right z) = 𝟘-induction
+≺-is-transitive center (right y) center _ = id
+≺-is-transitive center (right y) (left z) _ = id
+≺-is-transitive center (right y) (right z) _ _ = *
+≺-is-transitive (left x) center center _ _ = *
+≺-is-transitive (left x) center (left z) _ = 𝟘-induction
+≺-is-transitive (left x) center (right z) _ = id
+≺-is-transitive (left x) (left y) center _ = id
 ≺-is-transitive (left x) (left y) (left z) = ≺-is-transitive x y z
 ≺-is-transitive (left x) (left y) (right z) _ = id
-≺-is-transitive (left x) (right y) midpoint _ _ = *
+≺-is-transitive (left x) (right y) center _ _ = *
 ≺-is-transitive (left x) (right y) (left z) _ = 𝟘-induction
 ≺-is-transitive (left x) (right y) (right z) _ _ = *
-≺-is-transitive (right x) midpoint z = 𝟘-induction
+≺-is-transitive (right x) center z = 𝟘-induction
 ≺-is-transitive (right x) (left y) z = 𝟘-induction
-≺-is-transitive (right x) (right y) midpoint _ = id
+≺-is-transitive (right x) (right y) center _ = id
 ≺-is-transitive (right x) (right y) (left z) _ = id
 ≺-is-transitive (right x) (right y) (right z) = ≺-is-transitive x y z
 
 ≺-is-linear : (x y : 𝔻) → x ≢ y → x ≺ y + y ≺ x
-≺-is-linear midpoint midpoint p = 𝟘-induction (p refl)
-≺-is-linear midpoint (left y) _ = inr *
-≺-is-linear midpoint (right y) _ = inl *
-≺-is-linear (left x) midpoint _ = inl *
+≺-is-linear center center p = 𝟘-induction (p refl)
+≺-is-linear center (left y) _ = inr *
+≺-is-linear center (right y) _ = inl *
+≺-is-linear (left x) center _ = inl *
 ≺-is-linear (left x) (left y) lx≢ly = ≺-is-linear x y x≢y
  where
   x≢y : x ≢ y
   x≢y = contrapositive (ap left) lx≢ly
 ≺-is-linear (left x) (right y) _ = inl *
-≺-is-linear (right x) midpoint _ = inr *
+≺-is-linear (right x) center _ = inr *
 ≺-is-linear (right x) (left y) _ = inr *
 ≺-is-linear (right x) (right y) rx≢ry = ≺-is-linear x y x≢y
  where
@@ -136,15 +136,15 @@ trichotomy-is-a-singleton.
     d = inr ∘ inr
 
 ≺-to-≢ : {x y : 𝔻} → x ≺ y → x ≢ y
-≺-to-≢ {midpoint} {midpoint}    = 𝟘-induction
-≺-to-≢ {midpoint} {left y}      = 𝟘-induction
-≺-to-≢ {midpoint} {right y} _   = midpoint-is-not-right
-≺-to-≢ {left x}   {midpoint} _  = (λ p → midpoint-is-not-left (p ⁻¹))
-≺-to-≢ {left x}   {left y} x≺y  = contrapositive left-lc (≺-to-≢ x≺y)
-≺-to-≢ {left x}   {right y} _   = left-is-not-right
-≺-to-≢ {right x}  {midpoint}    = 𝟘-induction
-≺-to-≢ {right x}  {left y}      = 𝟘-induction
-≺-to-≢ {right x}  {right y} x≺y = contrapositive right-lc (≺-to-≢ x≺y)
+≺-to-≢ {center}  {center}      = 𝟘-induction
+≺-to-≢ {center}  {left y}      = 𝟘-induction
+≺-to-≢ {center}  {right y} _   = center-is-not-right
+≺-to-≢ {left x}  {center}  _   = (λ p → center-is-not-left (p ⁻¹))
+≺-to-≢ {left x}  {left y}  x≺y = contrapositive left-lc (≺-to-≢ x≺y)
+≺-to-≢ {left x}  {right y} _   = left-is-not-right
+≺-to-≢ {right x} {center}      = 𝟘-induction
+≺-to-≢ {right x} {left y}      = 𝟘-induction
+≺-to-≢ {right x} {right y} x≺y = contrapositive right-lc (≺-to-≢ x≺y)
 
 ≺-to-≢' : {x y : 𝔻} → y ≺ x → x ≢ y
 ≺-to-≢' l e = ≺-to-≢ l (e ⁻¹)
@@ -156,15 +156,15 @@ trichotomy-is-a-singleton.
 ≡-to-¬≺' e l = ≺-to-≢ l (e ⁻¹)
 
 ≺-to-¬≺ : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
-≺-to-¬≺ midpoint midpoint    = 𝟘-induction
-≺-to-¬≺ midpoint (left y)    = 𝟘-induction
-≺-to-¬≺ midpoint (right y) _ = id
-≺-to-¬≺ (left x) midpoint _  = id
-≺-to-¬≺ (left x) (left y)    = ≺-to-¬≺ x y
-≺-to-¬≺ (left x) (right y) _ = id
-≺-to-¬≺ (right x) midpoint   = 𝟘-induction
-≺-to-¬≺ (right x) (left y)   = 𝟘-induction
-≺-to-¬≺ (right x) (right y)  = ≺-to-¬≺ x y
+≺-to-¬≺ center    center      = 𝟘-induction
+≺-to-¬≺ center    (left y)    = 𝟘-induction
+≺-to-¬≺ center    (right y) _ = id
+≺-to-¬≺ (left x)  center    _ = id
+≺-to-¬≺ (left x)  (left y)    = ≺-to-¬≺ x y
+≺-to-¬≺ (left x)  (right y) _ = id
+≺-to-¬≺ (right x) center      = 𝟘-induction
+≺-to-¬≺ (right x) (left y)    = 𝟘-induction
+≺-to-¬≺ (right x) (right y)   = ≺-to-¬≺ x y
 
 trichotomy-is-a-singleton : {x y : 𝔻} → is-singleton (x ≺ y + (x ≡ y) + y ≺ x)
 trichotomy-is-a-singleton {x} {y} =
@@ -191,13 +191,13 @@ as explained at the top of this file).
 \begin{code}
 
 left-≺ : (x : 𝔻) → left x ≺ x
-left-≺ midpoint = *
-left-≺ (left x) = left-≺ x
+left-≺ center    = *
+left-≺ (left x)  = left-≺ x
 left-≺ (right x) = *
 
 ≺-right : (x : 𝔻) → x ≺ right x
-≺-right midpoint = *
-≺-right (left x) = *
+≺-right center    = *
+≺-right (left x)  = *
 ≺-right (right x) = ≺-right x
 
 ≺-has-no-left-endpoint-Σ : (x : 𝔻) → Σ y ꞉ 𝔻 , y ≺ x
@@ -207,14 +207,14 @@ left-≺ (right x) = *
 ≺-has-no-right-endpoint-Σ x = right x , ≺-right x
 
 ≺-is-dense-Σ : (x y : 𝔻) → x ≺ y → Σ z ꞉ 𝔻 , x ≺ z × z ≺ y
-≺-is-dense-Σ midpoint (right y) _ = right (left y) , * , left-≺ y
-≺-is-dense-Σ (left x) midpoint _ = left (right x) , ≺-right x , *
+≺-is-dense-Σ center (right y) _ = right (left y) , * , left-≺ y
+≺-is-dense-Σ (left x) center _ = left (right x) , ≺-right x , *
 ≺-is-dense-Σ (left x) (left y) x≺y = γ (≺-is-dense-Σ x y x≺y)
  where
   γ : (Σ z ꞉ 𝔻 , x ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , left x ≺ z × z ≺ left y
   γ (z , x≺z , z≺y) = left z , x≺z , z≺y
-≺-is-dense-Σ (left x) (right y) _ = midpoint , * , *
-≺-is-dense-Σ (right x) midpoint = 𝟘-induction
+≺-is-dense-Σ (left x) (right y) _ = center , * , *
+≺-is-dense-Σ (right x) center = 𝟘-induction
 ≺-is-dense-Σ (right x) (left y) = 𝟘-induction
 ≺-is-dense-Σ (right x) (right y) l = γ (≺-is-dense-Σ x y l)
  where

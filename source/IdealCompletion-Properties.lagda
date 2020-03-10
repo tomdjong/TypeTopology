@@ -128,66 +128,92 @@ module SmallIdeals
      γ ((j , q) , m) = ideals-are-lower-sets (carrier I) (ideality I)
                            i j m q
 
-{-
  Idl-≪-in-terms-of-⊑ : (I J : Idl) → I ≪⟨ Idl-DCPO ⟩ J
-                     → ∃ x ꞉ P , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
- Idl-≪-in-terms-of-⊑ I J I≪J = do
-  ((x , x∈J) , I⊑↓x) ← I≪J (𝕋 (carrier J)) (↓-of-ideal J)
-                       (↓-of-ideal-is-directed J)
-                       (≡-to-⊑ Idl-DCPO (Idl-∐-≡ J))
-  ∣ x , x∈J , I⊑↓x ∣
+                     → ∃ x ꞉ X , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+ Idl-≪-in-terms-of-⊑ I J u = ∥∥-functor γ g
+  where
+   γ : (Σ j ꞉ 𝕋 (carrier J) , I ⊑⟨ Idl-DCPO ⟩ (↓-of-ideal J j))
+     → Σ x ꞉ X , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+   γ ((j , p) , l) = j , (p , l)
+   g : ∃ j ꞉ 𝕋 (carrier J) , I ⊑⟨ Idl-DCPO ⟩ (↓-of-ideal J j)
+   g = u (𝕋 (carrier J)) (↓-of-ideal J) (↓-of-ideal-is-directed J)
+       (≡-to-⊑ Idl-DCPO (Idl-∐-≡ J))
 
  Idl-≪-in-terms-of-⊑₂ : (I J : Idl) → I ≪⟨ Idl-DCPO ⟩ J
-                      → ∃ x ꞉ P , Σ y ꞉ P , x ≺ y
+                      → ∃ x ꞉ X , Σ y ꞉ X , x ≺ y
                                           × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
                                           × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
                                           × (↓ y) ⊑⟨ Idl-DCPO ⟩ J
- Idl-≪-in-terms-of-⊑₂ I J I≪J = do
-  (x , x∈J , I⊑↓x) ← Idl-≪-in-terms-of-⊑ I J I≪J
-  (y , y∈J , x≺y) ← roundness J x∈J
-  let ↓x⊑↓y = ↓-is-monotone x≺y
-  let ↓y⊑J = λ z z≺y → ideals-are-lower-sets (carrier J) (ideality J) z y z≺y y∈J
-  ∣ x , y , x≺y , I⊑↓x , ↓x⊑↓y , ↓y⊑J ∣
+ Idl-≪-in-terms-of-⊑₂ I J u = ∥∥-rec ∥∥-is-a-prop γ (Idl-≪-in-terms-of-⊑ I J u)
+  where
+   γ : (Σ x ꞉ X , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x))
+     → ∃ x ꞉ X , Σ y ꞉ X , x ≺ y
+               × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+               × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+               × (↓ y) ⊑⟨ Idl-DCPO ⟩ J
+   γ (x , xJ , s) = ∥∥-functor g (roundness J xJ)
+    where
+     g : (Σ y ꞉ X , y ∈ᵢ J × x ≺ y)
+       → Σ x ꞉ X , Σ y ꞉ X , x ≺ y
+                 × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+                 × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+                 × (↓ y) ⊑⟨ Idl-DCPO ⟩ J
+     g (y , yJ , l) = x , y , l , s , t , r
+      where
+       t : (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+       t = ↓-is-monotone l
+       r : (↓ y) ⊑⟨ Idl-DCPO ⟩ J
+       r z m = ideals-are-lower-sets (carrier J) (ideality J) z y m yJ
 
  Idl-≪-in-terms-of-⊑' : (I J : Idl)
-                      → ∃ x ꞉ P , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+                      → ∃ x ꞉ X , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
                       → I ≪⟨ Idl-DCPO ⟩ J
  Idl-≪-in-terms-of-⊑' I J = ∥∥-rec (≪-is-prop-valued Idl-DCPO {I} {J}) γ
   where
-   γ : (Σ x ꞉ P , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x))
+   γ : (Σ x ꞉ X , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x))
      → I ≪⟨ Idl-DCPO ⟩ J
-   γ (x , x∈J , I⊑↓x) 𝓐 α δ J⊑∐α = do
-    (a , x∈αa) ← J⊑∐α x x∈J
-    let ↓x⊑αa = λ y y≺x → ideals-are-lower-sets (carrier (α a)) (ideality (α a))
-                y x y≺x x∈αa
-    let I⊑αa = transitivity Idl-DCPO I (↓ x) (α a) I⊑↓x ↓x⊑αa
-    ∣ a , I⊑αa ∣
+   γ (x , xJ , s) 𝓐 α δ t = ∥∥-functor g (t x xJ)
+    where
+     g : (Σ a ꞉ 𝓐 , x ∈ᵢ α a)
+       → Σ a ꞉ 𝓐 , I ⊑⟨ Idl-DCPO ⟩ α a
+     g (a , xa) = a , r
+      where
+       r : I ⊑⟨ Idl-DCPO ⟩ α a
+       r = transitivity Idl-DCPO I (↓ x) (α a) s q
+        where
+         q : (↓ x) ⊑⟨ Idl-DCPO ⟩ α a
+         q y l = ideals-are-lower-sets (carrier (α a)) (ideality (α a)) y x l xa
 
  Idl-≪-in-terms-of-⊑₂' : (I J : Idl)
-                       → ∃ x ꞉ P , Σ y ꞉ P , x ≺ y
-                                           × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
-                                           × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
-                                           × (↓ y) ⊑⟨ Idl-DCPO ⟩ J
+                       → ∃ x ꞉ X , Σ y ꞉ X , x ≺ y
+                                 × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+                                 × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+                                 × (↓ y) ⊑⟨ Idl-DCPO ⟩ J
                        → I ≪⟨ Idl-DCPO ⟩ J
  Idl-≪-in-terms-of-⊑₂' I J = ∥∥-rec (≪-is-prop-valued Idl-DCPO {I} {J}) γ
   where
-   γ : (Σ x ꞉ P , Σ y ꞉ P , x ≺ y
-                          × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
-                          × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
-                          × (↓ y) ⊑⟨ Idl-DCPO ⟩ J)
+   γ : (Σ x ꞉ X , Σ y ꞉ X , x ≺ y
+                × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
+                × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+                × (↓ y) ⊑⟨ Idl-DCPO ⟩ J)
      → I ≪⟨ Idl-DCPO ⟩ J
-   γ (x , y , x≺y , I⊑↓x , ↓x⊑↓y , ↓y⊑J) 𝓐 α δ J⊑∐α = do
-    let x∈J = ↓y⊑J x x≺y
-    (a , x∈αa) ← J⊑∐α x x∈J
-    let ↓x⊑αa = λ z z≺x → ideals-are-lower-sets (carrier (α a)) (ideality (α a))
-                          z x z≺x x∈αa
-    let I⊑α = transitivity Idl-DCPO I (↓ x) (α a) I⊑↓x ↓x⊑αa
-    ∣ a , I⊑α ∣
+   γ (x , y , l , s , _ , r) 𝓐 α δ m = ∥∥-functor g (m x (r x l))
+    where
+     g : (Σ a ꞉ 𝓐 , x ∈ᵢ α a)
+       → Σ a ꞉ 𝓐 , I ⊑⟨ Idl-DCPO ⟩ α a
+     g (a , xa) = a , h
+      where
+       h : I ⊑⟨ Idl-DCPO ⟩ α a
+       h = transitivity Idl-DCPO I (↓ x) (α a) s s'
+        where
+         s' : (↓ x) ⊑⟨ Idl-DCPO ⟩ α a
+         s' z n = ideals-are-lower-sets (carrier (α a)) (ideality (α a)) z x n xa
 
 \end{code}
 
 \begin{code}
 
+{-
  ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
                       → (f : P → ⟨ 𝓓 ⟩)
                       → ({p q : P} → p ≺ q → f p ⊑⟨ 𝓓 ⟩ f q)

@@ -81,8 +81,8 @@ module SmallIdeals
         (≺-trans : {x y z : X} → x ≺ y → y ≺ z → x ≺ z)
        where
 
- open Ideals {𝓥} {𝓥} {X}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
- open Idl-Properties {𝓥} {𝓥} {X}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
+ open Ideals {𝓥} {𝓥} {X} _≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
+ open Idl-Properties {𝓥} {𝓥} {X} _≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
 
  ↓-of-ideal : (I : Idl) → 𝕋 (carrier I) → Idl
  ↓-of-ideal I (i , _) = ↓ i
@@ -213,37 +213,40 @@ module SmallIdeals
 
 \begin{code}
 
-{-
  ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
-                      → (f : P → ⟨ 𝓓 ⟩)
-                      → ({p q : P} → p ≺ q → f p ⊑⟨ 𝓓 ⟩ f q)
+                      → (f : X → ⟨ 𝓓 ⟩)
+                      → ({x  y : X} → x ≺ y → f x ⊑⟨ 𝓓 ⟩ f y)
                       → Idl → ⟨ 𝓓 ⟩
  ∐-from-Idl-to-a-dcpo 𝓓 f f-monotone I = ∐ 𝓓 {𝕋 (carrier I)} {ι} δ
   where
    ι : 𝕋 (carrier I) → ⟨ 𝓓 ⟩
-   ι (p , p∈I) = f p
+   ι = f ∘ pr₁
    δ : is-Directed 𝓓 ι
-   δ = (directed-sets-are-inhabited (carrier I) I-dir) , ε
+   δ = (directed-sets-are-inhabited (carrier I) Idir) , ε
     where
-     I-dir : is-directed-set (carrier I)
-     I-dir = ideals-are-directed-sets (carrier I) (ideality I)
+     Idir : is-directed-set (carrier I)
+     Idir = ideals-are-directed-sets (carrier I) (ideality I)
      ε : is-weakly-directed (underlying-order 𝓓) ι
-     ε (p , p∈I) (q , q∈I) = do
-      r , r∈I , p≺r , q≺r ← directed-sets-are-weakly-directed (carrier I) I-dir
-                            p q p∈I q∈I
-      ∣ (r , r∈I) , (f-monotone p≺r , f-monotone q≺r) ∣
+     ε (x , xI) (y , yI) = ∥∥-functor γ g
+      where
+       γ : (Σ z ꞉ X , z ∈ᵢ I × x ≺ z × y ≺ z)
+         → Σ i ꞉ 𝕋 (carrier I) , (ι (x , xI) ⊑⟨ 𝓓 ⟩ ι i)
+                               × (ι (y , yI) ⊑⟨ 𝓓 ⟩ ι i)
+       γ (z , zI , lx , ly) = (z , zI) , f-monotone lx , f-monotone ly
+       g : ∃ z ꞉ X , z ∈ᵢ I × x ≺ z × y ≺ z
+       g = directed-sets-are-weakly-directed (carrier I) Idir x y xI yI
 
 \end{code}
 
 \begin{code}
 
  Idl-is-continuous : is-a-continuous-dcpo (Idl-DCPO)
- Idl-is-continuous = ∣ P , ↓_ , ≺s , γ ∣
+ Idl-is-continuous = ∣ X , ↓_ , s , γ ∣
   where
-   ≺' : P → P → 𝓥 ̇
-   ≺' x y = ∃ z ꞉ P , z ≺ y × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ z)
-   ≺s : ≪-small-on-B Idl-DCPO ↓_
-   ≺s x y = ≺' x y , e
+   ≺' : X → X → 𝓥 ̇
+   ≺' x y = ∃ z ꞉ X , z ≺ y × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ z)
+   s : ≪-small-on-B Idl-DCPO ↓_
+   s x y = ≺' x y , e
     where
      e : ≺' x y ≃ (↓ x) ≪⟨ Idl-DCPO ⟩ (↓ y)
      e = logically-equivalent-props-are-equivalent
@@ -252,17 +255,15 @@ module SmallIdeals
          (Idl-≪-in-terms-of-⊑' (↓ x ) (↓ y))
          (Idl-≪-in-terms-of-⊑ (↓ x) (↓ y))
    γ : (I : Idl)
-     → ∃ 𝓐 ꞉ 𝓥 ̇ , Σ α ꞉ (𝓐 → P) ,
+     → ∃ 𝓐 ꞉ 𝓥 ̇ , Σ α ꞉ (𝓐 → X) ,
          ((a : 𝓐) → (↓ (α a)) ≪⟨ Idl-DCPO ⟩ I)
        × (Σ δ ꞉ is-Directed Idl-DCPO (↓_ ∘ α) ,
            ∐ Idl-DCPO {𝓐} {↓_ ∘ α} δ ≡ I)
    γ I = ∣ 𝕋 (carrier I) , pr₁ , g , δ , ((Idl-∐-≡ I) ⁻¹) ∣
     where
      g : (i : 𝕋 (carrier I)) → (↓ pr₁ i) ≪⟨ Idl-DCPO ⟩ I
-     g (i , i∈I) = Idl-≪-in-terms-of-⊑' (↓ i) I ∣ i , i∈I , (λ x → id) ∣
+     g (i , p) = Idl-≪-in-terms-of-⊑' (↓ i) I ∣ i , p , (λ x → id) ∣
      δ : is-Directed Idl-DCPO (↓-of-ideal I)
      δ = ↓-of-ideal-is-directed I
-
--}
 
 \end{code}

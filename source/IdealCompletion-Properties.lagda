@@ -27,62 +27,65 @@ open import UF-Powersets
 open PropositionalTruncation pt
 
 module Idl-Properties
-        {P : 𝓤 ̇ }
-        (_≺_ : P → P → 𝓥 ⊔ 𝓣 ̇ )
-        (≺-prop-valued : {p q : P} → is-prop (p ≺ q))
-        (INT₂ : {q₀ q₁ p : P} → q₀ ≺ p → q₁ ≺ p
-              → ∃ r ꞉ P , q₀ ≺ r × q₁ ≺ r × r ≺ p)
-        (INT₀ : (p : P) → ∃ q ꞉ P , q ≺ p)
-        (≺-trans : {p q r : P} → p ≺ q → q ≺ r → p ≺ r)
+        {X : 𝓤 ̇ }
+        (_≺_ : X → X → 𝓥 ⊔ 𝓣 ̇ )
+        (≺-prop-valued : {x y : X} → is-prop (x ≺ y))
+        (INT₂ : {y₀ y₁ x : X} → y₀ ≺ x → y₁ ≺ x
+              → ∃ z ꞉ X , y₀ ≺ z × y₁ ≺ z × z ≺ x)
+        (INT₀ : (x : X) → ∃ y ꞉ X , y ≺ x)
+        (≺-trans : {x y z : X} → x ≺ y → y ≺ z → x ≺ z)
        where
 
- open Ideals {𝓤} {𝓥 ⊔ 𝓣} {P} _≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
+ open Ideals {𝓤} {𝓥 ⊔ 𝓣} {X} _≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
 
- roundness : (I : Idl) {x : P} → (x ∈ᵢ I) → ∃ y ꞉ P , y ∈ᵢ I × x ≺ y
- roundness I {x} x∈I = do
-  (y , y∈I , x≺y , _) ← directed-sets-are-weakly-directed (carrier I)
-                        (ideals-are-directed-sets (carrier I) (ideality I))
-                        x x x∈I x∈I
-  ∣ y , y∈I , x≺y ∣
+ roundness : (I : Idl) {x : X} → (x ∈ᵢ I) → ∃ y ꞉ X , y ∈ᵢ I × x ≺ y
+ roundness I {x} xI = ∥∥-functor γ h
+  where
+   h : ∃ y ꞉ X , y ∈ᵢ I × x ≺ y × x ≺ y
+   h = directed-sets-are-weakly-directed (carrier I)
+       (ideals-are-directed-sets (carrier I) (ideality I))
+       x x xI xI
+   γ : (Σ y ꞉ X , y ∈ᵢ I × x ≺ y × x ≺ y)
+     → Σ y ꞉ X , y ∈ᵢ I × x ≺ y
+   γ (y , yI , l , _) = y , yI , l
 
- ↓_ : P → Idl
- ↓ p = (λ (q : P) → (q ≺ p) , ≺-prop-valued) ,
+ ↓_ : X → Idl
+ ↓ x = (λ (y : X) → (y ≺ x) , ≺-prop-valued) ,
        ls , inh , δ
   where
-   ls : is-lower-set (λ q → (q ≺ p) , ≺-prop-valued)
-   ls p q = ≺-trans
-   inh : ∃ q ꞉ P , q ≺ p
-   inh = INT₀ p
-   δ : is-weakly-directed-set (λ q → (q ≺ p) , ≺-prop-valued)
-   δ q₀ q₁ q₀≺p q₁≺p = do
-    r , q₀≺r , q₁≺r , r≺p ← INT₂ q₀≺p q₁≺p
-    ∣ r , r≺p , q₀≺r , q₁≺r ∣
+   ls : is-lower-set (λ y → (y ≺ x) , ≺-prop-valued)
+   ls x y = ≺-trans
+   inh : ∃ y ꞉ X , y ≺ x
+   inh = INT₀ x
+   δ : is-weakly-directed-set (λ y → (y ≺ x) , ≺-prop-valued)
+   δ y₁ y₂ l₁ l₂ = ∥∥-functor γ (INT₂ l₁ l₂)
+    where
+     γ : (Σ z ꞉ X , y₁ ≺ z × y₂ ≺ z × z ≺ x)
+       → (Σ z ꞉ X , z ≺ x × y₁ ≺ z × y₂ ≺ z)
+     γ (z , m₁ , m₂ , n) = z , n , m₁ , m₂
 
- ↓-is-monotone : {p q : P} → p ≺ q → (↓ p) ⊑⟨ Idl-DCPO ⟩ (↓ q)
- ↓-is-monotone {p} {q} p≺q x x≺p = ≺-trans x≺p p≺q
-
+ ↓-is-monotone : {x y : X} → x ≺ y → (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+ ↓-is-monotone {x} {y} l _ m = ≺-trans m l
 
 \end{code}
-
-This should be phrased of has-size (i.e. "essentially small").
 
 \begin{code}
 
 module SmallIdeals
-        {P : 𝓥 ̇ }
-        (_≺_ : P → P → 𝓥 ̇ )
-        (≺-prop-valued : {p q : P} → is-prop (p ≺ q))
-        (INT₂ : {q₀ q₁ p : P} → q₀ ≺ p → q₁ ≺ p
-              → ∃ r ꞉ P , q₀ ≺ r × q₁ ≺ r × r ≺ p)
-        (INT₀ : (p : P) → ∃ q ꞉ P , q ≺ p)
-        (≺-trans : {p q r : P} → p ≺ q → q ≺ r → p ≺ r)
+        {X : 𝓥 ̇ }
+        (_≺_ : X → X → 𝓥 ̇ )
+        (≺-prop-valued : {x y : X} → is-prop (x ≺ y))
+        (INT₂ : {y₀ y₁ x : X} → y₀ ≺ x → y₁ ≺ x
+              → ∃ z ꞉ X , y₀ ≺ z × y₁ ≺ z × z ≺ x)
+        (INT₀ : (x : X) → ∃ y ꞉ X , y ≺ x)
+        (≺-trans : {x y z : X} → x ≺ y → y ≺ z → x ≺ z)
        where
 
- open Ideals {𝓥} {𝓥} {P}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
- open Idl-Properties {𝓥} {𝓥} {P}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
+ open Ideals {𝓥} {𝓥} {X}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
+ open Idl-Properties {𝓥} {𝓥} {X}_≺_ ≺-prop-valued INT₂ INT₀ ≺-trans
 
  ↓-of-ideal : (I : Idl) → 𝕋 (carrier I) → Idl
- ↓-of-ideal I (i , i∈I) = ↓ i
+ ↓-of-ideal I (i , _) = ↓ i
 
  ↓-of-ideal-is-directed : (I : Idl) → is-Directed Idl-DCPO (↓-of-ideal I)
  ↓-of-ideal-is-directed (I , ι) = inh , ε
@@ -92,29 +95,40 @@ module SmallIdeals
    inh : ∥ 𝕋 I ∥
    inh = directed-sets-are-inhabited I (ideals-are-directed-sets I ι)
    ε : is-weakly-directed _⊑_ (↓-of-ideal (I , ι))
-   ε (i , i∈I) (j , j∈I) = do
-    k , k∈I , i≺k , j≺k ← δ i j i∈I j∈I
-    ∣ (k , k∈I) , ((λ x x≺i → ≺-trans x≺i i≺k) , λ x x≺j → ≺-trans x≺j j≺k) ∣
+   ε (i , p) (j , q) = ∥∥-functor γ (δ i j p q)
+    where
+     γ : (Σ x ꞉ X , x ∈ I × i ≺ x × j ≺ x)
+       → Σ k ꞉ 𝕋 I , (↓-of-ideal (I , ι) (i , p) ⊑ ↓-of-ideal (I , ι) k)
+                   × (↓-of-ideal (I , ι) (j , q) ⊑ ↓-of-ideal (I , ι) k)
+     γ (x , xI , lᵢ , lⱼ) = (x , xI) , (u , v)
+      where
+       u : ↓-of-ideal (I , ι) (i , p) ⊑ ↓-of-ideal (I , ι) (x , xI)
+       u y mᵢ = ≺-trans mᵢ lᵢ
+       v : ↓-of-ideal (I , ι) (j , q) ⊑ ↓-of-ideal (I , ι) (x , xI)
+       v y m = ≺-trans m lⱼ
 
  Idl-∐-≡ : (I : Idl)
          → I ≡ ∐ Idl-DCPO {_} {↓-of-ideal I} (↓-of-ideal-is-directed I)
- Idl-∐-≡ I = antisymmetry Idl-DCPO I (∐ Idl-DCPO {_} {α} δ) ⊑₁ ⊑₂
+ Idl-∐-≡ I = antisymmetry Idl-DCPO I (∐ Idl-DCPO {_} {α} δ) l₁ l₂
   where
    α : 𝕋 (carrier I) → Idl
    α = ↓-of-ideal I
    δ : is-Directed Idl-DCPO α
    δ = ↓-of-ideal-is-directed I
-   ⊑₁ : I ⊑⟨ Idl-DCPO ⟩ ∐ Idl-DCPO {_} {α} δ
-   ⊑₁ i i∈I = do
-    j , j∈I , i≺j ← roundness I i∈I
-    ∣ (j , j∈I) , i≺j ∣
-   ⊑₂ : ∐ Idl-DCPO {_} {α} δ ⊑⟨ Idl-DCPO ⟩ I
-   ⊑₂ i i∈∐α = ∥∥-rec (∈-is-a-prop (carrier I) i) γ i∈∐α
+   l₁ : I ⊑⟨ Idl-DCPO ⟩ ∐ Idl-DCPO {_} {α} δ
+   l₁ i p = ∥∥-functor γ (roundness I p)
+    where
+     γ : (Σ j ꞉ X , j ∈ᵢ I × i ≺ j)
+       → Σ a ꞉ 𝕋 (carrier I) , i ∈ᵢ α a
+     γ (j , q , m) = (j , q) , m
+   l₂ : ∐ Idl-DCPO {_} {α} δ ⊑⟨ Idl-DCPO ⟩ I
+   l₂ i p = ∥∥-rec (∈-is-a-prop (carrier I) i) γ p
     where
      γ : (Σ j ꞉ 𝕋 (carrier I) , i ≺ pr₁ j) → i ∈ carrier I
-     γ ((j , j∈I) , i≺j) = ideals-are-lower-sets (carrier I) (ideality I)
-                           i j i≺j j∈I
+     γ ((j , q) , m) = ideals-are-lower-sets (carrier I) (ideality I)
+                           i j m q
 
+{-
  Idl-≪-in-terms-of-⊑ : (I J : Idl) → I ≪⟨ Idl-DCPO ⟩ J
                      → ∃ x ꞉ P , x ∈ᵢ J × I ⊑⟨ Idl-DCPO ⟩ (↓ x)
  Idl-≪-in-terms-of-⊑ I J I≪J = do
@@ -222,5 +236,7 @@ module SmallIdeals
      g (i , i∈I) = Idl-≪-in-terms-of-⊑' (↓ i) I ∣ i , i∈I , (λ x → id) ∣
      δ : is-Directed Idl-DCPO (↓-of-ideal I)
      δ = ↓-of-ideal-is-directed I
+
+-}
 
 \end{code}

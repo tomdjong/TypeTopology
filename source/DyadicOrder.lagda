@@ -128,7 +128,7 @@ trichotomy-is-a-singleton.
   a : x ≡ y → (x ≺ y) + (x ≡ y) + (y ≺ x)
   a = inr ∘ inl
   b : (x ≢ y) → (x ≺ y) + (x ≡ y) + (y ≺ x)
-  b x≢y = cases c d (≺-is-linear x y x≢y)
+  b n = cases c d (≺-is-linear x y n)
    where
     c : x ≺ y → (x ≺ y) + (x ≡ y) + (y ≺ x)
     c = inl
@@ -147,13 +147,13 @@ trichotomy-is-a-singleton.
 ≺-to-≢ {right x}  {right y} x≺y = contrapositive right-lc (≺-to-≢ x≺y)
 
 ≺-to-≢' : {x y : 𝔻} → y ≺ x → x ≢ y
-≺-to-≢' y≺x p = ≺-to-≢ y≺x (p ⁻¹)
+≺-to-≢' l e = ≺-to-≢ l (e ⁻¹)
 
 ≡-to-¬≺ : {x y : 𝔻} → x ≡ y → ¬ (x ≺ y)
-≡-to-¬≺ x≡y x≺y = ≺-to-≢ x≺y x≡y
+≡-to-¬≺ e l = ≺-to-≢ l e
 
 ≡-to-¬≺' : {x y : 𝔻} → x ≡ y → ¬ (y ≺ x)
-≡-to-¬≺' x≡y y≺x = ≺-to-≢ y≺x (x≡y ⁻¹)
+≡-to-¬≺' e l = ≺-to-≢ l (e ⁻¹)
 
 ≺-to-¬≺ : (x y : 𝔻) → x ≺ y → ¬ (y ≺ x)
 ≺-to-¬≺ midpoint midpoint    = 𝟘-induction
@@ -176,12 +176,12 @@ trichotomy-is-a-singleton {x} {y} =
      h : is-prop ((x ≡ y) + y ≺ x)
      h = +-is-prop 𝔻-is-a-set (≺-is-prop-valued y x) ≡-to-¬≺'
      g : x ≺ y → ¬ ((x ≡ y) + y ≺ x)
-     g x≺y = cases a b
+     g l = cases a b
       where
        a : x ≢ y
-       a = ≺-to-≢ x≺y
+       a = ≺-to-≢ l
        b : ¬ (y ≺ x)
-       b = ≺-to-¬≺ x y x≺y
+       b = ≺-to-¬≺ x y l
 
 \end{code}
 
@@ -216,10 +216,10 @@ left-≺ (right x) = *
 ≺-is-dense-Σ (left x) (right y) _ = midpoint , * , *
 ≺-is-dense-Σ (right x) midpoint = 𝟘-induction
 ≺-is-dense-Σ (right x) (left y) = 𝟘-induction
-≺-is-dense-Σ (right x) (right y) x≺y = γ (≺-is-dense-Σ x y x≺y)
+≺-is-dense-Σ (right x) (right y) l = γ (≺-is-dense-Σ x y l)
  where
   γ : (Σ z ꞉ 𝔻 , x ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , right x ≺ z × z ≺ right y
-  γ (z , x≺z , z≺y) = right z , x≺z , z≺y
+  γ (z , m , n) = right z , m , n
 
 \end{code}
 
@@ -231,24 +231,24 @@ We will need this property to construct the (rounded) ideal completion of
 
 \begin{code}
 
-≺-interpolation₂-Σ : (x₀ x₁ y : 𝔻) → x₀ ≺ y → x₁ ≺ y
-                   → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-≺-interpolation₂-Σ x₀ x₁ y x₀≺y x₁≺y = cases₃ a b c (≺-is-trichotomous x₀ x₁)
+≺-interpolation₂-Σ : (x₁ x₂ y : 𝔻) → x₁ ≺ y → x₂ ≺ y
+                   → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+≺-interpolation₂-Σ x₁ x₂ y l₁ l₂ = cases₃ a b c (≺-is-trichotomous x₁ x₂)
  where
-  a : x₀ ≺ x₁ → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-  a x₀≺x₁ = γ (≺-is-dense-Σ x₁ y x₁≺y)
+  a : x₁ ≺ x₂ → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+  a k = γ (≺-is-dense-Σ x₂ y l₂)
    where
-    γ : (Σ z ꞉ 𝔻 , x₁ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-    γ (z , x₁≺z , z≺y) = z , ≺-is-transitive x₀ x₁ z x₀≺x₁ x₁≺z , x₁≺z , z≺y
-  b : x₀ ≡ x₁ → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-  b refl = γ (≺-is-dense-Σ x₁ y x₁≺y)
+    γ : (Σ z ꞉ 𝔻 , x₂ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+    γ (z , m , n) = z , ≺-is-transitive x₁ x₂ z k m , m , n
+  b : x₁ ≡ x₂ → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+  b refl = γ (≺-is-dense-Σ x₁ y l₁)
    where
-    γ : (Σ z ꞉ 𝔻 , x₁ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-    γ (z , x₁≺z , z≺y) = z , x₁≺z , x₁≺z , z≺y
-  c : x₁ ≺ x₀ → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-  c x₁≺x₀ = γ (≺-is-dense-Σ x₀ y x₀≺y)
+    γ : (Σ z ꞉ 𝔻 , x₁ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+    γ (z , m , n) = z , m , m , n
+  c : x₂ ≺ x₁ → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+  c k = γ (≺-is-dense-Σ x₁ y l₁)
    where
-    γ : (Σ z ꞉ 𝔻 , x₀ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₀ ≺ z × x₁ ≺ z × z ≺ y
-    γ (z , x₀≺z , z≺y) = z , x₀≺z , ≺-is-transitive x₁ x₀ z x₁≺x₀ x₀≺z , z≺y
+    γ : (Σ z ꞉ 𝔻 , x₁ ≺ z × z ≺ y) → Σ z ꞉ 𝔻 , x₁ ≺ z × x₂ ≺ z × z ≺ y
+    γ (z , m , n) = z , m , ≺-is-transitive x₂ x₁ z k m , n
 
 \end{code}

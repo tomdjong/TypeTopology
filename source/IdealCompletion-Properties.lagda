@@ -17,6 +17,7 @@ module IdealCompletion-Properties
        where
 
 open import Dcpo pt fe 𝓥
+open import DcpoAlgebraic pt fe 𝓥
 open import DcpoApproximation pt fe 𝓥
 open import DcpoBasis pt fe 𝓥
 open import IdealCompletion pt fe pe 𝓥
@@ -240,8 +241,8 @@ module SmallIdeals
 
 \begin{code}
 
- Idl-is-continuous : is-a-continuous-dcpo (Idl-DCPO)
- Idl-is-continuous = ∣ X , ↓_ , s , γ ∣
+ ↓-is-a-basis-of-Idl : is-a-basis Idl-DCPO ↓_
+ ↓-is-a-basis-of-Idl = s , γ
   where
    ≺' : X → X → 𝓥 ̇
    ≺' x y = ∃ z ꞉ X , z ≺ y × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ z)
@@ -262,8 +263,26 @@ module SmallIdeals
    γ I = ∣ 𝕋 (carrier I) , pr₁ , g , δ , ((Idl-∐-≡ I) ⁻¹) ∣
     where
      g : (i : 𝕋 (carrier I)) → (↓ pr₁ i) ≪⟨ Idl-DCPO ⟩ I
-     g (i , p) = Idl-≪-in-terms-of-⊑' (↓ i) I ∣ i , p , (λ x → id) ∣
+     g (i , p) = Idl-≪-in-terms-of-⊑' (↓ i) I
+                 ∣ i , p , reflexivity Idl-DCPO (↓ i) ∣
      δ : is-Directed Idl-DCPO (↓-of-ideal I)
      δ = ↓-of-ideal-is-directed I
+
+ Idl-is-continuous : is-a-continuous-dcpo (Idl-DCPO)
+ Idl-is-continuous = ∣ X , ↓_ , ↓-is-a-basis-of-Idl ∣
+
+\end{code}
+
+\begin{code}
+
+ Idl-is-algebraic-if-order-is-reflexive : ((x : X) → x ≺ x)
+                                        → is-an-algebraic-dcpo Idl-DCPO
+ Idl-is-algebraic-if-order-is-reflexive ρ = ∣ X , ↓_ , ↓-is-a-basis-of-Idl , κ ∣
+  where
+   κ : (x : X) → is-compact Idl-DCPO (↓ x)
+   κ x = Idl-≪-in-terms-of-⊑' (↓ x) (↓ x) γ
+    where
+     γ : ∃ y ꞉ X , y ∈ᵢ (↓ x) × (↓ x) ⊑⟨ Idl-DCPO ⟩ (↓ y)
+     γ = ∣ x , ρ x , reflexivity Idl-DCPO (↓ x) ∣
 
 \end{code}

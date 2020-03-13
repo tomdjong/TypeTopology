@@ -30,6 +30,18 @@ open import UF-Powersets
 
 open PropositionalTruncation pt
 
+module _
+        {X : 𝓤 ̇ }
+        (_≺_ : X → X → 𝓣 ̇ )
+       where
+
+ reflexivity-implies-INT₀ : ({x : X} → x ≺ x) → (x : X) → ∃ y ꞉ X , y ≺ x
+ reflexivity-implies-INT₀ r x = ∣ x , r ∣
+
+ reflexivity-implies-INT₂ : ({x : X} → x ≺ x) → {y₀ y₁ x : X} → y₀ ≺ x → y₁ ≺ x
+                          → ∃ z ꞉ X , y₀ ≺ z × y₁ ≺ z × z ≺ x
+ reflexivity-implies-INT₂ r {y₀} {y₁} {x} l m = ∣ x , l , m , r ∣
+
 module Idl-Properties
         {X : 𝓤 ̇ }
         (_≺_ : X → X → 𝓥 ⊔ 𝓣 ̇ )

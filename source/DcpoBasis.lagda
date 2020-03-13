@@ -159,6 +159,20 @@ syntax basis-⊑ 𝓓 c b b' = b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b'
        (⊑ᴮ-to-⊑ 𝓓 c)
        (⊑-to-⊑ᴮ 𝓓 c)
 
+⊑ᴮ-is-reflexive : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {β : B → ⟨ 𝓓 ⟩}
+                  (c : is-a-basis 𝓓 β) {b : B} → b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b
+⊑ᴮ-is-reflexive 𝓓 {B} {β} c {b} = ⊑-to-⊑ᴮ 𝓓 c (reflexivity 𝓓 (β b))
+
+⊑ᴮ-is-transitive : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {β : B → ⟨ 𝓓 ⟩}
+                   (c : is-a-basis 𝓓 β) {x y z : B}
+                 → x ⊑ᴮ⟨ 𝓓 ⟩[ c ] y
+                 → y ⊑ᴮ⟨ 𝓓 ⟩[ c ] z
+                 → x ⊑ᴮ⟨ 𝓓 ⟩[ c ] z
+⊑ᴮ-is-transitive 𝓓 {B} {β} c {x} {y} {z} l m = ⊑-to-⊑ᴮ 𝓓 c n
+ where
+  n : β x ⊑⟨ 𝓓 ⟩ β z
+  n = transitivity 𝓓 (β x) (β y) (β z) (⊑ᴮ-to-⊑ 𝓓 c l) (⊑ᴮ-to-⊑ 𝓓 c m)
+
 ≪-INT₀ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {β : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 β)
          (x : ⟨ 𝓓 ⟩) → ∃ b ꞉ B , β b ≪⟨ 𝓓 ⟩ x
 ≪-INT₀ 𝓓 {B} {β} (≺ , c) x = ∥∥-rec ∥∥-is-a-prop γ (c x)
@@ -365,5 +379,18 @@ An interpolation property starting from two inequalities.
    γ (b , x , y , z) = b , ≪-to-≪ᴮ 𝓓 c b₁ b x ,
                            ≪-to-≪ᴮ 𝓓 c b₂ b y ,
                            ≪-to-≪ᴮ 𝓓 c b  b₃ z
+
+\end{code}
+
+\begin{code}
+
+-- TO DO: Find a better home for this.
+
+locally-small-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+locally-small-dcpo 𝓓 = ((x y : ⟨ 𝓓 ⟩) → (x ⊑⟨ 𝓓 ⟩ y) has-size 𝓥)
+
+locally-small-order : (𝓓 : DCPO {𝓤} {𝓣}) → locally-small-dcpo 𝓓
+                    → (⟨ 𝓓 ⟩ → ⟨ 𝓓 ⟩ → 𝓥 ̇ )
+locally-small-order 𝓓 ls x y = has-size-type (ls x y)
 
 \end{code}

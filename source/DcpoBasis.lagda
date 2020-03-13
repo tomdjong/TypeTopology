@@ -18,6 +18,8 @@ module DcpoBasis
 open PropositionalTruncation pt
 
 open import Dcpo pt fe 𝓥
+open import DcpoBasics pt fe 𝓥
+
 open import DcpoApproximation pt fe 𝓥
 
 is-small : (X : 𝓤 ̇ ) → 𝓥 ⁺ ⊔ 𝓤 ̇

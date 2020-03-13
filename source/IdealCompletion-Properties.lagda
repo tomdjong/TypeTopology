@@ -17,9 +17,12 @@ module IdealCompletion-Properties
        where
 
 open import Dcpo pt fe 𝓥
+open import DcpoBasics pt fe 𝓥
+
 open import DcpoAlgebraic pt fe 𝓥
 open import DcpoApproximation pt fe 𝓥
 open import DcpoBasis pt fe 𝓥
+
 open import IdealCompletion pt fe pe 𝓥
 
 open import UF-Equiv
@@ -214,28 +217,85 @@ module SmallIdeals
 
 \begin{code}
 
- ∐-from-Idl-to-a-dcpo : (𝓓 : DCPO {𝓤} {𝓣})
-                      → (f : X → ⟨ 𝓓 ⟩)
-                      → ({x  y : X} → x ≺ y → f x ⊑⟨ 𝓓 ⟩ f y)
-                      → Idl → ⟨ 𝓓 ⟩
- ∐-from-Idl-to-a-dcpo 𝓓 f f-monotone I = ∐ 𝓓 {𝕋 (carrier I)} {ι} δ
+ Idl-mediating-directed : (𝓓 : DCPO {𝓤} {𝓣})
+                        → (f : X → ⟨ 𝓓 ⟩)
+                        → ({x  y : X} → x ≺ y → f x ⊑⟨ 𝓓 ⟩ f y)
+                        → (I : Idl)
+                        → is-Directed 𝓓 {𝕋 (carrier I)} (f ∘ pr₁)
+ Idl-mediating-directed 𝓓 f m I =
+  (directed-sets-are-inhabited (carrier I) Idir) , ε
+   where
+    ι : 𝕋 (carrier I) → ⟨ 𝓓 ⟩
+    ι = f ∘ pr₁
+    Idir : is-directed-set (carrier I)
+    Idir = ideals-are-directed-sets (carrier I) (ideality I)
+    ε : is-weakly-directed (underlying-order 𝓓) ι
+    ε (x , xI) (y , yI) = ∥∥-functor γ g
+     where
+      γ : (Σ z ꞉ X , z ∈ᵢ I × x ≺ z × y ≺ z)
+        → Σ i ꞉ 𝕋 (carrier I) , (ι (x , xI) ⊑⟨ 𝓓 ⟩ ι i)
+                              × (ι (y , yI) ⊑⟨ 𝓓 ⟩ ι i)
+      γ (z , zI , lx , ly) = (z , zI) , m lx , m ly
+      g : ∃ z ꞉ X , z ∈ᵢ I × x ≺ z × y ≺ z
+      g = directed-sets-are-weakly-directed (carrier I) Idir x y xI yI
+
+ Idl-mediating-map : (𝓓 : DCPO {𝓤} {𝓣})
+                   → (f : X → ⟨ 𝓓 ⟩)
+                   → ({x  y : X} → x ≺ y → f x ⊑⟨ 𝓓 ⟩ f y)
+                   → Idl → ⟨ 𝓓 ⟩
+ Idl-mediating-map 𝓓 f m I = ∐ 𝓓 (Idl-mediating-directed 𝓓 f m I)
+
+ Idl-mediating-map-commutes : (𝓓 : DCPO {𝓤} {𝓣})
+                            → (f : X → ⟨ 𝓓 ⟩)
+                            → (m : {x  y : X} → x ≺ y → f x ⊑⟨ 𝓓 ⟩ f y)
+                            → ({x : X} → x ≺ x)
+                            → Idl-mediating-map 𝓓 f m ∘ ↓_ ∼ f
+ Idl-mediating-map-commutes 𝓓 f m ρ x = γ
   where
-   ι : 𝕋 (carrier I) → ⟨ 𝓓 ⟩
-   ι = f ∘ pr₁
-   δ : is-Directed 𝓓 ι
-   δ = (directed-sets-are-inhabited (carrier I) Idir) , ε
+   δ : is-Directed 𝓓 (f ∘ pr₁)
+   δ = Idl-mediating-directed 𝓓 f m (↓ x)
+   γ : ∐ 𝓓 δ ≡ f x
+   γ = antisymmetry 𝓓 (∐ 𝓓 δ) (f x) a b
     where
-     Idir : is-directed-set (carrier I)
-     Idir = ideals-are-directed-sets (carrier I) (ideality I)
-     ε : is-weakly-directed (underlying-order 𝓓) ι
-     ε (x , xI) (y , yI) = ∥∥-functor γ g
+     a : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ f x
+     a = ∐-is-lowerbound-of-upperbounds 𝓓 δ (f x) g
       where
-       γ : (Σ z ꞉ X , z ∈ᵢ I × x ≺ z × y ≺ z)
-         → Σ i ꞉ 𝕋 (carrier I) , (ι (x , xI) ⊑⟨ 𝓓 ⟩ ι i)
-                               × (ι (y , yI) ⊑⟨ 𝓓 ⟩ ι i)
-       γ (z , zI , lx , ly) = (z , zI) , f-monotone lx , f-monotone ly
-       g : ∃ z ꞉ X , z ∈ᵢ I × x ≺ z × y ≺ z
-       g = directed-sets-are-weakly-directed (carrier I) Idir x y xI yI
+       g : (y : Σ y ꞉ X , y ∈ᵢ (↓ x))
+         → f (pr₁ y) ⊑⟨ 𝓓 ⟩ f x
+       g (y , l) = m l
+     b : f x ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
+     b = ∐-is-upperbound 𝓓 δ (x , ρ)
+
+ Idl-mediating-map-is-continuous : (𝓓 : DCPO {𝓤} {𝓣})
+                                 → (f : X → ⟨ 𝓓 ⟩)
+                                 → (m : {x  y : X} → x ≺ y → f x ⊑⟨ 𝓓 ⟩ f y)
+                                 → is-continuous Idl-DCPO 𝓓
+                                   (Idl-mediating-map 𝓓 f m)
+ Idl-mediating-map-is-continuous 𝓓 f m 𝓐 α δ = ub , lb
+  where
+   f' : Idl → ⟨ 𝓓 ⟩
+   f' = Idl-mediating-map 𝓓 f m
+   ε : (I : Idl) → is-Directed 𝓓 (f ∘ pr₁)
+   ε = Idl-mediating-directed 𝓓 f m
+   ub : (a : 𝓐) → f' (α a) ⊑⟨ 𝓓 ⟩ f' (∐ Idl-DCPO {𝓐} {α} δ)
+   ub a = ∐-is-lowerbound-of-upperbounds 𝓓 (ε (α a))
+          (f' (∐ Idl-DCPO {𝓐} {α} δ)) γ
+    where
+     γ : (y : (Σ x ꞉ X , x ∈ᵢ α a))
+       → f (pr₁ y) ⊑⟨ 𝓓 ⟩ f' (∐ Idl-DCPO {𝓐} {α} δ)
+     γ (x , p) = ∐-is-upperbound 𝓓 (ε (∐ Idl-DCPO {𝓐} {α} δ)) g
+      where
+       g : Σ y ꞉ X , y ∈ᵢ (∐ Idl-DCPO {𝓐} {α} δ)
+       g = x , ∣ a , p ∣
+   lb : is-lowerbound-of-upperbounds (underlying-order 𝓓)
+         (f' (∐ Idl-DCPO {𝓐} {α} δ))
+         (λ a → f' (α a))
+   lb d u = ∐-is-lowerbound-of-upperbounds 𝓓 (ε (∐ Idl-DCPO {𝓐} {α} δ)) d γ
+    where
+     γ : (y : (Σ x ꞉ X , x ∈ᵢ ∐ Idl-DCPO {𝓐} {α} δ))
+       → f (pr₁ y) ⊑⟨ 𝓓 ⟩ d
+     γ (x , p) = {!!} -- use ∥∥-rec
+
 
 \end{code}
 

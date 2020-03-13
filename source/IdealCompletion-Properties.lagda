@@ -260,7 +260,7 @@ module SmallIdeals
      a : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ f x
      a = ∐-is-lowerbound-of-upperbounds 𝓓 δ (f x) g
       where
-       g : (y : Σ y ꞉ X , y ∈ᵢ (↓ x))
+       g : (y : Σ z ꞉ X , z ∈ᵢ (↓ x))
          → f (pr₁ y) ⊑⟨ 𝓓 ⟩ f x
        g (y , l) = m l
      b : f x ⊑⟨ 𝓓 ⟩ ∐ 𝓓 δ
@@ -292,8 +292,8 @@ module SmallIdeals
          (λ a → f' (α a))
    lb d u = ∐-is-lowerbound-of-upperbounds 𝓓 (ε (∐ Idl-DCPO {𝓐} {α} δ)) d γ
     where
-     γ : (y : (Σ x ꞉ X , x ∈ᵢ ∐ Idl-DCPO {𝓐} {α} δ))
-       → f (pr₁ y) ⊑⟨ 𝓓 ⟩ d
+     γ : (x : (Σ y ꞉ X , y ∈ᵢ ∐ Idl-DCPO {𝓐} {α} δ))
+       → f (pr₁ x) ⊑⟨ 𝓓 ⟩ d
      γ (x , p) = ∥∥-rec (prop-valuedness 𝓓 (f x) d) g p
       where
        g : (Σ a ꞉ 𝓐 , x ∈ᵢ α a) → f x ⊑⟨ 𝓓 ⟩ d

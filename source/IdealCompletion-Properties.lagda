@@ -294,8 +294,12 @@ module SmallIdeals
     where
      γ : (y : (Σ x ꞉ X , x ∈ᵢ ∐ Idl-DCPO {𝓐} {α} δ))
        → f (pr₁ y) ⊑⟨ 𝓓 ⟩ d
-     γ (x , p) = {!!} -- use ∥∥-rec
-
+     γ (x , p) = ∥∥-rec (prop-valuedness 𝓓 (f x) d) g p
+      where
+       g : (Σ a ꞉ 𝓐 , x ∈ᵢ α a) → f x ⊑⟨ 𝓓 ⟩ d
+       g (a , q) = f x      ⊑⟨ 𝓓 ⟩[ ∐-is-upperbound 𝓓 (ε (α a)) (x , q) ]
+                   f' (α a) ⊑⟨ 𝓓 ⟩[ u a ]
+                   d        ∎⟨ 𝓓 ⟩
 
 \end{code}
 

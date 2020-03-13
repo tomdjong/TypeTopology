@@ -23,5 +23,10 @@ open import DcpoBasis pt fe 𝓥
 open import IdealCompletion pt fe pe 𝓥
 open import IdealCompletion-Properties pt fe pe 𝓥
 
+module _
+        (𝓓 : DCPO {𝓤} {𝓣})
+        {B : 𝓥 ̇ }
+        (β : B → ⟨ 𝓓 ⟩)
+       where
 
 \end{code}

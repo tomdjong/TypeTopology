@@ -21,18 +21,18 @@ open import DcpoBasis pt fe 𝓥
 
 is-an-algebraic-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 is-an-algebraic-dcpo {𝓤} {𝓣} 𝓓 =
- ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) ,
- is-a-basis 𝓓 ι × ((b : B) → is-compact 𝓓 (ι b))
+ ∃ B ꞉ 𝓥 ̇ , Σ β ꞉ (B → ⟨ 𝓓 ⟩) ,
+ is-a-basis 𝓓 β × ((b : B) → is-compact 𝓓 (β b))
 
 algebraicity-implies-continuity : (𝓓 : DCPO {𝓤} {𝓣})
                                 → is-an-algebraic-dcpo 𝓓
                                 → is-a-continuous-dcpo 𝓓
 algebraicity-implies-continuity 𝓓 = ∥∥-functor γ
  where
-  γ : (Σ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) ,
-         is-a-basis 𝓓 ι
-        × ((b : B) → is-compact 𝓓 (ι b)))
-    → Σ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , is-a-basis 𝓓 ι
-  γ (B , ι , isb , comp) = B , ι , isb
+  γ : (Σ B ꞉ 𝓥 ̇ , Σ β ꞉ (B → ⟨ 𝓓 ⟩) ,
+         is-a-basis 𝓓 β
+        × ((b : B) → is-compact 𝓓 (β b)))
+    → Σ B ꞉ 𝓥 ̇ , Σ β ꞉ (B → ⟨ 𝓓 ⟩) , is-a-basis 𝓓 β
+  γ (B , β , isb , comp) = B , β , isb
 
 \end{code}

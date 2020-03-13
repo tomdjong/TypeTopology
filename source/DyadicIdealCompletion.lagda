@@ -78,16 +78,16 @@ Idl-𝔻-has-no-compact-elements I κ = ∥∥-rec 𝟘-is-prop γ g
 Idl-𝔻-is-not-algebraic : ¬ (is-an-algebraic-dcpo Idl-𝔻)
 Idl-𝔻-is-not-algebraic = ∥∥-rec 𝟘-is-prop γ
  where
-  γ : ¬ (Σ B ꞉ 𝓤₀ ̇ , Σ ι ꞉ (B → ⟨ Idl-𝔻 ⟩) ,
-         is-a-basis Idl-𝔻 ι × ((b : B) → is-compact Idl-𝔻 (ι b)))
-  γ (B , ι , (≺ , c) , κ) = ∥∥-rec 𝟘-is-prop g B-inh
+  γ : ¬ (Σ B ꞉ 𝓤₀ ̇ , Σ β ꞉ (B → ⟨ Idl-𝔻 ⟩) ,
+         is-a-basis Idl-𝔻 β × ((b : B) → is-compact Idl-𝔻 (β b)))
+  γ (B , β , (≺ , c) , κ) = ∥∥-rec 𝟘-is-prop g B-inh
    where
     g : ¬ B
-    g b = Idl-𝔻-has-no-compact-elements (ι b) (κ b)
+    g b = Idl-𝔻-has-no-compact-elements (β b) (κ b)
     B-inh : ∥ B ∥
     B-inh = do
      𝓐 , α , _ , (δ , _) ← c (↓ center)
-     a ← Directed-implies-inhabited Idl-DCPO {𝓐} {ι ∘ α} δ
+     a ← Directed-implies-inhabited Idl-DCPO {𝓐} {β ∘ α} δ
      ∣ α a ∣
 
 \end{code}

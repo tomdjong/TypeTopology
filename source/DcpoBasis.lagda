@@ -20,8 +20,11 @@ open PropositionalTruncation pt
 open import Dcpo pt fe 𝓥
 open import DcpoApproximation pt fe 𝓥
 
+is-small : (X : 𝓤 ̇ ) → 𝓥 ⁺ ⊔ 𝓤 ̇
+is-small X = X has-size 𝓥
+
 ≪-small-on-B : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-≪-small-on-B 𝓓 {B} ι = (b b' : B) → (ι b ≪⟨ 𝓓 ⟩ ι b') has-size 𝓥
+≪-small-on-B 𝓓 {B} ι = (b b' : B) → is-small (ι b ≪⟨ 𝓓 ⟩ ι b')
 
 approximate-from-basis-Σ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩)
                          → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
@@ -144,7 +147,7 @@ syntax basis-⊑ 𝓓 c b b' = b ⊑ᴮ⟨ 𝓓 ⟩[ c ] b'
 
 ⊑-is-small-on-basis : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩}
                       (c : is-a-basis 𝓓 ι) {b b' : B}
-                    → (ι b ⊑⟨ 𝓓 ⟩ ι b') has-size 𝓥
+                    → is-small (ι b ⊑⟨ 𝓓 ⟩ ι b')
 ⊑-is-small-on-basis 𝓓 {B} {ι} c {b₁} {b₂} = (b₁ ⊑ᴮ⟨ 𝓓 ⟩[ c ] b₂) , γ
  where
   γ : (b₁ ⊑ᴮ⟨ 𝓓 ⟩[ c ] b₂) ≃ ι b₁ ⊑⟨ 𝓓 ⟩ ι b₂

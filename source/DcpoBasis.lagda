@@ -27,17 +27,17 @@ approximate-from-basis-Σ : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B �
                          → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 approximate-from-basis-Σ {𝓤} {𝓣} 𝓓 {B} ι x =
  Σ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , ((i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x)
-                          × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
+                            × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
 
 approximate-from-basis : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩)
                        → ⟨ 𝓓 ⟩ → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 approximate-from-basis {𝓤} {𝓣} 𝓓 {B} ι x =
  ∃ I ꞉ 𝓥 ̇ , Σ β ꞉ (I → B) , ((i : I) → ι (β i) ≪⟨ 𝓓 ⟩ x)
-                          × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
+                            × (Σ δ ꞉ is-Directed 𝓓 (ι ∘ β) , ∐ 𝓓 δ ≡ x)
 
 is-a-basis : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } → (B → ⟨ 𝓓 ⟩) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 is-a-basis {𝓤} {𝓣} 𝓓 {B} ι = ≪-small-on-B 𝓓 ι
-                             × ((x : ⟨ 𝓓 ⟩) → approximate-from-basis 𝓓 ι x)
+                                × ((x : ⟨ 𝓓 ⟩) → approximate-from-basis 𝓓 ι x)
 
 is-a-continuous-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
 is-a-continuous-dcpo {𝓤} {𝓣} 𝓓 = ∃ B ꞉ 𝓥 ̇ , Σ ι ꞉ (B → ⟨ 𝓓 ⟩) , is-a-basis 𝓓 ι
@@ -182,8 +182,6 @@ https://www.cs.bham.ac.uk/~mhe/papers/interpolation.pdf, but adapted so that we
 only include basis elements in the newly constructed directed family.
 
 \begin{code}
-
--- TO DO: Split and improve this proof
 
 ≪-INT₂-aux : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } {ι : B → ⟨ 𝓓 ⟩} (c : is-a-basis 𝓓 ι)
              {I : 𝓥 ̇ } (α : I → B)

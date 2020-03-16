@@ -57,3 +57,26 @@ module _
    ι = {!!}
 
 \end{code}
+
+Observation from 13/03/2020.
+
+The exponential E^D of two locally-small dcpos D and E is not locally
+small. This is because the order of the exponential mentions all elements of the
+D (so E^D is locally small if D is additionally assumed to be small).
+
+However, we do have the following result.
+
+If D is continuous and E is locally small, then E^D is locally small.  Proof: We
+claim that Π x : D , f x ⊑ g x is equivalent to Π b : B , f b ⊑ g b (where B is
+a basis of D). Since B is small, the latter is small, making E^D locally
+small. For the proof of the equivalence, note that the left-to-right implication
+is trivial. For the converse, let x : D and (by continuity) write x = ∐ α with
+every element αᵢ : B. Then:
+f x      =
+f (∐ α)  = (by continuity of f)
+∐ᵢ (f αᵢ) ⊑ (by assumption and the fact that αᵢ : B)
+∐ᵢ (g αᵢ) ⊑ (by continuity of g)
+g (∐ α)  =
+g x.
+
+TO DO: Formalise this.

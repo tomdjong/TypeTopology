@@ -122,6 +122,9 @@ import ConvergentSequenceInfCompact
 import DecidabilityOfNonContinuity
 import DecidableAndDetachable
 import DiscreteAndSeparated
+import Dyadic
+import DyadicOrder
+import Dyadics
 import Dominance
 import DummettDisjunction
 import Empty

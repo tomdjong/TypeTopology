@@ -18,6 +18,7 @@ open import UF-Subsingletons
 open import UF-Subsingletons-FunExt hiding (not)
 open import UF-Size
 open import UF-Retracts
+open import SizeBasics
 
 open import Poset
 

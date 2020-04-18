@@ -9,11 +9,7 @@ open import UF-Base
 open import UF-FunExt
 open import UF-Subsingletons
 open import UF-Equiv
-
--- open import UF-EquivalenceExamples
--- open import UF-Equiv-FunExt
--- open import UF-Yoneda
--- open import UF-Retracts
+open import UF-Retracts
 
 vvfunext : ∀ 𝓤 𝓥 → (𝓤 ⊔ 𝓥)⁺ ̇
 vvfunext 𝓤 𝓥 = {X : 𝓤 ̇ } {A : X → 𝓥 ̇ }
@@ -161,79 +157,125 @@ vvfunext' 𝓤 𝓥 = {X : 𝓤 ̇ } {A : X → 𝓥 ̇ }
               → ((x : X) → is-prop (A x))
               → is-prop (Π A)
 
+vvfunext-unprime : vvfunext' 𝓤 𝓥 → vvfunext 𝓤 𝓥
+vvfunext-unprime vfe' ν =
+ pointed-props-are-singletons
+   (λ x → singleton-types-are-pointed (ν x))
+   (vfe' (λ x → singletons-are-props (ν x)))
 
-open import UF-PropTrunc
-open import UF-Retracts
+-- We use Voevodsky's construction as a way to "have" a prop. trunc. with a
+-- judgemental computation rule
 
-module _
-        (pt : propositional-truncations-exist)
-       where
+∥_∥ᵥ : {𝓤 𝓥 : Universe} → 𝓤 ̇ → 𝓥 ⁺ ⊔ 𝓤 ̇
+∥_∥ᵥ {𝓤} {𝓥} X = (P : 𝓥 ̇ ) → is-prop P → (X → P) → P
 
- open PropositionalTruncation pt
+∥∥ᵥ-rec : {X : 𝓤 ̇ } {P : 𝓥 ̇ } → is-prop P → (X → P) → ∥ X ∥ᵥ → P
+∥∥ᵥ-rec {𝓤} {𝓥} {X} {P} i f t = t P i f
 
- ∥∥-comp : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
- ∥∥-comp 𝓤 𝓥 = (X : 𝓤 ̇ ) (Y : 𝓥 ̇ ) (i : is-prop Y) (f : X → Y)
-             → (x : X) → ∥∥-rec i f ∣ x ∣ ≡ f x
+∣_∣ᵥ : {𝓥 : Universe} {X : 𝓤 ̇ } → X → ∥_∥ᵥ {𝓤} {𝓥} X
+∣_∣ᵥ x P _ f = f x
 
- ∥∥-comp-gives-vvfunext : ∥∥-comp {!!} {!!}
-                         → vvfunext' 𝓤 𝓥
- ∥∥-comp-gives-vvfunext {𝓤} {𝓥} c {X} {A} ν = retract-of-prop (r , s , η) i
+∥∥ᵥ-comp : {X : 𝓤 ̇ } {P : 𝓥 ̇ } (i : is-prop P) (f : X → P) (x : X)
+         → ∥∥ᵥ-rec i f ∣ x ∣ᵥ ≡ f x
+∥∥ᵥ-comp i f x = refl
+
+prop-trunc-implies-funext : (𝓤 𝓥 : Universe)
+                          → ((Y : (𝓤 ⊔ 𝓥) ̇ ) → is-prop (∥_∥ᵥ {𝓤 ⊔ 𝓥} {𝓥} Y))
+                          → vvfunext' 𝓤 𝓥
+prop-trunc-implies-funext 𝓤 𝓥 pt {X} {A} ν =
+ retract-of-prop (r , s , ρ) (pt (Π A))
   where
-   s : Π A → ∥ Π A ∥
-   s = ∣_∣
-   r : ∥ Π A ∥ → Π A
-   r f' x = ∥∥-rec (ν x) (λ g → g x) f'
-   η : (φ : Π A) → r (s φ) ≡ φ
-   η φ = {!c!}
-   i : is-prop ∥ Π A ∥
-   i = ∥∥-is-a-prop
+   r : ∥ Π A ∥ᵥ → Π A
+   r g x = ∥∥ᵥ-rec (ν x) (λ f → f x) g
+   s : Π A → ∥ Π A ∥ᵥ
+   s = ∣_∣ᵥ
+   ρ : (f : Π A) → r (s f) ≡ f
+   ρ f = refl
 
-{-
-lemma₂ : propositional-univalence 𝓤
-       → (X : 𝓤 ̇ )
-       → (A : X → 𝓥 ̇ )
+\end{code}
+
+\begin{code}
+
+lemma₂ : propositional-univalence (𝓤 ⊔ 𝓥)
+       → propositional-univalence 𝓥
+       → (X : 𝓥 ̇ ) (A : X → 𝓤 ̇ )
+       → is-prop X                        -- We would like to get rid of this
        → ((x : X) → is-prop (A x))
        → is-prop (Π A)
-lemma₂ {𝓤} {𝓥} pu X A i f₀ f₁ = γ
+lemma₂ pu pu' X A i ν = retract-of-prop (r , s , ρ) j
  where
-  Δ : X → 𝓥 ̇
-  Δ x = Σ a₀ ꞉ A x , Σ a₁ ꞉ A x , a₀ ≡ a₁
-  δ : (Π A) → Π Δ
-  δ g x = (g x , g x , refl)
-  π₀ π₁ : (Π Δ) → Π A
-  π₀ g x = pr₁ (g x)
-  π₁ g x = pr₁ (pr₂ (g x))
-  δ-is-equiv : is-equiv δ
-  δ-is-equiv = (π₀ , η) , (π₀ , ε)
-   where
-    η : (d : Π Δ) → δ (π₀ d) ≡ d
-    η g = {!!}
-    ε : (g : Π A) → π₀ (δ g) ≡ g
-    ε g = {!!}
+  r : (Σ h ꞉ (X → Σ A) , pr₁ ∘ h ≡ id) → Π A
+  r (h , p) x = transport A (happly p x) (pr₂ (h x))
+  s : Π A → (Σ h ꞉ (X → Σ A) , pr₁ ∘ h ≡ id)
+  s φ = (λ x → x , φ x) , refl
+  ρ : (φ : Π A) → r (s φ) ≡ φ
+  ρ φ = refl
+  j : is-prop (Σ h ꞉ (X → Σ A) , pr₁ ∘ h ≡ id)
+  j = Σ-is-prop (lemma₁ pu X (Σ A) (Σ-is-prop i ν))
+      (λ h → props-are-sets (lemma₁ pu' X X i))
 
-{-
-  πδ : π₀ ∘ δ ≡ π₁ ∘ δ
-  πδ = refl
-  φ : (Δ → Y) → (Y → Y)
-  φ π = π ∘ δ
-  φ-is-equiv : is-equiv φ
-  φ-is-equiv = prop-precomp-is-equiv pu Y Δ Y i δ δ-is-equiv
-  π₀-equals-π₁ : π₀ ≡ π₁
-  π₀-equals-π₁ = equivs-are-lc φ φ-is-equiv πδ
--}
-  γ : f₀ ≡ f₁
-  γ = f₀                              ≡⟨ refl ⟩
-      (λ x → f₀ x)                    ≡⟨ refl ⟩
-      {!!} ≡⟨ {!!} ⟩
-      {!!} ≡⟨ {!!} ⟩
---      (λ x → π₀ (f₀ x , f₁ x , h x))  ≡⟨ ap (λ π x → π (f₀ x , f₁ x , h x)) π₀-equals-π₁ ⟩
---      (λ x → π₁ (f₀ x , f₁ x , h x))  ≡⟨ refl ⟩
-      (λ x → f₁ x)                    ≡⟨ refl ⟩
-      f₁                              ∎
-   where
-    h : (x : X) → f₀ x ≡ f₁ x
-    h x = i x (f₀ x) (f₁ x)
--}
+prop-dfunext : (𝓤 𝓥 : Universe) → (𝓤 ⊔ 𝓥)⁺ ̇
+prop-dfunext 𝓤 𝓥 = (X : 𝓤 ̇ ) (Y : X → 𝓥 ̇ )
+                 → is-prop X
+                 → ((x : X) → is-prop (Y x))
+                 → (f g : Π Y)
+                 → ((x : X) → f x ≡ g x) → f ≡ g
+
+pua-to-prop-dfunext : propositional-univalence (𝓤 ⊔ 𝓥)
+                    → propositional-univalence 𝓤
+                    → prop-dfunext 𝓤 𝓥
+pua-to-prop-dfunext pu pu' X Y i j f g _ = lemma₂ pu pu' X Y i j f g
+
+open import UF-Equiv
+
+being-a-prop-is-a-prop' : {X : 𝓤 ̇ } → prop-dfunext 𝓤 𝓤 → is-prop (is-prop X)
+being-a-prop-is-a-prop' {𝓤} {X} fe f g = c₁
+ where
+  l : is-set X
+  l = props-are-sets f
+  c : (x y : X) → f x y ≡ g x y
+  c x y = l (f x y) (g x y)
+  c₀ : (x : X) → f x ≡ g x
+  c₀ x = {!!} -- dfunext fe (c x)
+  c₁ : f ≡ g
+  c₁  = {!!} -- dfunext fe c₀
+
+
+identifications-of-props-are-props' : propext 𝓤 → prop-dfunext 𝓤 𝓤
+                                    → (P : 𝓤 ̇ ) → is-prop P
+                                    → (X : 𝓤 ̇ ) → is-prop (X ≡ P)
+identifications-of-props-are-props' {𝓤} pe fe P i = local-hedberg' P (λ X → g X ∘ f X , k X)
+ where
+  f : (X : 𝓤 ̇ ) → X ≡ P → is-prop X × (X ⇔ P)
+  f X refl = i , (id , id)
+  g : (X : 𝓤 ̇ ) → is-prop X × (X ⇔ P) → X ≡ P
+  g X (l , φ , γ) = pe l i φ γ
+  j : (X : 𝓤 ̇ ) → is-prop (is-prop X × (X ⇔ P))
+  j X = ×-prop-criterion ((λ _ → being-a-prop-is-a-prop' fe) ,
+                          (λ l → ×-is-prop (fe P {!!} {!!} {!!} {!!}))
+                                            {!!})
+  k : (X : 𝓤 ̇ ) → wconstant (g X ∘ f X)
+  k X p q = ap (g X) (j X (f X p) (f X q))
+
+prop-dfunext-to-pua : prop-dfunext 𝓤 𝓤 → propext 𝓤 → propositional-univalence 𝓤
+prop-dfunext-to-pua pdfe pe P i X =
+ qinvs-are-equivs (idtoeq P X) (ι , a , b)
+  where
+   ι : P ≃ X → P ≡ X
+   ι e = pe i (equiv-to-prop (≃-sym e) i) ⌜ e ⌝ ⌜ ≃-sym e ⌝
+   a : (u : P ≡ X) → ι (idtoeq P X u) ≡ u
+   a u = {!!}
+   b : (e : P ≃ X) → idtoeq P X (ι e) ≡ e
+   b e = Σ-is-prop ϕ ψ (idtoeq P X (ι e)) e
+    where
+     j : is-prop X
+     j = equiv-to-prop (≃-sym e) i
+     ϕ : is-prop (P → X)
+     ϕ f g = pdfe P (λ _ → X) i (λ p → j) f g (λ p → j (f p) (g p))
+     ψ : (f : P → X) → is-prop (is-equiv f)
+     ψ f = ×-is-prop {!!} {!!}
+--          (λ f g → pdfe P (λ _ → X) i (λ _ → j) f g (λ p → equiv-to-prop (≃-sym e) i (f p) (g p)))
+--         {!λ!} (idtoeq P X (ι e)) e
 
 
 \end{code}

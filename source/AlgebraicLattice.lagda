@@ -153,9 +153,9 @@ P ∨ Q = (∥ P holds + Q holds ∥ , ∥∥-is-a-prop)
   (i , a) ← cP I S δ lP
   (j , b) ← cQ I S δ lQ
   (k , u , v) ← is-directed-order S δ i j
-  return (k , ∨-is-join P Q (S k)
+  ∣ (k , ∨-is-join P Q (S k)
               (⊑-trans P (S i) (S k) a u)
-              (⊑-trans Q (S j) (S k) b v))
+              (⊑-trans Q (S j) (S k) b v)) ∣
  where
   lP : P ⊑ ∐ S
   lP = ⊑-trans P (P ∨ Q) (∐ S) (∨-left P Q) l
@@ -260,9 +260,10 @@ LPO-is-subsingleton = Π-is-prop fe₀ instance-of-LPO-is-subsingleton
 open import CompactTypes
 open import DiscreteAndSeparated
 
-⟨⟩'ⁿ-decidable : (α : ℕ∞) (n : ℕ) → decidable (⟨ α ⟩'₁ⁿ n)
+{- ⟨⟩'ⁿ-decidable : (α : ℕ∞) (n : ℕ) → decidable (⟨ α ⟩'₁ⁿ n)
 ⟨⟩'ⁿ-decidable α n =
  Fin'-Compact n (λ x → ι α (pr₁ x) ≡ ₁) (λ x → 𝟚-is-discrete (ι α (pr₁ x)) ₁)
+-}
 
 ⟨_⟩₁ⁿ_ : ℕ∞ → ℕ → 𝓤₀ ̇
 ⟨ α ⟩₁ⁿ n = (Σ \(m : ℕ) → (m ≤ n) × (ι α m ≡ ₁))

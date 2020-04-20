@@ -20,12 +20,15 @@ open import Dcpo pt fe 𝓥
 open import DcpoApproximation pt fe 𝓥
 open import DcpoAlgebraic pt fe 𝓥
 open import DcpoBasis pt fe 𝓥
+open import DcpoBasics pt fe 𝓥
 open import IdealCompletion pt fe pe 𝓥
 open import IdealCompletion-Properties pt fe pe 𝓥
 
 open import UF-Powersets
 
 open import UF-Size
+
+open import UF-Retracts
 
 module _
         (𝓓 : DCPO {𝓤} {𝓣})
@@ -101,8 +104,10 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
        h = ≪-INT₂ 𝓓 𝒷 (β b₁) (β b₂) x
            (≪ₛ-to-≪ 𝓓 𝒷 s b₁ x u₁) (≪ₛ-to-≪ 𝓓 𝒷 s b₂ x u₂)
 
- from-Idl : Idl → ⟨ 𝓓 ⟩
- from-Idl (I , ι) = ∐ 𝓓 (h , ε)
+ -- TO DO: Refactor this?
+ ideals-are-directed : (I : Idl)
+                     → is-Directed 𝓓 (β ∘ (λ (i : 𝕋 (carrier I)) → pr₁ i))
+ ideals-are-directed (I , ι) = h , ε
   where
    δ : is-directed-set I
    δ = ideals-are-directed-sets I ι
@@ -120,6 +125,45 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
         → Σ r ꞉ 𝕋 I , α (b₁ , i₁) ⊑⟨ 𝓓 ⟩ α r
                     × α (b₂ , i₂) ⊑⟨ 𝓓 ⟩ α r
       γ (b , i , u₁ , u₂) = (b , i) , ⊑ᴮ-to-⊑ 𝓓 𝒷 u₁ , ⊑ᴮ-to-⊑ 𝓓 𝒷 u₂
+
+ from-Idl : Idl → ⟨ 𝓓 ⟩
+ from-Idl I = ∐ 𝓓 (ideals-are-directed I)
+
+ Idl-retract : is-locally-small 𝓓 → ⟨ 𝓓 ⟩ ◁ Idl
+ Idl-retract ls = r , s , γ
+  where
+   r : Idl → ⟨ 𝓓 ⟩
+   r = from-Idl
+   s : ⟨ 𝓓 ⟩ → Idl
+   s = to-Idl ls
+   γ : r ∘ s ∼ id
+   γ x = antisymmetry 𝓓 (r (s x)) x u v
+    where
+     sm : ↓≪-smallness 𝓓 𝒷
+     sm = being-locally-small-implies-↓≪-smallness 𝓓 𝒷 ls
+     u : r (s x) ⊑⟨ 𝓓 ⟩ x
+     u = ∐-is-lowerbound-of-upperbounds 𝓓 (ideals-are-directed (s x)) x g
+      where
+       g : (i : 𝕋 (carrier (s x))) → β (pr₁ i) ⊑⟨ 𝓓 ⟩ x
+       g (b , w) = ≪-to-⊑ 𝓓 (≪ₛ-to-≪ 𝓓 𝒷 sm b x w)
+     v : x ⊑⟨ 𝓓 ⟩ r (s x)
+     v = ∥∥-rec (prop-valuedness 𝓓 x (r (s x))) g h
+      where
+       g : approximate-from-basis-Σ 𝓓 β x → x ⊑⟨ 𝓓 ⟩ r (s x)
+       g (I , α , wb , δ , e) = x       ⊑⟨ 𝓓 ⟩[ ≡-to-⊑ 𝓓 (e ⁻¹) ]
+                                ∐ 𝓓 δ   ⊑⟨ 𝓓 ⟩[ w ]
+                                r (s x) ∎⟨ 𝓓 ⟩
+        where
+         w : ∐ 𝓓 δ ⊑⟨ 𝓓 ⟩ r (s x)
+         w = ∐-is-lowerbound-of-upperbounds 𝓓 δ (r (s x)) ϕ
+          where
+           ϕ : (i : I) → β (α i) ⊑⟨ 𝓓 ⟩ r (s x)
+           ϕ i = ∐-is-upperbound 𝓓 (ideals-are-directed (s x)) (α i , ψ)
+            where
+             ψ : α i ≪ₛ⟨ 𝓓 ⟩[ 𝒷 ][ sm ] x
+             ψ = ≪-to-≪ₛ 𝓓 𝒷 sm (α i) x (wb i)
+       h : approximate-from-basis 𝓓 β x
+       h = pr₂ 𝒷 x
 
 \end{code}
 

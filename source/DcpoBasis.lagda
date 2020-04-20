@@ -384,13 +384,83 @@ An interpolation property starting from two inequalities.
 
 \begin{code}
 
--- TO DO: Find a better home for this.
+-- TO DO: Find a better home for this?
 
 locally-small-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
-locally-small-dcpo 𝓓 = ((x y : ⟨ 𝓓 ⟩) → (x ⊑⟨ 𝓓 ⟩ y) has-size 𝓥)
+locally-small-dcpo 𝓓 = (x y : ⟨ 𝓓 ⟩) → is-small (x ⊑⟨ 𝓓 ⟩ y)
 
 locally-small-order : (𝓓 : DCPO {𝓤} {𝓣}) → locally-small-dcpo 𝓓
                     → (⟨ 𝓓 ⟩ → ⟨ 𝓓 ⟩ → 𝓥 ̇ )
 locally-small-order 𝓓 ls x y = has-size-type (ls x y)
+
+-- TO DO: Find a better name for this?
+
+locally-small-dcpo' : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } (β : B → ⟨ 𝓓 ⟩)
+                    → is-a-basis 𝓓 β → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+locally-small-dcpo' 𝓓 {B} β 𝒷 = (b : B) (x : ⟨ 𝓓 ⟩) → is-small (β b ≪⟨ 𝓓 ⟩ x)
+
+locally-small-prime : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } (β : B → ⟨ 𝓓 ⟩)
+                      (𝒷 : is-a-basis 𝓓 β)
+                    → locally-small-dcpo 𝓓
+                    → locally-small-dcpo' 𝓓 β 𝒷
+locally-small-prime 𝓓 {B} β 𝒷 ls b x = (b ≪' x) , γ
+ where
+  _⊑'_ : ⟨ 𝓓 ⟩ → ⟨ 𝓓 ⟩ → 𝓥 ̇
+  x ⊑' y = has-size-type (ls x y)
+  ⊑'-to-⊑ : (x y : ⟨ 𝓓 ⟩) → x ⊑' y → x ⊑⟨ 𝓓 ⟩ y
+  ⊑'-to-⊑ x y = ⌜ has-size-equiv (ls x y) ⌝
+  ⊑-to-⊑' : (x y : ⟨ 𝓓 ⟩) → x ⊑⟨ 𝓓 ⟩ y → x ⊑' y
+  ⊑-to-⊑' x y = back-eqtofun (has-size-equiv (ls x y))
+  _≪'_ : B → ⟨ 𝓓 ⟩ → 𝓥 ̇
+  b ≪' x = ∃ b' ꞉ B , b ≪ᴮ⟨ 𝓓 ⟩[ 𝒷 ] b' × (β b' ⊑' x)
+  γ : b ≪' x ≃ β b ≪⟨ 𝓓 ⟩ x
+  γ = logically-equivalent-props-are-equivalent
+       ∥∥-is-a-prop (≪-is-prop-valued 𝓓) f g
+   where
+    f : b ≪' x → β b ≪⟨ 𝓓 ⟩ x
+    f = ∥∥-rec (≪-is-prop-valued 𝓓) ϕ
+     where
+      ϕ : Σ b' ꞉ B , b ≪ᴮ⟨ 𝓓 ⟩[ 𝒷 ] b' × (β b' ⊑' x)
+        → β b ≪⟨ 𝓓 ⟩ x
+      ϕ (b' , u , v) = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 𝒷 b b' u) (⊑'-to-⊑ (β b') x v)
+    g : β b ≪⟨ 𝓓 ⟩ x → b ≪' x
+    g u = ∥∥-functor ψ (≪-INT₁ 𝓓 𝒷 (β b) x u)
+     where
+      ψ : (Σ b' ꞉ B , β b ≪⟨ 𝓓 ⟩ β b' × β b' ≪⟨ 𝓓 ⟩ x)
+        → Σ b' ꞉ B , b ≪ᴮ⟨ 𝓓 ⟩[ 𝒷 ] b' × (β b' ⊑' x)
+      ψ (b' , u , v) = b' , ≪-to-≪ᴮ 𝓓 𝒷 b b' u , ⊑-to-⊑' (β b') x (≪-to-⊑ 𝓓 v)
+
+locally-small-unprime : (𝓓 : DCPO {𝓤} {𝓣}) {B : 𝓥 ̇ } (β : B → ⟨ 𝓓 ⟩)
+                        (𝒷 : is-a-basis 𝓓 β)
+                      → locally-small-dcpo' 𝓓 β 𝒷
+                      → locally-small-dcpo 𝓓
+locally-small-unprime 𝓓 {B} β 𝒷 ls' x y = (x ⊑' y) , γ
+ where
+  _≪'_ : B → ⟨ 𝓓 ⟩ → 𝓥 ̇
+  b ≪' x = has-size-type (ls' b x)
+  ≪'-to-≪ : (b : B) (x : ⟨ 𝓓 ⟩) → b ≪' x → β b ≪⟨ 𝓓 ⟩ x
+  ≪'-to-≪ b x = ⌜ has-size-equiv (ls' b x) ⌝
+  ≪-to-≪' : (b : B) (x : ⟨ 𝓓 ⟩) → β b ≪⟨ 𝓓 ⟩ x → b ≪' x
+  ≪-to-≪' b x = back-eqtofun (has-size-equiv (ls' b x))
+  ≪'-is-prop-valued : (b : B) (x : ⟨ 𝓓 ⟩) → is-prop (b ≪' x)
+  ≪'-is-prop-valued b x = equiv-to-prop (has-size-equiv (ls' b x))
+                          (≪-is-prop-valued 𝓓)
+  _⊑'_ : ⟨ 𝓓 ⟩ → ⟨ 𝓓 ⟩ → 𝓥 ̇
+  x ⊑' y = (b : B) → b ≪' x → b ≪' y
+  γ : x ⊑' y ≃ x ⊑⟨ 𝓓 ⟩ y
+  γ = logically-equivalent-props-are-equivalent
+       (Π-is-prop fe
+         (λ b → Π-is-prop fe
+         (λ u → ≪'-is-prop-valued b y)))
+       (prop-valuedness 𝓓 x y)
+       f g
+   where
+    f : x ⊑' y → x ⊑⟨ 𝓓 ⟩ y
+    f u = ⊑-in-terms-of-≪' 𝓓 𝒷 ϕ
+     where
+      ϕ : (b : B) → β b ≪⟨ 𝓓 ⟩ x → β b ≪⟨ 𝓓 ⟩ y
+      ϕ b v = ≪'-to-≪ b y (u b (≪-to-≪' b x v))
+    g : x ⊑⟨ 𝓓 ⟩ y → x ⊑' y
+    g u b v = ≪-to-≪' b y (⊑-in-terms-of-≪ 𝓓 u (β b) (≪'-to-≪ b x v))
 
 \end{code}

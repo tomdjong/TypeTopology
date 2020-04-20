@@ -46,6 +46,16 @@ module _
       (reflexivity-implies-INT₀ (basis-⊑ 𝓓 c) (⊑ᴮ-is-reflexive 𝓓 c))
       (⊑ᴮ-is-transitive 𝓓 c)
 
+\end{code}
+
+Undated observation: for a dcpo 𝓓 with basis β : B → ⟨ 𝓓 ⟩, being locally small
+is equivalent to asking that (β b ≪ x) is small for all b : B and x ∶ ⟨ 𝓓 ⟩,
+which is exactly what we need to get the desired map ⟨ 𝓓 ⟩ → Idl.
+
+TO DO: Formalise this.
+
+\begin{code}
+
  to-Idl : locally-small-dcpo 𝓓 → ⟨ 𝓓 ⟩ → Idl
  to-Idl ls x = I , ι
   where

@@ -72,6 +72,20 @@ continuity-criterion 𝓓 𝓔 f m e I α δ = ub , lb-of-ubs
                   ∐ 𝓔 ε     ⊑⟨ 𝓔 ⟩[ ∐-is-lowerbound-of-upperbounds 𝓔 ε y u ]
                   y         ∎⟨ 𝓔 ⟩
 
+continuity-criterion' : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
+                        (f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩)
+                      → (m : is-monotone 𝓓 𝓔 f)
+                      → ((I : 𝓥 ̇ )
+                         (α : I → ⟨ 𝓓 ⟩)
+                         (δ : is-Directed 𝓓 α)
+                      → is-lowerbound-of-upperbounds (underlying-order 𝓔)
+                                                     (f (∐ 𝓓 δ)) (f ∘ α))
+                      → is-continuous 𝓓 𝓔 f
+continuity-criterion' 𝓓 𝓔 f m lb I α δ = ub , lb I α δ
+ where
+  ub : (i : I) → f (α i) ⊑⟨ 𝓔 ⟩ f (∐ 𝓓 δ)
+  ub i = m (α i) (∐ 𝓓 δ) (∐-is-upperbound 𝓓 δ i)
+
 continuous-implies-monotone : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                               (f : DCPO[ 𝓓 , 𝓔 ])
                             → is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)

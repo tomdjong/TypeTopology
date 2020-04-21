@@ -165,6 +165,65 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
        h : approximate-from-basis 𝓓 β x
        h = pr₂ 𝒷 x
 
+ -- TO DO: Make a proper deflation/embedding-projection definition
+ Idl-deflation : (ls : is-locally-small 𝓓) (I : Idl)
+               → to-Idl ls (from-Idl I) ⊑⟨ Idl-DCPO ⟩ I
+ Idl-deflation ls (I , ι) b wb = ∥∥-rec (∈-is-a-prop I b) γ h
+  where
+   γ : (Σ i ꞉ 𝕋 I , β b ⊑⟨ 𝓓 ⟩ β (pr₁ i)) → b ∈ I
+   γ ((b' , p) , u) = ideals-are-lower-sets I ι b b' (⊑-to-⊑ᴮ 𝓓 𝒷 u) p
+   sm : ↓≪-smallness 𝓓 𝒷
+   sm = being-locally-small-implies-↓≪-smallness 𝓓 𝒷 ls
+   g : β b ≪⟨ 𝓓 ⟩ from-Idl (I , ι)
+   g = ≪ₛ-to-≪ 𝓓 𝒷 sm b (from-Idl (I , ι)) wb
+   h : ∃ i ꞉ 𝕋 I , β b ⊑⟨ 𝓓 ⟩ β (pr₁ i)
+   h = g (𝕋 I) (β ∘ pr₁) (ideals-are-directed (I , ι))
+       (reflexivity 𝓓 (from-Idl (I , ι)))
+
+ to-Idl-monotone : (ls : is-locally-small 𝓓) → is-monotone 𝓓 Idl-DCPO (to-Idl ls)
+ to-Idl-monotone ls x y l b u =
+  ≪-to-≪ₛ 𝓓 𝒷 sm b y (≪-⊑-to-≪ 𝓓 (≪ₛ-to-≪ 𝓓 𝒷 sm b x u) l)
+   where
+    sm : ↓≪-smallness 𝓓 𝒷
+    sm = being-locally-small-implies-↓≪-smallness 𝓓 𝒷 ls
+
+ -- TO DO: Make order embedding definition
+ to-Idl-order-embedding : (ls : is-locally-small 𝓓) (x y : ⟨ 𝓓 ⟩)
+                        → to-Idl ls x ⊑⟨ Idl-DCPO ⟩ to-Idl ls y
+                        → x ⊑⟨ 𝓓 ⟩ y
+ to-Idl-order-embedding ls x y l = ⊑-in-terms-of-≪' 𝓓 𝒷 γ
+  where
+   γ : (b : B) → β b ≪⟨ 𝓓 ⟩ x → β b ≪⟨ 𝓓 ⟩ y
+   γ b u = ≪ₛ-to-≪ 𝓓 𝒷 sm b y (l b (≪-to-≪ₛ 𝓓 𝒷 sm b x u))
+    where
+     sm : ↓≪-smallness 𝓓 𝒷
+     sm = being-locally-small-implies-↓≪-smallness 𝓓 𝒷 ls
+
+ to-Idl-continuous : (ls : is-locally-small 𝓓)
+                   → is-continuous 𝓓 Idl-DCPO (to-Idl ls)
+ to-Idl-continuous ls = continuity-criterion' 𝓓 Idl-DCPO s (to-Idl-monotone ls) γ
+  where
+   s : ⟨ 𝓓 ⟩ → Idl
+   s = to-Idl ls
+   γ : (𝓐 : 𝓥 ̇) (α : 𝓐 → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
+     → is-lowerbound-of-upperbounds (underlying-order Idl-DCPO) (s (∐ 𝓓 δ)) (s ∘ α)
+   γ 𝓐 α δ (I , ι) ub b p = ∥∥-rec (∈-is-a-prop I b) g h
+    where
+     sm : ↓≪-smallness 𝓓 𝒷
+     sm = being-locally-small-implies-↓≪-smallness 𝓓 𝒷 ls
+     h : ∃ b' ꞉ B , β b ≪⟨ 𝓓 ⟩ β b' × β b' ≪⟨ 𝓓 ⟩ ∐ 𝓓 δ
+     h = ≪-INT₁ 𝓓 𝒷 (β b) (∐ 𝓓 δ) (≪ₛ-to-≪ 𝓓 𝒷 sm b (∐ 𝓓 δ) p)
+     g : Σ b' ꞉ B , β b ≪⟨ 𝓓 ⟩ β b' × β b' ≪⟨ 𝓓 ⟩ ∐ 𝓓 δ
+       → b ∈ I
+     g (b' , u , v) =
+      ∥∥-rec (∈-is-a-prop I b) f (v 𝓐 α δ (reflexivity 𝓓 (∐ 𝓓 δ)))
+       where
+        f : (Σ a ꞉ 𝓐 , β b' ⊑⟨ 𝓓 ⟩ α a) → b ∈ I
+        f (a , l) = ub a b (≪-to-≪ₛ 𝓓 𝒷 sm b (α a) w)
+         where
+          w : β b ≪⟨ 𝓓 ⟩ α a
+          w = ≪-⊑-to-≪ 𝓓 u l
+
 \end{code}
 
 Observation from 13/03/2020.

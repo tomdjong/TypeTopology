@@ -188,6 +188,10 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
     sm = being-locally-small-implies-↓≪-smallness 𝓓 𝒷 ls
 
  -- TO DO: Make order embedding definition
+
+ -- Note: this also follows from the retract and the fact that from-Idl is monotone:
+ -- if to-Idl x ⊑⟨ Idl-DCPO ⟩ to-Idl y,
+ -- then x = from-Idl (to-Idl x) ⊑⟨ 𝓓 ⟩ from-Idl (to-Idl y) = y
  to-Idl-order-embedding : (ls : is-locally-small 𝓓) (x y : ⟨ 𝓓 ⟩)
                         → to-Idl ls x ⊑⟨ Idl-DCPO ⟩ to-Idl ls y
                         → x ⊑⟨ 𝓓 ⟩ y
@@ -249,6 +253,58 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
                    x              ∎⟨ 𝓓 ⟩
         where
          u = ∐-is-upperbound 𝓓 (ideals-are-directed (α a)) (b , p)
+
+\end{code}
+
+In fact, being locally small is equivalent to having an order-embedding to Idl,
+because Idl is locally small.
+
+\begin{code}
+
+ open import UF-Equiv
+
+ Idl-is-locally-small : is-locally-small Idl-DCPO
+ Idl-is-locally-small I J = (I ⊑⟨ Idl-DCPO ⟩ J) , ≃-refl (I ⊑⟨ Idl-DCPO ⟩ J)
+
+ order-embedding-to-Idl-locally-small : (s : ⟨ 𝓓 ⟩ → Idl)
+                                      → is-monotone 𝓓 Idl-DCPO s
+                                      → ((x y : ⟨ 𝓓 ⟩) → s x ⊑⟨ Idl-DCPO ⟩ s y
+                                                       → x ⊑⟨ 𝓓 ⟩ y)
+                                      → is-locally-small 𝓓
+ order-embedding-to-Idl-locally-small s m e x y = (s x ⊑⟨ Idl-DCPO ⟩ s y) , γ
+  where
+   γ : (s x ⊑⟨ Idl-DCPO ⟩ s y) ≃ (x ⊑⟨ 𝓓 ⟩ y)
+   γ = logically-equivalent-props-are-equivalent
+        (prop-valuedness Idl-DCPO (s x) (s y))
+        (prop-valuedness 𝓓 x y)
+        (e x y)
+        (m x y)
+
+\end{code}
+
+Or, phrased in terms of a monotone retract:
+
+\begin{code}
+
+ monotone-retract-of-Idl-locally-small : (r : Idl → ⟨ 𝓓 ⟩) (ρ : has-section r)
+                                       → is-monotone Idl-DCPO 𝓓 r
+                                       → is-monotone 𝓓 Idl-DCPO (section (r , ρ))
+                                       → is-locally-small 𝓓
+ monotone-retract-of-Idl-locally-small r (s , rs) mr ms x y =
+  (s x ⊑⟨ Idl-DCPO ⟩ s y) , γ
+   where
+    γ : (s x ⊑⟨ Idl-DCPO ⟩ s y) ≃ (x ⊑⟨ 𝓓 ⟩ y)
+    γ = logically-equivalent-props-are-equivalent
+         (prop-valuedness Idl-DCPO (s x) (s y))
+         (prop-valuedness 𝓓 x y)
+         (e x y)
+         (ms x y)
+     where
+      e : (x y : ⟨ 𝓓 ⟩) → s x ⊑⟨ Idl-DCPO ⟩ s y → x ⊑⟨ 𝓓 ⟩ y
+      e x y l = x       ⊑⟨ 𝓓 ⟩[ ≡-to-⊑ 𝓓 ((rs x) ⁻¹) ]
+                r (s x) ⊑⟨ 𝓓 ⟩[ mr (s x) (s y) l     ]
+                r (s y) ⊑⟨ 𝓓 ⟩[ ≡-to-⊑ 𝓓 (rs y)      ]
+                y       ∎⟨ 𝓓 ⟩
 
 \end{code}
 

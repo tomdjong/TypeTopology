@@ -224,6 +224,32 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
           w : β b ≪⟨ 𝓓 ⟩ α a
           w = ≪-⊑-to-≪ 𝓓 u l
 
+ from-Idl-continuous : is-continuous Idl-DCPO 𝓓 from-Idl
+ from-Idl-continuous 𝓐 α δ = ub , lb-of-ubs
+  where
+   s : Idl
+   s = ∐ Idl-DCPO {𝓐} {α} δ
+   ub : (a : 𝓐) → from-Idl (α a) ⊑⟨ 𝓓 ⟩ from-Idl s
+   ub a = ∐-is-lowerbound-of-upperbounds 𝓓 (ideals-are-directed (α a))
+          (from-Idl s) γ
+    where
+     γ : (t : 𝕋 (carrier (α a)))
+       → β (pr₁ t) ⊑⟨ 𝓓 ⟩ from-Idl s
+     γ (b , p) = ∐-is-upperbound 𝓓 (ideals-are-directed s) (b , ∣ a , p ∣)
+   lb-of-ubs : is-lowerbound-of-upperbounds (underlying-order 𝓓)
+                 (from-Idl (∐ Idl-DCPO {𝓐} {α} δ)) (from-Idl ∘ α)
+   lb-of-ubs x ub = ∐-is-lowerbound-of-upperbounds 𝓓 (ideals-are-directed s) x γ
+    where
+     γ : (t : 𝕋 (carrier s)) → β (pr₁ t) ⊑⟨ 𝓓 ⟩ x
+     γ (b , q) = ∥∥-rec (prop-valuedness 𝓓 (β b) x) g q
+      where
+       g : (Σ a ꞉ 𝓐 , b ∈ᵢ α a) → β b ⊑⟨ 𝓓 ⟩ x
+       g (a , p) = β b            ⊑⟨ 𝓓 ⟩[ u ]
+                   from-Idl (α a) ⊑⟨ 𝓓 ⟩[ ub a ]
+                   x              ∎⟨ 𝓓 ⟩
+        where
+         u = ∐-is-upperbound 𝓓 (ideals-are-directed (α a)) (b , p)
+
 \end{code}
 
 Observation from 13/03/2020.
@@ -237,7 +263,7 @@ However, we do have the following result.
 If D is continuous and E is locally small, then E^D is locally small.  Proof: We
 claim that Π x : D , f x ⊑ g x is equivalent to Π b : B , f b ⊑ g b (where B is
 a basis of D). Since B is small, the latter is small, making E^D locally
-small. For the proof of the equivalence, note that the left-to-right implication
+/small. For the proof of the equivalence, note that the left-to-right implication
 is trivial. For the converse, let x : D and (by continuity) write x = ∐ α with
 every element αᵢ : B. Then:
 f x      =

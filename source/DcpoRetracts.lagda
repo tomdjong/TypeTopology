@@ -26,6 +26,7 @@ open import IdealCompletion-Properties pt fe pe 𝓥
 
 open import UF-Powersets
 
+open import UF-Equiv
 open import UF-Size
 
 open import UF-Retracts
@@ -256,12 +257,21 @@ what we need to get the desired map ⟨ 𝓓 ⟩ → Idl. See DcpoBasis.lagda.
 
 \end{code}
 
+The point is that, although 𝓓 just has a basis, Idl has a basis of compact
+elements.
+
+\begin{code}
+
+ Idl-is-algebraic : is-an-algebraic-dcpo Idl-DCPO
+ Idl-is-algebraic = Idl-is-algebraic-if-order-is-reflexive
+                    (λ (b : B) → ⊑-to-⊑ᴮ 𝓓 𝒷 (reflexivity 𝓓 (β b)))
+
+\end{code}
+
 In fact, being locally small is equivalent to having an order-embedding to Idl,
 because Idl is locally small.
 
 \begin{code}
-
- open import UF-Equiv
 
  Idl-is-locally-small : is-locally-small Idl-DCPO
  Idl-is-locally-small I J = (I ⊑⟨ Idl-DCPO ⟩ J) , ≃-refl (I ⊑⟨ Idl-DCPO ⟩ J)
@@ -330,3 +340,37 @@ g (∐ α)  =
 g x.
 
 TO DO: Formalise this.
+
+----
+
+Every locally small, continuous dcpo is a retract of some (i.e. formulated with
+∥∥) algebraic dcpo.
+
+\begin{code}
+
+continuous-retract-of-algebraic : (𝓓 : DCPO {𝓤} {𝓣})
+                                → is-locally-small 𝓓
+                                → is-a-continuous-dcpo 𝓓
+                                → ∃ 𝓔 ꞉ DCPO {𝓥 ⁺} {𝓥} , ⟨ 𝓓 ⟩ ◁ ⟨ 𝓔 ⟩
+continuous-retract-of-algebraic 𝓓 ls = ∥∥-functor γ
+ where
+  γ : (Σ B ꞉ 𝓥 ̇ , Σ β ꞉ (B → ⟨ 𝓓 ⟩) , is-a-basis 𝓓 β)
+    → Σ 𝓔 ꞉ DCPO {𝓥 ⁺} {𝓥} , ⟨ 𝓓 ⟩ ◁ ⟨ 𝓔 ⟩
+  γ (B , β , 𝒷) = Idl-DCPO , Idl-retract 𝓓 β 𝒷 ls
+   where
+    open Ideals {𝓥} {𝓥} {B} (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-prop-valued 𝓓 𝒷)
+                (reflexivity-implies-INT₂ (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-reflexive 𝓓 𝒷))
+                (reflexivity-implies-INT₀ (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-reflexive 𝓓 𝒷))
+                (⊑ᴮ-is-transitive 𝓓 𝒷)
+    open SmallIdeals {B} (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-prop-valued 𝓓 𝒷)
+                     (reflexivity-implies-INT₂ (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-reflexive 𝓓 𝒷))
+                     (reflexivity-implies-INT₀ (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-reflexive 𝓓 𝒷))
+                     (⊑ᴮ-is-transitive 𝓓 𝒷)
+    open Idl-Properties
+         {𝓥} {𝓥} {B} (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-prop-valued 𝓓 𝒷)
+         (reflexivity-implies-INT₂ (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-reflexive 𝓓 𝒷))
+         (reflexivity-implies-INT₀ (basis-⊑ 𝓓 𝒷) (⊑ᴮ-is-reflexive 𝓓 𝒷))
+         (⊑ᴮ-is-transitive 𝓓 𝒷)
+
+
+\end{code}

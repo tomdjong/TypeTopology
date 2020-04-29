@@ -138,3 +138,36 @@ _⟹ᵈᶜᵖᵒ⊥_ : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'}
       (λ g d → ⊥-is-least 𝓔 (underlying-function (𝓓 ⁻) (𝓔 ⁻) g d))
 
 \end{code}
+
+\begin{code}
+
+DCPO-∘-is-continuous₁ : (𝓓 : DCPO {𝓤} {𝓣})
+                        (𝓔 : DCPO {𝓤'} {𝓣'})
+                        (𝓔' : DCPO {𝓦} {𝓦'})
+                        (f : DCPO[ 𝓓 , 𝓔 ])
+                      → is-continuous (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') (DCPO-∘ 𝓓 𝓔 𝓔' f)
+DCPO-∘-is-continuous₁ 𝓓 𝓔 𝓔' f I α δ = γ
+ where
+  γ : is-sup (underlying-order (𝓓 ⟹ᵈᶜᵖᵒ 𝓔'))
+        (DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ)) (λ x → DCPO-∘ 𝓓 𝓔 𝓔' f (α x))
+  γ = transport (λ - → is-sup (underlying-order (𝓓 ⟹ᵈᶜᵖᵒ 𝓔')) - (λ x → DCPO-∘ 𝓓 𝓔 𝓔' f (α x))) (claim ⁻¹) (∐-is-sup (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε)
+  -- transport {!λ - → is-sup ? - ?!} -- claim ∐-is-sup -- ∐-is-sup {!!} ε
+   where
+    β : I → ⟨ 𝓓 ⟹ᵈᶜᵖᵒ 𝓔' ⟩
+    β i = DCPO-∘ 𝓓 𝓔 𝓔' f (α i)
+    ε : is-Directed (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') β
+    ε = image-is-directed (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {!!} δ
+    claim : DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ)
+          ≡ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε
+    claim = to-subtype-≡ (λ g → being-continuous-is-a-prop 𝓓 𝓔' g)
+            (dfunext fe ψ)
+     where
+      ψ : (x : ⟨ 𝓓 ⟩) → pr₁ (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ) (pr₁ f x) ≡
+       ∐ 𝓔' (pointwise-family-is-directed 𝓓 𝓔' β ε x)
+      ψ x = ∐-independent-of-directedness-witness 𝓔' (pointwise-family-is-directed 𝓔 𝓔' α δ (pr₁ f x)) (pointwise-family-is-directed 𝓓 𝓔' β ε x)
+
+
+-- ∐-is-sup {!!} (pointwise-family-is-directed {!!} {!!} {!!} {!!} {!!})
+
+
+\end{code}

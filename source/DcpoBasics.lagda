@@ -258,3 +258,44 @@ double-∐-swap {𝓤} {𝓣} {I} {J} 𝓓 {γ} δᵢ δⱼ ε₁ ε₂ =
              ∐ 𝓓 ε₁     ∎⟨ 𝓓 ⟩
 
 \end{code}
+
+\begin{code}
+
+∘-is-continuous : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) (𝓔' : DCPO {𝓦} {𝓦'})
+                  (f : ⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) (g : ⟨ 𝓔 ⟩ → ⟨ 𝓔' ⟩)
+                → is-continuous 𝓓 𝓔 f
+                → is-continuous 𝓔 𝓔' g
+                → is-continuous 𝓓 𝓔' (g ∘ f)
+∘-is-continuous 𝓓 𝓔 𝓔' f g cf cg = continuity-criterion 𝓓 𝓔' (g ∘ f) m γ
+ where
+  mf : is-monotone 𝓓 𝓔 f
+  mf = continuous-implies-monotone 𝓓 𝓔 (f , cf)
+  mg : is-monotone 𝓔 𝓔' g
+  mg = continuous-implies-monotone 𝓔 𝓔' (g , cg)
+  m : is-monotone 𝓓 𝓔' (g ∘ f)
+  m x y l = mg (f x) (f y) (mf x y l)
+  γ : (I : 𝓥 ̇) (α : I → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
+    → g (f (∐ 𝓓 δ)) ⊑⟨ 𝓔' ⟩ ∐ 𝓔' (image-is-directed 𝓓 𝓔' m δ)
+  γ I α δ = g (f (∐ 𝓓 δ)) ⊑⟨ 𝓔' ⟩[ l₁  ]
+            g (∐ 𝓔 εf)    ⊑⟨ 𝓔' ⟩[ l₂ ]
+            ∐ 𝓔' εg       ⊑⟨ 𝓔' ⟩[ l₃ ]
+            ∐ 𝓔' ε        ∎⟨ 𝓔' ⟩
+   where
+    ε : is-Directed 𝓔' (g ∘ f ∘ α)
+    ε = image-is-directed 𝓓 𝓔' m δ
+    εf : is-Directed 𝓔 (f ∘ α)
+    εf = image-is-directed' 𝓓 𝓔 (f , cf) δ
+    εg : is-Directed 𝓔' (g ∘ f ∘ α)
+    εg = image-is-directed' 𝓔 𝓔' (g , cg) εf
+    l₁ = mg (f (∐ 𝓓 δ)) (∐ 𝓔 εf) h
+     where
+      h : [ 𝓓 , 𝓔 ]⟨ f , cf ⟩ (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 εf
+      h = continuous-∐-⊑ 𝓓 𝓔 (f , cf) δ
+    l₂ = continuous-∐-⊑ 𝓔 𝓔' (g , cg) εf
+    l₃ = ≡-to-⊑ 𝓔' (∐-independent-of-directedness-witness 𝓔' εg ε)
+
+DCPO-∘ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'}) (𝓔' : DCPO {𝓦} {𝓦'})
+       → DCPO[ 𝓓 , 𝓔 ] → DCPO[ 𝓔 , 𝓔' ] → DCPO[ 𝓓 , 𝓔' ]
+DCPO-∘ 𝓓 𝓔 𝓔' (f , cf) (g , cg) = (g ∘ f) , (∘-is-continuous 𝓓 𝓔 𝓔' f g cf cg)
+
+\end{code}

@@ -141,33 +141,49 @@ _⟹ᵈᶜᵖᵒ⊥_ : DCPO⊥ {𝓤} {𝓣} → DCPO⊥ {𝓤'} {𝓣'}
 
 \begin{code}
 
+DCPO-∘-is-monotone₁ : (𝓓 : DCPO {𝓤} {𝓣})
+                      (𝓔 : DCPO {𝓤'} {𝓣'})
+                      (𝓔' : DCPO {𝓦} {𝓦'})
+                      (f : DCPO[ 𝓓 , 𝓔 ])
+                    → is-monotone (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') (DCPO-∘ 𝓓 𝓔 𝓔' f)
+DCPO-∘-is-monotone₁ 𝓓 𝓔 𝓔' (f , cf) g h l x = l (f x)
+
+DCPO-∘-is-monotone₂ : (𝓓 : DCPO {𝓤} {𝓣})
+                      (𝓔 : DCPO {𝓤'} {𝓣'})
+                      (𝓔' : DCPO {𝓦} {𝓦'})
+                      (g : DCPO[ 𝓔 , 𝓔' ])
+                    → is-monotone (𝓓 ⟹ᵈᶜᵖᵒ 𝓔) (𝓓 ⟹ᵈᶜᵖᵒ 𝓔')
+                       (λ f → DCPO-∘ 𝓓 𝓔 𝓔' f g)
+DCPO-∘-is-monotone₂ 𝓓 𝓔 𝓔' g (f , cf) (h , ch) l x =
+ continuous-implies-monotone 𝓔 𝓔' g (f x) (h x) (l x)
+
 DCPO-∘-is-continuous₁ : (𝓓 : DCPO {𝓤} {𝓣})
                         (𝓔 : DCPO {𝓤'} {𝓣'})
                         (𝓔' : DCPO {𝓦} {𝓦'})
                         (f : DCPO[ 𝓓 , 𝓔 ])
                       → is-continuous (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') (DCPO-∘ 𝓓 𝓔 𝓔' f)
-DCPO-∘-is-continuous₁ 𝓓 𝓔 𝓔' f I α δ = γ
- where
-  γ : is-sup (underlying-order (𝓓 ⟹ᵈᶜᵖᵒ 𝓔'))
-        (DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ)) (λ x → DCPO-∘ 𝓓 𝓔 𝓔' f (α x))
-  γ = transport (λ - → is-sup (underlying-order (𝓓 ⟹ᵈᶜᵖᵒ 𝓔')) - (λ x → DCPO-∘ 𝓓 𝓔 𝓔' f (α x))) (claim ⁻¹) (∐-is-sup (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε)
-  -- transport {!λ - → is-sup ? - ?!} -- claim ∐-is-sup -- ∐-is-sup {!!} ε
-   where
-    β : I → ⟨ 𝓓 ⟹ᵈᶜᵖᵒ 𝓔' ⟩
-    β i = DCPO-∘ 𝓓 𝓔 𝓔' f (α i)
-    ε : is-Directed (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') β
-    ε = image-is-directed (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {!!} δ
-    claim : DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ)
-          ≡ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε
-    claim = to-subtype-≡ (λ g → being-continuous-is-a-prop 𝓓 𝓔' g)
-            (dfunext fe ψ)
-     where
-      ψ : (x : ⟨ 𝓓 ⟩) → pr₁ (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ) (pr₁ f x) ≡
-       ∐ 𝓔' (pointwise-family-is-directed 𝓓 𝓔' β ε x)
-      ψ x = ∐-independent-of-directedness-witness 𝓔' (pointwise-family-is-directed 𝓔 𝓔' α δ (pr₁ f x)) (pointwise-family-is-directed 𝓓 𝓔' β ε x)
-
-
--- ∐-is-sup {!!} (pointwise-family-is-directed {!!} {!!} {!!} {!!} {!!})
-
+DCPO-∘-is-continuous₁ 𝓓 𝓔 𝓔' f I α δ =
+ transport (λ - → is-sup (underlying-order (𝓓 ⟹ᵈᶜᵖᵒ 𝓔')) - (DCPO-∘ 𝓓 𝓔 𝓔' f ∘ α))
+  (γ ⁻¹) (∐-is-sup (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε)
+  where
+     β : I → ⟨ 𝓓 ⟹ᵈᶜᵖᵒ 𝓔' ⟩
+     β i = DCPO-∘ 𝓓 𝓔 𝓔' f (α i)
+     ε : is-Directed (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') β
+     ε = image-is-directed (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {DCPO-∘ 𝓓 𝓔 𝓔' f}
+         (DCPO-∘-is-monotone₁ 𝓓 𝓔 𝓔' f) {I} {α} δ
+     γ : DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ)
+       ≡ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε
+     γ = to-subtype-≡ (λ g → being-continuous-is-a-prop 𝓓 𝓔' g) (dfunext fe ψ)
+      where
+       ψ : (x : ⟨ 𝓓 ⟩)
+         → [ 𝓔 , 𝓔' ]⟨ (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ) ⟩ ([ 𝓓 , 𝓔 ]⟨ f ⟩ x)
+         ≡ ∐ 𝓔' (pointwise-family-is-directed 𝓓 𝓔' β ε x)
+       ψ x = [ 𝓔 , 𝓔' ]⟨ (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ) ⟩ ([ 𝓓 , 𝓔 ]⟨ f ⟩ x) ≡⟨ refl ⟩
+             ∐ 𝓔' (pointwise-family-is-directed 𝓔 𝓔' α δ ([ 𝓓 , 𝓔 ]⟨ f ⟩ x)) ≡⟨ {!!} ⟩
+             ∐ 𝓔' (pointwise-family-is-directed 𝓓 𝓔' β ε x) ∎
+{- ∐-independent-of-directedness-witness 𝓔'
+              (pointwise-family-is-directed 𝓔 𝓔' α δ (pr₁ f x))
+              (pointwise-family-is-directed 𝓓 𝓔' β ε x)
+-}
 
 \end{code}

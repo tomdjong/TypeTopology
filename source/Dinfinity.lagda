@@ -193,4 +193,73 @@ p-is-strict (succ n) =
     lb-of-ubs τ ub n = ∐-is-lowerbound-of-upperbounds (𝓓 n ⁻) (ε n) (⦅ τ ⦆ n)
                         (λ i → ub i n)
 
+⦅_⦆ : ⟪ 𝓓∞ ⟫ → (n : ℕ) → ⟪ 𝓓 n ⟫
+⦅_⦆ = pr₁
+
+⟨p∞⟩ : (n : ℕ) → ⟪ 𝓓∞ ⟫ → ⟪ 𝓓 n ⟫
+⟨p∞⟩ n σ = ⦅ σ ⦆ n
+
+p∞ : (n : ℕ) → DCPO[ 𝓓∞ ⁻ , 𝓓 n ⁻ ]
+p∞ n = (⟨p∞⟩ n) , {!!}
+
+open import NaturalsAddition renaming (_+_ to _+'_)
+open import NaturalsOrder
+open import NaturalNumbers-Properties
+
+⟨e-up⟩ : (n m k : ℕ) → (m ≡ n +' k) → ⟪ 𝓓 n ⟫ → ⟪ 𝓓 m ⟫
+⟨e-up⟩ n n zero refl = id
+⟨e-up⟩ n .(succ (n +' k)) (succ k) refl = ⟨e⟩ (n +' k) ∘ IH
+ where
+  IH : ⟪ 𝓓 n ⟫ → ⟪ 𝓓 (n +' k) ⟫
+  IH = ⟨e-up⟩ n (n +' k) k refl
+
+⟨e-up⟩-succ-lemma : (n m k : ℕ) (eq : succ m ≡ n +' succ k)
+                  → ⟨e-up⟩ n (succ m) (succ k) eq
+                  ≡ ⟨e⟩ m ∘ ⟨e-up⟩ n m k (succ-lc eq)
+⟨e-up⟩-succ-lemma = {!!}
+
+⟨p-down⟩ : (n m k : ℕ) → (m ≡ n +' k) → ⟪ 𝓓 m ⟫ → ⟪ 𝓓 n ⟫
+⟨p-down⟩ n n zero refl = id
+⟨p-down⟩ n .(succ (n +' k)) (succ k) refl = IH ∘ ⟨p⟩ (n +' k)
+ where
+  IH : ⟪ 𝓓 (n +' k) ⟫ → ⟪ 𝓓 n ⟫
+  IH = ⟨p-down⟩ n (n +' k) k refl
+
+⟨e∞⟩ : (n : ℕ) → ⟪ 𝓓 n ⟫ → ⟪ 𝓓∞ ⟫
+⟨e∞⟩ n x = σ , φ
+ where
+  σ : (m : ℕ) → ⟪ 𝓓 m ⟫
+  σ m = γ (<-decidable n m)
+   where
+    γ : decidable (n < m) → ⟪ 𝓓 m ⟫
+    γ (inl l) = ⟨e-up⟩ n m k eq x
+     where
+      s : Σ k ꞉ ℕ , k +' n ≡ m
+      s = subtraction n m (<-coarser-than-≤ n m l)
+      k : ℕ
+      k = pr₁ s
+      eq = m      ≡⟨ (pr₂ s) ⁻¹ ⟩
+           k +' n ≡⟨ addition-commutativity k n ⟩
+           n +' k ∎
+    γ (inr l) = ⟨p-down⟩ m n k eq x
+     where
+      l' : n ≥ m
+      l' = not-less-bigger-or-equal m n l
+      s : Σ k ꞉ ℕ , k +' m ≡ n
+      s = subtraction m n l'
+      k : ℕ
+      k = pr₁ s
+      eq = n      ≡⟨ (pr₂ s) ⁻¹ ⟩
+           k +' m ≡⟨ addition-commutativity k m ⟩
+           m +' k ∎
+  φ : (m : ℕ) → ⟨p⟩ m (σ (succ m)) ≡ σ m
+  φ m = γ (<-decidable n (succ m))
+   where
+    γ : decidable (n < (succ m)) → ⟨p⟩ m (σ (succ m)) ≡ σ m
+    γ (inl l) = ⟨p⟩ m (σ (succ m)) ≡⟨ {!!} ⟩
+                ⟨p⟩ m (⟨e-up⟩ n (succ m) (succ {!!}) {!!} x) ≡⟨ ap (⟨p⟩ m) (happly (⟨e-up⟩-succ-lemma n m {!!} {!!}) x) ⟩
+                ⟨p⟩ m ((⟨e⟩ m ∘ ⟨e-up⟩ n m {!!} (succ-lc {!!})) x) ≡⟨ {!!} ⟩
+                σ m ∎
+    γ (inr l) = {!!}
+
 \end{code}

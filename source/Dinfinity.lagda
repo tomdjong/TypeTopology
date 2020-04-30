@@ -21,6 +21,8 @@ open import DcpoBasics pt fe 𝓤
 open import DcpoLifting pt fe 𝓤 pe
 open import DcpoExponential pt fe 𝓤
 
+open import Poset fe
+
 𝓓 : ℕ → DCPO⊥ {𝓤 ⁺} {𝓤 ⁺}
 𝓓 zero     = 𝓛-DCPO⊥ {𝓤} {𝟙{𝓤}} (props-are-sets 𝟙-is-prop)
 𝓓 (succ n) = 𝓓 n ⟹ᵈᶜᵖᵒ⊥ 𝓓 n
@@ -93,5 +95,102 @@ open import DcpoExponential pt fe 𝓤
                   (DCPO-∘-is-continuous₁ (𝓓 n ⁻) (𝓓 (succ n) ⁻)
                    (𝓓 (succ n) ⁻) eₙ)
                   (DCPO-∘-is-continuous₂ (𝓓 n ⁻) (𝓓 (succ n) ⁻) (𝓓 n ⁻) pₙ)
+
+p : (n : ℕ) → DCPO[ 𝓓 (succ n) ⁻ , 𝓓 n ⁻ ]
+p n = pr₂ (𝓓-diagram n)
+
+e : (n : ℕ) → DCPO[ 𝓓 n ⁻ , 𝓓 (succ n) ⁻ ]
+e n = pr₁ (𝓓-diagram n)
+
+⟨p⟩ : (n : ℕ) → ⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 n ⟫
+⟨p⟩ n = underlying-function (𝓓 (succ n) ⁻) (𝓓 n ⁻) (p n)
+
+⟨e⟩ : (n : ℕ) → ⟪ 𝓓 n ⟫ → ⟪ 𝓓 (succ n) ⟫
+⟨e⟩ n = underlying-function (𝓓 n ⁻) (𝓓 (succ n) ⁻) (e n)
+
+p-is-strict : (n : ℕ) → ⟨p⟩ n (⊥ (𝓓 (succ n))) ≡ ⊥ (𝓓 n)
+p-is-strict zero = refl
+p-is-strict (succ n) =
+ to-subtype-≡ (λ f → being-continuous-is-a-prop (𝓓 n ⁻) (𝓓 n ⁻) f) (dfunext fe γ)
+  where
+   IH : ⟨p⟩ n (⊥ (𝓓 (succ n))) ≡ ⊥ (𝓓 n)
+   IH = p-is-strict n
+   con : ⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 (succ n) ⟫
+   con y = ⊥ (𝓓 (succ n))
+   γ : (x : ⟪ 𝓓 n ⟫) → ⟨p⟩ n (con (⟨e⟩ n x)) ≡ ⊥ (𝓓 n)
+   γ x = IH
+
+𝓓∞ : DCPO⊥ {𝓤 ⁺} {𝓤 ⁺}
+𝓓∞ = (X , _⊑_ , pa , dc) , ⊥-seq , ⊥-seq-is-least
+ where
+  X : 𝓤 ⁺ ̇
+  X = Σ σ ꞉ ((n : ℕ) → ⟪ 𝓓 n ⟫) , ((n : ℕ) → ⟨p⟩ n (σ (succ n)) ≡ σ n)
+  ⦅_⦆ : X → ((n : ℕ) → ⟪ 𝓓 n ⟫)
+  ⦅_⦆ = pr₁
+  p-equality : (σ : X) (n : ℕ) → ⟨p⟩ n (⦅ σ ⦆ (succ n)) ≡ ⦅ σ ⦆ n
+  p-equality = pr₂
+  _⊑_ : X → X → 𝓤 ⁺ ̇
+  σ ⊑ τ = (n : ℕ) → ⦅ σ ⦆ n ⊑⟨ 𝓓 n ⁻ ⟩ ⦅ τ ⦆ n
+  ⊥-seq : X
+  ⊥-seq = (λ n → ⊥ (𝓓 n)) , p-is-strict
+  ⊥-seq-is-least : is-least _⊑_ ⊥-seq
+  ⊥-seq-is-least σ n = ⊥-is-least (𝓓 n) (⦅ σ ⦆ n)
+  pa : PosetAxioms.poset-axioms _⊑_
+  pa = sl , pv , r , t , a
+   where
+    open PosetAxioms {_} {_} {X} _⊑_
+    sl : is-set X
+    sl = subsets-of-sets-are-sets _ _
+          (Π-is-set fe (λ n → sethood (𝓓 n ⁻)))
+          (Π-is-prop fe (λ n → sethood (𝓓 n ⁻)))
+    pv : is-prop-valued
+    pv σ τ = Π-is-prop fe (λ n → prop-valuedness (𝓓 n ⁻) (⦅ σ ⦆ n) (⦅ τ ⦆ n))
+    r : is-reflexive
+    r σ n = reflexivity (𝓓 n ⁻) (⦅ σ ⦆ n)
+    a : is-antisymmetric
+    a σ τ l k = to-subtype-≡ (λ _ → Π-is-prop fe (λ n → sethood (𝓓 n ⁻)))
+                 (dfunext fe (λ n → antisymmetry (𝓓 n ⁻) (⦅ σ ⦆ n) (⦅ τ ⦆ n)
+                                     (l n) (k n)))
+    t : is-transitive
+    t σ τ ρ l k n = transitivity (𝓓 n ⁻) (⦅ σ ⦆ n) (⦅ τ ⦆ n) (⦅ ρ ⦆ n)
+                     (l n) (k n)
+  dc : is-directed-complete _⊑_
+  dc I α δ = σ , ub , lb-of-ubs
+   where
+    β : (n : ℕ) → I → ⟪ 𝓓 n ⟫
+    β n i = ⦅ α i ⦆ n
+    ε : (n : ℕ) → is-Directed (𝓓 n ⁻) (β n)
+    ε n = (directed-implies-inhabited _⊑_ α δ) , γ
+     where
+      γ : is-weakly-directed (underlying-order (𝓓 n ⁻)) (β n)
+      γ i j = ∥∥-functor g (directed-implies-weakly-directed _⊑_ α δ i j)
+       where
+        g : (Σ k ꞉ I , (α i ⊑ α k) × (α j ⊑ α k))
+          → (Σ k ꞉ I , (β n i ⊑⟨ 𝓓 n ⁻ ⟩ β n k) × (β n j ⊑⟨ 𝓓 n ⁻ ⟩ β n k) )
+        g (k , l , m) = k , l n , m n
+    σ : X
+    σ = (λ n → ∐ (𝓓 n ⁻) (ε n)) , φ
+     where
+      φ : (n : ℕ) → ⟨p⟩ n (∐ (𝓓 (succ n) ⁻) (ε (succ n))) ≡ ∐ (𝓓 n ⁻) (ε n)
+      φ n = ⟨p⟩ n (∐ (𝓓 (succ n) ⁻) (ε (succ n))) ≡⟨ eq₁ ⟩
+            ∐ (𝓓 n ⁻) {I} {⟨p⟩ n ∘ β (succ n)} ε' ≡⟨ eq₂ ⟩
+            ∐ (𝓓 n ⁻) {I} {β n} ε''               ≡⟨ eq₃ ⟩
+            ∐ (𝓓 n ⁻) {I} {β n} (ε n)             ∎
+       where
+        ε' : is-Directed (𝓓 n ⁻) (⟨p⟩ n ∘ β (succ n))
+        ε' = image-is-directed' (𝓓 (succ n) ⁻) (𝓓 n ⁻) (p n) (ε (succ n))
+        h : ⟨p⟩ n ∘ β (succ n) ≡ β n
+        h = dfunext fe (λ i → p-equality (α i) n)
+        ε'' : is-Directed (𝓓 n ⁻) (β n)
+        ε'' = transport (is-Directed (𝓓 n ⁻)) h ε'
+        eq₁ = continuous-∐-≡ (𝓓 (succ n) ⁻) (𝓓 n ⁻) (p n)
+               {I} {β (succ n)} (ε (succ n))
+        eq₂ = ∐-family-≡ (𝓓 n ⁻) (⟨p⟩ n ∘ β (succ n)) (β n) h ε'
+        eq₃ = ∐-independent-of-directedness-witness (𝓓 n ⁻) ε'' (ε n)
+    ub : (i : I) → α i ⊑ σ
+    ub i n = ∐-is-upperbound (𝓓 n ⁻) (ε n) i
+    lb-of-ubs : is-lowerbound-of-upperbounds _⊑_ σ α
+    lb-of-ubs τ ub n = ∐-is-lowerbound-of-upperbounds (𝓓 n ⁻) (ε n) (⦅ τ ⦆ n)
+                        (λ i → ub i n)
 
 \end{code}

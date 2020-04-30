@@ -27,7 +27,7 @@ open import DcpoExponential pt fe 𝓤
 
 𝓓-diagram : (n : ℕ) → DCPO[ 𝓓 n ⁻  , 𝓓 (succ n) ⁻ ]
                     × DCPO[ 𝓓 (succ n) ⁻ , 𝓓 n ⁻   ]
-𝓓-diagram zero     = (e₀ , e₀-continuity) , p₀ , p₀-continuity
+𝓓-diagram zero = (e₀ , e₀-continuity) , p₀ , p₀-continuity
  where
   e₀ : ⟨ 𝓓 0 ⁻ ⟩ → ⟨ 𝓓 1 ⁻ ⟩
   e₀ x = (λ y → x) , (constant-functions-are-continuous (𝓓 0 ⁻) (𝓓 0 ⁻) x)
@@ -55,51 +55,43 @@ open import DcpoExponential pt fe 𝓤
       where
        ε : is-Directed (𝓓 0 ⁻) (pointwise-family (𝓓 0 ⁻) (𝓓 0 ⁻) α (⊥ (𝓓 0)))
        ε = pointwise-family-is-directed (𝓓 0 ⁻) (𝓓 0 ⁻) α δ (⊥ (𝓓 0))
-𝓓-diagram (succ n) = (e , {!!}) , {!!}
+𝓓-diagram (succ n) = (e , e-continuity) , (p , p-continuity)
  where
   IH : DCPO[ 𝓓 n ⁻ , 𝓓 (succ n) ⁻ ] × DCPO[ 𝓓 (succ n) ⁻ , 𝓓 n ⁻ ]
   IH = 𝓓-diagram n
-  eₙ : ⟪ 𝓓 n ⟫ → ⟪ 𝓓 (succ n) ⟫
-  eₙ = underlying-function (𝓓 n ⁻) (𝓓 (succ n) ⁻) (pr₁ IH)
-  eₙ-continuity : is-continuous (𝓓 n ⁻) (𝓓 (succ n) ⁻) eₙ
-  eₙ-continuity = continuity-of-function (𝓓 n ⁻) (𝓓 (succ n) ⁻) (pr₁ IH)
-  pₙ : ⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 n ⟫
-  pₙ = underlying-function (𝓓 (succ n) ⁻) (𝓓 n ⁻) (pr₂ IH)
-  pₙ-continuity : is-continuous (𝓓 (succ n) ⁻) (𝓓 n ⁻) pₙ
-  pₙ-continuity = continuity-of-function (𝓓 (succ n) ⁻) (𝓓 n ⁻) (pr₂ IH)
-  e : ⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 (succ (succ n)) ⟫
-  e (f , cf) = (eₙ ∘ f ∘ pₙ) ,
-               ∘-is-continuous (𝓓 (succ n) ⁻) (𝓓 n ⁻) (𝓓 (succ n) ⁻)
-                (f ∘ pₙ) eₙ
-                (∘-is-continuous (𝓓 (succ n) ⁻) (𝓓 n ⁻) (𝓓 n ⁻)
-                  pₙ f pₙ-continuity cf)
-                eₙ-continuity
-
-{- (λ f → (underlying-function {!!} {!!} {!eₙ!} ∘ underlying-function (𝓓 n ⁻) (𝓓 n ⁻) f ∘ underlying-function (𝓓 (succ n) ⁻) (𝓓 n ⁻) pₙ) {!!}) , {!!} -}
-        -- DCPO-∘ (𝓓 (succ n) ⁻) {!!} {!!} pₙ
-        -- (DCPO-∘ {!!} {!!} {!!} eₙ {!!})
-
-{-
-up-and-down : (n : ℕ) → (⟪ 𝓓 n ⟫ → ⟪ 𝓓 (succ n) ⟫)
-                      × (⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 n ⟫)
-up-and-down zero     = e₀ , p₀
- where
-  e₀ : ⟪ 𝓓 0 ⟫ → ⟪ 𝓓 1 ⟫
-  e₀ x = (λ y → x) , constant-functions-are-continuous (𝓓 0 ⁻) (𝓓 0 ⁻) x
-  p₀ : ⟪ 𝓓 1 ⟫ → ⟪ 𝓓 0 ⟫
-  p₀ f = underlying-function (𝓓 0 ⁻) (𝓓 0 ⁻) f (⊥ (𝓓 0))
-up-and-down (succ n) = e , {!!}
- where
-  IH : (⟪ 𝓓 n ⟫ → ⟪ 𝓓 (succ n) ⟫) × (⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 n ⟫)
-  IH = up-and-down n
-  eₙ : ? -- ⟪ 𝓓 n ⟫ → ⟪ 𝓓 (succ n) ⟫
-  eₙ = underlying-function ? ? (pr₁ IH)
-  eₙ-continuity : is-continuous ? ? eₙ
-  eₙ-continuity = ?
-  pₙ : ⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 n ⟫
+  eₙ : DCPO[ 𝓓 n ⁻ , 𝓓 (succ n) ⁻ ]
+  eₙ = pr₁ IH
+  pₙ : DCPO[ 𝓓 (succ n) ⁻ , 𝓓 n ⁻ ]
   pₙ = pr₂ IH
   e : ⟪ 𝓓 (succ n) ⟫ → ⟪ 𝓓 (succ (succ n)) ⟫
-  e (f , c) = {!!} ∘ f ∘ {!!} , {!!}
--}
+  e f = DCPO-∘ (𝓓 (succ n) ⁻) (𝓓 n ⁻) (𝓓 (succ n) ⁻) pₙ h
+   where
+    h : DCPO[ 𝓓 n ⁻ , 𝓓 (succ n) ⁻ ]
+    h = DCPO-∘ (𝓓 n ⁻) (𝓓 n ⁻) (𝓓 (succ n) ⁻) f eₙ
+  e-continuity : is-continuous (𝓓 (succ n) ⁻) (𝓓 (succ (succ n)) ⁻) e
+  e-continuity = ∘-is-continuous
+                  (𝓓 (succ n) ⁻)
+                  ((𝓓 n ⁻) ⟹ᵈᶜᵖᵒ (𝓓 (succ n) ⁻))
+                  (𝓓 (succ (succ n)) ⁻)
+                  (λ f → DCPO-∘ (𝓓 n ⁻) (𝓓 n ⁻) (𝓓 (succ n) ⁻) f eₙ)
+                  (DCPO-∘ (𝓓 (succ n) ⁻) (𝓓 n ⁻) (𝓓 (succ n) ⁻) pₙ)
+                  (DCPO-∘-is-continuous₂ (𝓓 n ⁻) (𝓓 n ⁻) (𝓓 (succ n) ⁻) eₙ)
+                  (DCPO-∘-is-continuous₁ (𝓓 (succ n) ⁻) (𝓓 n ⁻)
+                   (𝓓 (succ n) ⁻) pₙ)
+  p : ⟪ 𝓓 (succ (succ n)) ⟫ → ⟪ 𝓓 (succ n) ⟫
+  p f = DCPO-∘ (𝓓 n ⁻) (𝓓 (succ n) ⁻) (𝓓 n ⁻) eₙ h
+   where
+    h : DCPO[ 𝓓 (succ n) ⁻ , 𝓓 n ⁻ ]
+    h = DCPO-∘ (𝓓 (succ n) ⁻) (𝓓 (succ n) ⁻) (𝓓 n ⁻) f pₙ
+  p-continuity : is-continuous (𝓓 (succ (succ n)) ⁻) (𝓓 (succ n) ⁻) p
+  p-continuity = ∘-is-continuous
+                  (𝓓 (succ (succ n)) ⁻)
+                  ((𝓓 n ⁻) ⟹ᵈᶜᵖᵒ (𝓓 (succ n) ⁻))
+                  (𝓓 (succ n) ⁻)
+                  (DCPO-∘ (𝓓 n ⁻) (𝓓 (succ n) ⁻) (𝓓 (succ n) ⁻) eₙ)
+                  (λ f → DCPO-∘ (𝓓 n ⁻) (𝓓 (succ n) ⁻) (𝓓 n ⁻) f pₙ)
+                  (DCPO-∘-is-continuous₁ (𝓓 n ⁻) (𝓓 (succ n) ⁻)
+                   (𝓓 (succ n) ⁻) eₙ)
+                  (DCPO-∘-is-continuous₂ (𝓓 n ⁻) (𝓓 (succ n) ⁻) (𝓓 n ⁻) pₙ)
 
 \end{code}

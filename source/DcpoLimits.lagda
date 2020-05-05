@@ -38,6 +38,12 @@ module Diagram
                       → is-continuous (𝓓 i) (𝓓 j) (ε {i} {j} l))
         (π-continuity : {i j : I} (l : i ⊑ j)
                       → is-continuous (𝓓 j) (𝓓 i) (π {i} {j} l))
+--      (ε-id : (i : I ) → ε (⊑-refl i) ∼ id)
+--      (π-id : (i : I ) → π (⊑-refl i) ∼ id)
+--      (ε-comp : (i j k : I) (l : i ⊑ j) (m : j ⊑ k)
+--              → ε m ∘ ε l ∼ ε (⊑-trans i j k l m))
+--      (π-comp : (i j k : I) (l : i ⊑ j) (m : j ⊑ k)
+--              → π l ∘ π m ∼ π (⊑-trans i j k l m))
        where
 
  𝓓∞ : DCPO {𝓥 ⊔ 𝓤 ⊔ 𝓦} {𝓥 ⊔ 𝓣}
@@ -113,5 +119,16 @@ module Diagram
      lb-of-ubs : is-lowerbound-of-upperbounds _≼_ σ α
      lb-of-ubs τ ub i = ∐-is-lowerbound-of-upperbounds (𝓓 i) (δ' i) (⦅ τ ⦆ i)
                         (λ a → ub a i)
+
+ π∞ : (i : I) → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓 i ⟩
+ π∞ i (σ , _) = σ i
+
+ ε∞ : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓓∞ ⟩
+ ε∞ i x = σ , φ
+  where
+   σ : (j : I) → ⟨ 𝓓 j ⟩
+   σ j = {!!} -- unique choice
+   φ : (j₁ j₂ : I) (l : j₁ ⊑ j₂) → π l (σ j₂) ≡ σ j₁
+   φ j₁ j₂ l = {!!} -- will need π-comp here?
 
 \end{code}

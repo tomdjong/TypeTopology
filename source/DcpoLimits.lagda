@@ -25,9 +25,10 @@ module Diagram
         {I : 𝓥 ̇ }
 --        (I-is-set : is-set I)
         (_⊑_ : I → I → 𝓦 ̇ )
-        (⊑-refl : (i : I) → i ⊑ i)
-        (⊑-trans : (i j k : I) → i ⊑ j → j ⊑ k → i ⊑ k)
+        (⊑-refl : {i : I} → i ⊑ i)
+        (⊑-trans : {i j k : I} → i ⊑ j → j ⊑ k → i ⊑ k)
 --        (⊑-antisym : (i j : I) → i ⊑ j → j ⊑ i → i ≡ j)
+        (⊑-prop-valued : (i j : I) → is-prop (i ⊑ j))
         (⊑-directed : (i j : I) → ∃ k ꞉ I , i ⊑ k × j ⊑ k)
         (𝓓 : I → DCPO {𝓤} {𝓣})
         (ε : {i j : I} → i ⊑ j → ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩)
@@ -40,10 +41,10 @@ module Diagram
                       → is-continuous (𝓓 j) (𝓓 i) (π {i} {j} l))
 --      (ε-id : (i : I ) → ε (⊑-refl i) ∼ id)
 --      (π-id : (i : I ) → π (⊑-refl i) ∼ id)
---      (ε-comp : (i j k : I) (l : i ⊑ j) (m : j ⊑ k)
---              → ε m ∘ ε l ∼ ε (⊑-trans i j k l m))
---      (π-comp : (i j k : I) (l : i ⊑ j) (m : j ⊑ k)
---              → π l ∘ π m ∼ π (⊑-trans i j k l m))
+        (ε-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
+                → ε m ∘ ε l ∼ ε (⊑-trans l m))
+        (π-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
+                → π l ∘ π m ∼ π (⊑-trans l m))
        where
 
  𝓓∞ : DCPO {𝓥 ⊔ 𝓤 ⊔ 𝓦} {𝓥 ⊔ 𝓣}
@@ -123,11 +124,32 @@ module Diagram
  π∞ : (i : I) → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓 i ⟩
  π∞ i (σ , _) = σ i
 
+ open import UF-ImageAndSurjection
+ open ImageAndSurjection pt
+
  ε∞ : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓓∞ ⟩
  ε∞ i x = σ , φ
   where
    σ : (j : I) → ⟨ 𝓓 j ⟩
-   σ j = {!!} -- unique choice
+   σ j = wconstant-map-to-set-truncation-of-domain-map
+         (Σ k ꞉ I , i ⊑ k × j ⊑ k) (sethood (𝓓 j)) ϕ ω (⊑-directed i j)
+    where
+     ϕ : (Σ k ꞉ I , i ⊑ k × j ⊑ k) → ⟨ 𝓓 j ⟩
+     ϕ (k , lᵢ , lⱼ) = π lⱼ (ε lᵢ x)
+     ω : wconstant ϕ
+     ω (k , lᵢ , lⱼ) (k' , lᵢ' , lⱼ')  = ∥∥-rec (sethood (𝓓 j)) ψ (⊑-directed k k')
+      where
+       ψ : (Σ m ꞉ I , k ⊑ m × k' ⊑ m)
+         → ϕ (k , lᵢ , lⱼ) ≡ ϕ (k' , lᵢ' , lⱼ')
+       ψ (m , u , u') = π lⱼ (ε lᵢ x)                 ≡⟨ ap (π lⱼ) (πε u (ε lᵢ x) ⁻¹) ⟩
+                        π lⱼ (π u (ε u (ε lᵢ x)))     ≡⟨ π-comp lⱼ u (ε u (ε lᵢ x)) ⟩
+                        π (⊑-trans lⱼ u) (ε u (ε lᵢ x)) ≡⟨ ap (π (⊑-trans lⱼ u)) (ε-comp lᵢ u x) ⟩
+                        π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ u) x) ≡⟨ ap (π (⊑-trans lⱼ u)) (ap (λ - → ε - x) (⊑-prop-valued i m (⊑-trans lᵢ u) (⊑-trans lᵢ' u'))) ⟩
+                        π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ' u') x) ≡⟨ ap (π (⊑-trans lⱼ u)) ((ε-comp lᵢ' u' x) ⁻¹) ⟩
+                        π (⊑-trans lⱼ u) (ε u' (ε lᵢ' x)) ≡⟨ ap (λ - → π - _) (⊑-prop-valued j m (⊑-trans lⱼ u) (⊑-trans lⱼ' u')) ⟩
+                        π (⊑-trans lⱼ' u') (ε u' (ε lᵢ' x)) ≡⟨ (π-comp lⱼ' u' (ε u' (ε lᵢ' x))) ⁻¹ ⟩
+                        π lⱼ' (π u' (ε u' (ε lᵢ' x))) ≡⟨ ap (π lⱼ') (πε u' (ε lᵢ' x)) ⟩
+                        π lⱼ' (ε lᵢ' x) ∎
    φ : (j₁ j₂ : I) (l : j₁ ⊑ j₂) → π l (σ j₂) ≡ σ j₁
    φ j₁ j₂ l = {!!} -- will need π-comp here?
 

@@ -66,4 +66,10 @@ module Poset
                             (λ u → Π-is-prop fe
                             (λ v → s))))))))
 
+  is-greatest : D → 𝓤 ⊔ 𝓣 ̇
+  is-greatest x = (y : D) → y ⊑ x
+
+  is-maximal : D → 𝓤 ⊔ 𝓣 ̇
+  is-maximal x = (y : D) → x ⊑ y → x ≡ y
+
 \end{code}

@@ -127,30 +127,66 @@ module Diagram
  open import UF-ImageAndSurjection
  open ImageAndSurjection pt
 
+ κ : (i j : I) → ⟨ 𝓓 i ⟩ → (Σ k ꞉ I , i ⊑ k × j ⊑ k) → ⟨ 𝓓 j ⟩
+ κ i j x (k , lᵢ , lⱼ) = π lⱼ (ε lᵢ x)
+
+ κ-wconstant : (i j : I) (x : ⟨ 𝓓 i ⟩) → wconstant (κ i j x)
+ κ-wconstant i j x (k , lᵢ , lⱼ) (k' , lᵢ' , lⱼ') = ∥∥-rec (sethood (𝓓 j)) γ (⊑-directed k k')
+  where
+   γ : (Σ m ꞉ I , k ⊑ m × k' ⊑ m)
+     → κ i j x (k , lᵢ , lⱼ) ≡ κ i j x (k' , lᵢ' , lⱼ')
+   γ (m , u , u') = π lⱼ (ε lᵢ x)                           ≡⟨ e₁ ⟩
+                    π lⱼ (π u (ε u (ε lᵢ x)))               ≡⟨ e₂ ⟩
+                    π (⊑-trans lⱼ u) (ε u (ε lᵢ x))         ≡⟨ e₃ ⟩
+                    π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ u) x)   ≡⟨ e₄ ⟩
+                    π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ' u') x) ≡⟨ e₅ ⟩
+                    π (⊑-trans lⱼ u) (ε u' (ε lᵢ' x))       ≡⟨ e₆ ⟩
+                    π (⊑-trans lⱼ' u') (ε u' (ε lᵢ' x))     ≡⟨ e₇ ⟩
+                    π lⱼ' (π u' (ε u' (ε lᵢ' x)))           ≡⟨ e₈ ⟩
+                    π lⱼ' (ε lᵢ' x)                         ∎
+    where
+     e₁ = ap (π lⱼ) (πε u (ε lᵢ x) ⁻¹)
+     e₂ = π-comp lⱼ u (ε u (ε lᵢ x))
+     e₃ = ap (π (⊑-trans lⱼ u)) (ε-comp lᵢ u x)
+     e₄ = ap (π (⊑-trans lⱼ u)) (ap (λ - → ε - x)
+          (⊑-prop-valued i m (⊑-trans lᵢ u) (⊑-trans lᵢ' u')))
+     e₅ = ap (π (⊑-trans lⱼ u)) ((ε-comp lᵢ' u' x) ⁻¹)
+     e₆ = ap (λ - → π - _) (⊑-prop-valued j m (⊑-trans lⱼ u) (⊑-trans lⱼ' u'))
+     e₇ = (π-comp lⱼ' u' (ε u' (ε lᵢ' x))) ⁻¹
+     e₈ = ap (π lⱼ') (πε u' (ε lᵢ' x))
+
+ -- TO DO: Rename wconstant-map-to-set-truncation-of-domain-map, which is a *terrible* name
+
+ ρ : (i j : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩
+ ρ i j x = wconstant-map-to-set-truncation-of-domain-map
+            (Σ k ꞉ I , i ⊑ k × j ⊑ k) (sethood (𝓓 j)) (κ i j x)
+            (κ-wconstant i j x) (⊑-directed i j)
+
+ ρ-in-terms-of-κ : (i j k : I) (lᵢ : i ⊑ k) (lⱼ : j ⊑ k) (x : ⟨ 𝓓 i ⟩)
+                 → ρ i j x ≡ κ i j x (k , lᵢ , lⱼ)
+ ρ-in-terms-of-κ i j k lᵢ lⱼ x =
+  ρ i j x ≡⟨ refl ⟩
+  wconstant-map-to-set-truncation-of-domain-map _ (sethood (𝓓 j)) (κ i j x) (κ-wconstant i j x) (⊑-directed i j) ≡⟨ ap (wconstant-map-to-set-truncation-of-domain-map _ (sethood (𝓓 j)) (κ i j x) (κ-wconstant i j x)) (∥∥-is-a-prop (⊑-directed i j) ∣ k , lᵢ , lⱼ ∣) ⟩
+  wconstant-map-to-set-truncation-of-domain-map _ (sethood (𝓓 j)) (κ i j x) (κ-wconstant i j x) ∣ (k , lᵢ , lⱼ) ∣ ≡⟨ (wconstant-map-to-set-factors-through-truncation-of-domain _ (sethood (𝓓 j)) (κ i j x) (κ-wconstant i j x) (k , lᵢ , lⱼ)) ⁻¹ ⟩
+  κ i j x (k , lᵢ , lⱼ) ∎
+
  ε∞ : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓓∞ ⟩
  ε∞ i x = σ , φ
   where
    σ : (j : I) → ⟨ 𝓓 j ⟩
-   σ j = wconstant-map-to-set-truncation-of-domain-map
-         (Σ k ꞉ I , i ⊑ k × j ⊑ k) (sethood (𝓓 j)) ϕ ω (⊑-directed i j)
-    where
-     ϕ : (Σ k ꞉ I , i ⊑ k × j ⊑ k) → ⟨ 𝓓 j ⟩
-     ϕ (k , lᵢ , lⱼ) = π lⱼ (ε lᵢ x)
-     ω : wconstant ϕ
-     ω (k , lᵢ , lⱼ) (k' , lᵢ' , lⱼ')  = ∥∥-rec (sethood (𝓓 j)) ψ (⊑-directed k k')
-      where
-       ψ : (Σ m ꞉ I , k ⊑ m × k' ⊑ m)
-         → ϕ (k , lᵢ , lⱼ) ≡ ϕ (k' , lᵢ' , lⱼ')
-       ψ (m , u , u') = π lⱼ (ε lᵢ x)                 ≡⟨ ap (π lⱼ) (πε u (ε lᵢ x) ⁻¹) ⟩
-                        π lⱼ (π u (ε u (ε lᵢ x)))     ≡⟨ π-comp lⱼ u (ε u (ε lᵢ x)) ⟩
-                        π (⊑-trans lⱼ u) (ε u (ε lᵢ x)) ≡⟨ ap (π (⊑-trans lⱼ u)) (ε-comp lᵢ u x) ⟩
-                        π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ u) x) ≡⟨ ap (π (⊑-trans lⱼ u)) (ap (λ - → ε - x) (⊑-prop-valued i m (⊑-trans lᵢ u) (⊑-trans lᵢ' u'))) ⟩
-                        π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ' u') x) ≡⟨ ap (π (⊑-trans lⱼ u)) ((ε-comp lᵢ' u' x) ⁻¹) ⟩
-                        π (⊑-trans lⱼ u) (ε u' (ε lᵢ' x)) ≡⟨ ap (λ - → π - _) (⊑-prop-valued j m (⊑-trans lⱼ u) (⊑-trans lⱼ' u')) ⟩
-                        π (⊑-trans lⱼ' u') (ε u' (ε lᵢ' x)) ≡⟨ (π-comp lⱼ' u' (ε u' (ε lᵢ' x))) ⁻¹ ⟩
-                        π lⱼ' (π u' (ε u' (ε lᵢ' x))) ≡⟨ ap (π lⱼ') (πε u' (ε lᵢ' x)) ⟩
-                        π lⱼ' (ε lᵢ' x) ∎
+   σ j = ρ i j x
    φ : (j₁ j₂ : I) (l : j₁ ⊑ j₂) → π l (σ j₂) ≡ σ j₁
-   φ j₁ j₂ l = {!!} -- will need π-comp here?
+   φ j₁ j₂ l = ∥∥-rec (sethood (𝓓 j₁)) γ (⊑-directed i j₂)
+    where
+     γ : (Σ k ꞉ I , i ⊑ k × j₂ ⊑ k) → π l (σ j₂) ≡ σ j₁
+     γ (k , lᵢ , l₂) = π l (σ j₂) ≡⟨ {!!} ⟩
+                       π l (ρ i j₂ x) ≡⟨ ap (π l) (ρ-in-terms-of-κ i j₂ k lᵢ l₂ x) ⟩
+                       π l (κ i j₂ x (k , lᵢ , l₂)) ≡⟨ {!!} ⟩
+                       π l (π l₂ (ε lᵢ x)) ≡⟨ {!!} ⟩
+                       {!!} ≡⟨ {!!} ⟩
+                       {!!} ≡⟨ {!!} ⟩
+                       {!!} ∎
+
+
 
 \end{code}

@@ -564,8 +564,27 @@ module Diagram
   colimit-mediating-arrow-commutes i = {!!}
 
   colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
+                                    → is-continuous 𝓓∞ 𝓔 h
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
                                     → h ∼ colimit-mediating-arrow
-  colimit-mediating-arrow-is-unique h h-comm σ = {!!}
+  colimit-mediating-arrow-is-unique h h-cont h-comm σ =
+   h σ                           ≡⟨ ap h (∐-of-ε∞s σ) ⟩
+   h (∐ 𝓓∞ {I} {ε∞-family σ} δ)  ≡⟨ continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) δ ⟩
+   ∐ 𝓔 {I} {h ∘ ε∞-family σ} δ₁  ≡⟨ {!!} ⟩ -- ∐-family-≡ 𝓔 (h ∘ ε∞-family σ) (colimit-family σ) p δ₁ ⟩
+--   ∐ 𝓔 {I} {colimit-family σ} δ₂ ≡⟨ ∐-independent-of-directedness-witness 𝓔 δ₂ δ₃ ⟩
+   {!!} ≡⟨ {!!} ⟩
+   ∐ 𝓔 {I} {colimit-family σ} δ₃ ≡⟨ refl ⟩
+   colimit-mediating-arrow σ     ∎
+    where
+     δ : is-Directed 𝓓∞ (ε∞-family σ)
+     δ = ε∞-family-is-directed σ
+     δ₁ : is-Directed 𝓔 (h ∘ ε∞-family σ)
+     δ₁ = image-is-directed' 𝓓∞ 𝓔 (h , h-cont) δ
+     δ₂ : {!!}
+     δ₂ = {!!}
+     δ₃ : {!!}
+     δ₃ = {!!}
+     p : {!!}
+     p = {!!}
 
 \end{code}

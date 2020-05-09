@@ -36,10 +36,10 @@ module Diagram
         (επ-deflation : {i j : I} (l : i ⊑ j) → (x : ⟨ 𝓓 j ⟩)
                       → ε l (π l x) ⊑⟨ 𝓓 j ⟩ x )
         (ε-section-of-π : {i j : I} (l : i ⊑ j) → π l ∘ ε l ∼ id )
-        (ε-continuity : {i j : I} (l : i ⊑ j)
-                      → is-continuous (𝓓 i) (𝓓 j) (ε {i} {j} l))
-        (π-continuity : {i j : I} (l : i ⊑ j)
-                      → is-continuous (𝓓 j) (𝓓 i) (π {i} {j} l))
+        (ε-is-continuous : {i j : I} (l : i ⊑ j)
+                         → is-continuous (𝓓 i) (𝓓 j) (ε {i} {j} l))
+        (π-is-continuous : {i j : I} (l : i ⊑ j)
+                         → is-continuous (𝓓 j) (𝓓 i) (π {i} {j} l))
 --      (ε-id : (i : I ) → ε (⊑-refl i) ∼ id)
 --      (π-id : (i : I ) → π (⊑-refl i) ∼ id)
         (ε-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
@@ -94,12 +94,12 @@ module Diagram
              ∐ (𝓓 i) {𝓐} {β i} (δ' i)   ∎
     where
      δ₁ : is-Directed (𝓓 i) (π l ∘ β j)
-     δ₁ = image-is-directed' (𝓓 j) (𝓓 i) ((π l) , (π-continuity l)) (δ' j)
+     δ₁ = image-is-directed' (𝓓 j) (𝓓 i) ((π l) , (π-is-continuous l)) (δ' j)
      h : π l ∘ β j ≡ β i
      h = dfunext fe (λ a → π-equality (α a) l)
      δ₂ : is-Directed (𝓓 i) (β i)
      δ₂ = transport (is-Directed (𝓓 i)) h δ₁
-     eq₁ = continuous-∐-≡ (𝓓 j) (𝓓 i) ((π l) , (π-continuity l)) (δ' j)
+     eq₁ = continuous-∐-≡ (𝓓 j) (𝓓 i) ((π l) , (π-is-continuous l)) (δ' j)
      eq₂ = ∐-family-≡ (𝓓 i) (π l ∘ β j) (β i) h δ₁
      eq₃ = ∐-independent-of-directedness-witness (𝓓 i) δ₂ (δ' i)
 
@@ -244,12 +244,12 @@ module Diagram
     where
      u₁ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ (⦅ σ ⦆ i))
      u₂ = ≡-to-⊑ (𝓓 j) (ap (π lⱼ ∘ ε lᵢ) ((π-equality σ lᵢ) ⁻¹))
-     u₃ = continuous-implies-monotone (𝓓 k) (𝓓 j) (π lⱼ , π-continuity lⱼ)
+     u₃ = continuous-implies-monotone (𝓓 k) (𝓓 j) (π lⱼ , π-is-continuous lⱼ)
            (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) (⦅ σ ⦆ k) (επ-deflation lᵢ (⦅ σ ⦆ k))
      u₄ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
 
- π∞-continuity : (i : I) → is-continuous 𝓓∞ (𝓓 i) (π∞ i)
- π∞-continuity i 𝓐 α δ = ub , lb-of-ubs
+ π∞-is-continuous : (i : I) → is-continuous 𝓓∞ (𝓓 i) (π∞ i)
+ π∞-is-continuous i 𝓐 α δ = ub , lb-of-ubs
   where
    δ' : (j : I) → is-Directed (𝓓 j) (family-at-ith-component α j)
    δ' = family-at-ith-component-is-directed α δ
@@ -266,5 +266,85 @@ module Diagram
                     x                     ∎⟨ 𝓓 i ⟩
     where
      l = ∐-is-lowerbound-of-upperbounds (𝓓 i) (δ' i) x ub
+
+ ε∞-is-monotone : (i : I) → is-monotone (𝓓 i) 𝓓∞ (ε∞ i)
+ ε∞-is-monotone i x y l j =
+  ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i x ⦆ j) (⦅ ε∞ i y ⦆ j))
+   γ (⊑-directed i j)
+    where
+     γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+       → ⦅ ε∞ i x ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ ε∞ i y ⦆ j
+     γ (k , lᵢ , lⱼ) = ⦅ ε∞ i x ⦆ j      ⊑⟨ 𝓓 j ⟩[ u₁ ]
+                       ρ i j x           ⊑⟨ 𝓓 j ⟩[ u₂ ]
+                       κ x (k , lᵢ , lⱼ) ⊑⟨ 𝓓 j ⟩[ u₃ ]
+                       π lⱼ (ε lᵢ x)     ⊑⟨ 𝓓 j ⟩[ u₄ ]
+                       π lⱼ (ε lᵢ y)     ⊑⟨ 𝓓 j ⟩[ u₅ ]
+                       κ y (k , lᵢ , lⱼ) ⊑⟨ 𝓓 j ⟩[ u₆ ]
+                       ρ i j y           ⊑⟨ 𝓓 j ⟩[ u₇ ]
+                       ⦅ ε∞ i y ⦆ j      ∎⟨ 𝓓 j ⟩
+      where
+       u₁ = reflexivity (𝓓 j) (⦅ ε∞ i x ⦆ j)
+       u₂ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ x)
+       u₃ = reflexivity (𝓓 j) (κ x (k , lᵢ , lⱼ))
+       u₄ = mπ (ε lᵢ x) (ε lᵢ y) (mε x y l)
+        where
+         mε : is-monotone (𝓓 i) (𝓓 k) (ε lᵢ)
+         mε = continuous-implies-monotone (𝓓 i) (𝓓 k)
+               ((ε lᵢ) , (ε-is-continuous lᵢ))
+         mπ : is-monotone (𝓓 k) (𝓓 j) (π lⱼ)
+         mπ = continuous-implies-monotone (𝓓 k) (𝓓 j)
+               ((π lⱼ) , (π-is-continuous lⱼ))
+       u₅ = reflexivity (𝓓 j) (π lⱼ (ε lᵢ y))
+       u₆ = ≡-to-⊑ (𝓓 j) ((ρ-in-terms-of-κ lᵢ lⱼ y) ⁻¹)
+       u₇ = reflexivity (𝓓 j) (ρ i j y)
+
+ ε∞-is-continuous : (i : I) → is-continuous (𝓓 i) 𝓓∞ (ε∞ i)
+ ε∞-is-continuous i = continuity-criterion' (𝓓 i) 𝓓∞ (ε∞ i) (ε∞-is-monotone i) γ
+  where
+   γ : (𝓐 : 𝓥 ̇) (α : 𝓐 → ⟨ 𝓓 i ⟩) (δ : is-Directed (𝓓 i) α)
+     → is-lowerbound-of-upperbounds (underlying-order 𝓓∞)
+        (ε∞ i (∐ (𝓓 i) δ)) (ε∞ i ∘ α)
+   γ 𝓐 α δ σ ub j =
+    ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i (∐ (𝓓 i) δ) ⦆ j) (⦅ σ ⦆ j))
+     g (⊑-directed i j)
+      where
+       g : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+         → ⦅ ε∞ i (∐ (𝓓 i) δ) ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ σ ⦆ j
+       g (k , lᵢ , lⱼ) =
+        ⦅ ε∞ i (∐ (𝓓 i) δ) ⦆ j                  ⊑⟨ 𝓓 j ⟩[ u₁ ]
+        ρ i j (∐ (𝓓 i) δ)                       ⊑⟨ 𝓓 j ⟩[ u₂ ]
+        κ (∐ (𝓓 i) δ) (k , lᵢ , lⱼ)             ⊑⟨ 𝓓 j ⟩[ u₃ ]
+        π lⱼ (ε lᵢ (∐ (𝓓 i) δ))                 ⊑⟨ 𝓓 j ⟩[ u₄ ]
+        ∐ (𝓓 j) {𝓐} {πε ∘ α} δ₁                 ⊑⟨ 𝓓 j ⟩[ u₅ ]
+        ∐ (𝓓 j) {𝓐} {λ a → ⦅ ε∞ i (α a) ⦆ j} δ₂ ⊑⟨ 𝓓 j ⟩[ u₆ ]
+        ⦅ σ ⦆ j ∎⟨ 𝓓 j ⟩
+         where
+          πε : ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩
+          πε = π lⱼ ∘ ε lᵢ
+          πε-is-continuous : is-continuous (𝓓 i) (𝓓 j) πε
+          πε-is-continuous = ∘-is-continuous (𝓓 i) (𝓓 k) (𝓓 j) (ε lᵢ) (π lⱼ)
+                              (ε-is-continuous lᵢ) (π-is-continuous lⱼ)
+          πε' : DCPO[ 𝓓 i , 𝓓 j ]
+          πε' = πε , πε-is-continuous
+          δ₁ : is-Directed (𝓓 j) (πε ∘ α)
+          δ₁ = image-is-directed' (𝓓 i) (𝓓 j) πε' δ
+          p : πε ∘ α ≡ (λ a → ⦅ ε∞ i (α a) ⦆ j)
+          p = dfunext fe h
+           where
+            h : πε ∘ α ∼ (λ a → ⦅ ε∞ i (α a) ⦆ j)
+            h a = πε (α a)              ≡⟨ refl ⟩
+                  π lⱼ (ε lᵢ (α a))     ≡⟨ refl ⟩
+                  κ (α a) (k , lᵢ , lⱼ) ≡⟨ (ρ-in-terms-of-κ lᵢ lⱼ (α a)) ⁻¹ ⟩
+                  ρ i j (α a)           ≡⟨ refl ⟩
+                  ⦅ ε∞ i (α a) ⦆ j      ∎
+          δ₂ : is-Directed (𝓓 j) (λ a → ⦅ ε∞ i (α a) ⦆ j)
+          δ₂ = transport (is-Directed (𝓓 j)) p δ₁
+          u₁ = reflexivity (𝓓 j) (⦅ ε∞ i (∐ (𝓓 i) δ) ⦆ j)
+          u₂ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ (∐ (𝓓 i) δ))
+          u₃ = reflexivity (𝓓 j) (κ (∐ (𝓓 i) δ) (k , lᵢ , lⱼ))
+          u₄ = continuous-∐-⊑ (𝓓 i) (𝓓 j) πε' δ
+          u₅ = ≡-to-⊑ (𝓓 j)
+                (∐-family-≡ (𝓓 j) (πε ∘ α) (λ a → ⦅ ε∞ i (α a) ⦆ j) p δ₁)
+          u₆ = ∐-is-lowerbound-of-upperbounds (𝓓 j) δ₂ (⦅ σ ⦆ j) (λ a → ub a j)
 
 \end{code}

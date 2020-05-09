@@ -41,8 +41,8 @@ module Diagram
                          → is-continuous (𝓓 i) (𝓓 j) (ε {i} {j} l))
         (π-is-continuous : {i j : I} (l : i ⊑ j)
                          → is-continuous (𝓓 j) (𝓓 i) (π {i} {j} l))
---      (ε-id : (i : I ) → ε (⊑-refl i) ∼ id)
---      (π-id : (i : I ) → π (⊑-refl i) ∼ id)
+        (ε-id : (i : I ) → ε (⊑-refl {i}) ∼ id)
+        (π-id : (i : I ) → π (⊑-refl {i}) ∼ id)
         (ε-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
                 → ε m ∘ ε l ∼ ε (⊑-trans l m))
         (π-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
@@ -408,12 +408,112 @@ module Diagram
  ε∞-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓓∞ ⟩
  ε∞-family σ i = ε∞ i (⦅ σ ⦆ i)
 
+ ε∞-family-is-monotone : (σ : ⟨ 𝓓∞ ⟩) (i j : I) → i ⊑ j
+                       → ε∞-family σ i ⊑⟨ 𝓓∞ ⟩ ε∞-family σ j
+ ε∞-family-is-monotone σ i j l k =
+  ∥∥-rec (prop-valuedness (𝓓 k) (⦅ ε∞-family σ i ⦆ k) (⦅ ε∞-family σ j ⦆ k))
+   γ (I-weakly-directed j k)
+    where
+     γ : (Σ m ꞉ I , j ⊑ m × k ⊑ m)
+       → ⦅ ε∞-family σ i ⦆ k ⊑⟨ 𝓓 k ⟩ ⦅ ε∞-family σ j ⦆ k
+     γ (m , lⱼ , lₖ) =
+      ⦅ ε∞-family σ i ⦆ k                 ⊑⟨ 𝓓 k ⟩[ u₁ ]
+      ρ i k (⦅ σ ⦆ i)                     ⊑⟨ 𝓓 k ⟩[ u₂ ]
+      κ (⦅ σ ⦆ i) (m , ⊑-trans l lⱼ , lₖ) ⊑⟨ 𝓓 k ⟩[ u₃ ]
+      π lₖ (ε (⊑-trans l lⱼ) (⦅ σ ⦆ i))   ⊑⟨ 𝓓 k ⟩[ u₄ ]
+      π lₖ (ε lⱼ (ε l (⦅ σ ⦆ i)))         ⊑⟨ 𝓓 k ⟩[ u₅ ]
+      π lₖ (ε lⱼ (ε l (π l (⦅ σ ⦆ j))))   ⊑⟨ 𝓓 k ⟩[ u₆ ]
+      π lₖ (ε lⱼ (⦅ σ ⦆ j))               ⊑⟨ 𝓓 k ⟩[ u₇ ]
+      κ (⦅ σ ⦆ j) (m , lⱼ , lₖ)           ⊑⟨ 𝓓 k ⟩[ u₈ ]
+      ρ j k (⦅ σ ⦆ j)                     ⊑⟨ 𝓓 k ⟩[ u₉ ]
+      ⦅ ε∞-family σ j ⦆ k                 ∎⟨ 𝓓 k ⟩
+       where
+        u₁ = reflexivity (𝓓 k) (⦅ ε∞-family σ i ⦆ k)
+        u₂ = ≡-to-⊑ (𝓓 k) (ρ-in-terms-of-κ (⊑-trans l lⱼ) lₖ (⦅ σ ⦆ i))
+        u₃ = reflexivity (𝓓 k) (κ (⦅ σ ⦆ i) (m , ⊑-trans l lⱼ , lₖ))
+        u₄ = ≡-to-⊑ (𝓓 k) (ap (π lₖ) ((ε-comp l lⱼ (⦅ σ ⦆ i)) ⁻¹))
+        u₅ = ≡-to-⊑ (𝓓 k) (ap (π lₖ ∘ ε lⱼ ∘ ε l) ((π-equality σ l) ⁻¹))
+        u₆ = mon (ε l (π l (⦅ σ ⦆ j))) (⦅ σ ⦆ j) (επ-deflation l (⦅ σ ⦆ j))
+         where
+          mon : is-monotone (𝓓 j) (𝓓 k) (π lₖ ∘ ε lⱼ)
+          mon = continuous-implies-monotone (𝓓 j) (𝓓 k)
+                 (π lₖ ∘ ε lⱼ ,
+                  ∘-is-continuous (𝓓 j) (𝓓 m) (𝓓 k)
+                  (ε lⱼ) (π lₖ) (ε-is-continuous lⱼ) (π-is-continuous lₖ))
+        u₇ = reflexivity (𝓓 k) (κ (⦅ σ ⦆ j) (m , lⱼ , lₖ))
+        u₈ = ≡-to-⊑ (𝓓 k) ((ρ-in-terms-of-κ lⱼ lₖ (⦅ σ ⦆ j)) ⁻¹)
+        u₉ = reflexivity (𝓓 k) (⦅ ε∞-family σ j ⦆ k)
+
  ε∞-family-is-directed : (σ : ⟨ 𝓓∞ ⟩) → is-Directed 𝓓∞ (ε∞-family σ)
- ε∞-family-is-directed σ = {!!}
+ ε∞-family-is-directed σ = I-inhabited , δ
+  where
+   δ : is-weakly-directed (underlying-order 𝓓∞) (ε∞-family σ)
+   δ i j = ∥∥-functor γ (I-weakly-directed i j)
+    where
+     γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+       → (Σ k ꞉ I , ε∞-family σ i ⊑⟨ 𝓓∞ ⟩ ε∞-family σ k
+                  × ε∞-family σ j ⊑⟨ 𝓓∞ ⟩ ε∞-family σ k)
+     γ (k , lᵢ , lⱼ) =
+      k , ε∞-family-is-monotone σ i k lᵢ ,
+          ε∞-family-is-monotone σ j k lⱼ
 
  ∐-of-ε∞s : (σ : ⟨ 𝓓∞ ⟩) → σ ≡ ∐ 𝓓∞ {I} {ε∞-family σ} (ε∞-family-is-directed σ)
- ∐-of-ε∞s = {!!}
-
+ ∐-of-ε∞s σ = antisymmetry 𝓓∞ σ (∐ 𝓓∞ δ) a b
+  where
+   α : I → ⟨ 𝓓∞ ⟩
+   α = ε∞-family σ
+   δ : is-Directed 𝓓∞ α
+   δ = ε∞-family-is-directed σ
+   a : σ ⊑⟨ 𝓓∞ ⟩ ∐ 𝓓∞ {I} {α} δ
+   a i = ⦅ σ ⦆ i                           ⊑⟨ 𝓓 i ⟩[ u₁ ]
+         ε ⊑-refl (⦅ σ ⦆ i)                ⊑⟨ 𝓓 i ⟩[ u₂ ]
+         π ⊑-refl (ε ⊑-refl (⦅ σ ⦆ i))     ⊑⟨ 𝓓 i ⟩[ u₃ ]
+         κ (⦅ σ ⦆ i) (i , ⊑-refl , ⊑-refl) ⊑⟨ 𝓓 i ⟩[ u₄ ]
+         ρ i i (⦅ σ ⦆ i)                   ⊑⟨ 𝓓 i ⟩[ u₅ ]
+         ⦅ ε∞ i (⦅ σ ⦆ i) ⦆ i              ⊑⟨ 𝓓 i ⟩[ u₆ ]
+         family-at-ith-component α i i     ⊑⟨ 𝓓 i ⟩[ u₇ ]
+         ∐ (𝓓 i) δ'                        ⊑⟨ 𝓓 i ⟩[ u₈ ]
+         ⦅ (∐ 𝓓∞ {I} {α} δ) ⦆ i            ∎⟨ 𝓓 i ⟩
+    where
+     δ' : is-Directed (𝓓 i) (family-at-ith-component α i)
+     δ' = family-at-ith-component-is-directed α δ i
+     u₁ = ≡-to-⊑ (𝓓 i) ((ε-id i (⦅ σ ⦆ i)) ⁻¹)
+     u₂ = ≡-to-⊑ (𝓓 i) ((π-id i (ε ⊑-refl (⦅ σ ⦆ i))) ⁻¹)
+     u₃ = reflexivity (𝓓 i) (π ⊑-refl (ε ⊑-refl (⦅ σ ⦆ i)))
+     u₄ = ≡-to-⊑ (𝓓 i) ((ρ-in-terms-of-κ ⊑-refl ⊑-refl (⦅ σ ⦆ i)) ⁻¹)
+     u₅ = reflexivity (𝓓 i) (ρ i i (⦅ σ ⦆ i))
+     u₆ = reflexivity (𝓓 i) (⦅ ε∞ i (⦅ σ ⦆ i) ⦆ i )
+     u₇ = ∐-is-upperbound (𝓓 i) δ' i
+     u₈ = reflexivity (𝓓 i) (⦅ ∐ 𝓓∞ {I} {α} δ ⦆ i)
+   b : ∐ 𝓓∞ {I} {α} δ ⊑⟨ 𝓓∞ ⟩ σ
+   b = ∐-is-lowerbound-of-upperbounds 𝓓∞ {I} {α} δ σ γ
+    where
+     γ : (i : I) → α i ⊑⟨ 𝓓∞ ⟩ σ
+     γ i j = ∥∥-rec (prop-valuedness (𝓓 j) (⦅ α i ⦆ j) (⦅ σ ⦆ j))
+              g (I-weakly-directed i j)
+      where
+       g : (Σ k ꞉ I , i ⊑ k × j ⊑ k) → ⦅ α i ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ σ ⦆ j
+       g (k , lᵢ , lⱼ) = ⦅ α i ⦆ j                    ⊑⟨ 𝓓 j ⟩[ u₁ ]
+                         ⦅ ε∞ i (⦅ σ ⦆ i) ⦆ j         ⊑⟨ 𝓓 j ⟩[ u₂ ]
+                         ρ i j (⦅ σ ⦆ i)              ⊑⟨ 𝓓 j ⟩[ u₃ ]
+                         κ (⦅ σ ⦆ i) (k , lᵢ , lⱼ)    ⊑⟨ 𝓓 j ⟩[ u₄ ]
+                         π lⱼ (ε lᵢ (⦅ σ ⦆ i))        ⊑⟨ 𝓓 j ⟩[ u₅ ]
+                         π lⱼ (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) ⊑⟨ 𝓓 j ⟩[ u₆ ]
+                         π lⱼ (⦅ σ ⦆ k)               ⊑⟨ 𝓓 j ⟩[ u₇ ]
+                         ⦅ σ ⦆ j                      ∎⟨ 𝓓 j ⟩
+        where
+         u₁ = reflexivity (𝓓 j) (⦅ α i ⦆ j)
+         u₂ = reflexivity (𝓓 j) (⦅ ε∞ i (⦅ σ ⦆ i) ⦆ j)
+         u₃ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ (⦅ σ ⦆ i))
+         u₄ = reflexivity (𝓓 j) (κ (⦅ σ ⦆ i) (k , lᵢ , lⱼ))
+         u₅ = ≡-to-⊑ (𝓓 j) (ap (π lⱼ ∘ ε lᵢ) ((π-equality σ lᵢ) ⁻¹))
+         u₆ = mon (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) (⦅ σ ⦆ k) (επ-deflation lᵢ (⦅ σ ⦆ k))
+          where
+           mon : is-monotone (𝓓 k) (𝓓 j) (π lⱼ)
+           mon = continuous-implies-monotone (𝓓 k) (𝓓 j)
+                  (π lⱼ , π-is-continuous lⱼ)
+         u₇ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
+{-
  module _
          (𝓔 : DCPO {𝓤'} {𝓣'})
          (g : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓔 ⟩)
@@ -467,5 +567,7 @@ module Diagram
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
                                     → h ∼ colimit-mediating-arrow
   colimit-mediating-arrow-is-unique h h-comm σ = {!!}
+
+-}
 
 \end{code}

@@ -513,7 +513,7 @@ module Diagram
            mon = continuous-implies-monotone (𝓓 k) (𝓓 j)
                   (π lⱼ , π-is-continuous lⱼ)
          u₇ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
-{-
+
  module _
          (𝓔 : DCPO {𝓤'} {𝓣'})
          (g : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓔 ⟩)
@@ -567,7 +567,5 @@ module Diagram
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
                                     → h ∼ colimit-mediating-arrow
   colimit-mediating-arrow-is-unique h h-comm σ = {!!}
-
--}
 
 \end{code}

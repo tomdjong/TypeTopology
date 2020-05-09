@@ -29,7 +29,8 @@ module Diagram
         (⊑-trans : {i j k : I} → i ⊑ j → j ⊑ k → i ⊑ k)
 --        (⊑-antisym : (i j : I) → i ⊑ j → j ⊑ i → i ≡ j)
         (⊑-prop-valued : (i j : I) → is-prop (i ⊑ j))
-        (⊑-directed : (i j : I) → ∃ k ꞉ I , i ⊑ k × j ⊑ k)
+        (I-inhabited : ∥ I ∥)
+        (I-weakly-directed : (i j : I) → ∃ k ꞉ I , i ⊑ k × j ⊑ k)
         (𝓓 : I → DCPO {𝓤} {𝓣})
         (ε : {i j : I} → i ⊑ j → ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩)
         (π : {i j : I} → i ⊑ j → ⟨ 𝓓 j ⟩ → ⟨ 𝓓 i ⟩)
@@ -149,6 +150,9 @@ module Diagram
  π∞ : (i : I) → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓 i ⟩
  π∞ i (σ , _) = σ i
 
+ π∞-commutes-with-πs : (i j : I) (l : i ⊑ j) → π l ∘ π∞ j ∼ π∞ i
+ π∞-commutes-with-πs i j l σ = π-equality σ l
+
  open import UF-ImageAndSurjection
  open ImageAndSurjection pt
 
@@ -156,41 +160,42 @@ module Diagram
  κ x (k , lᵢ , lⱼ) = π lⱼ (ε lᵢ x)
 
  κ-wconstant : (i j : I) (x : ⟨ 𝓓 i ⟩) → wconstant (κ x)
- κ-wconstant i j x (k , lᵢ , lⱼ) (k' , lᵢ' , lⱼ') = ∥∥-rec (sethood (𝓓 j)) γ (⊑-directed k k')
-  where
-   γ : (Σ m ꞉ I , k ⊑ m × k' ⊑ m)
-     → κ x (k , lᵢ , lⱼ) ≡ κ x (k' , lᵢ' , lⱼ')
-   γ (m , u , u') = π lⱼ (ε lᵢ x)                           ≡⟨ e₁ ⟩
-                    π lⱼ (π u (ε u (ε lᵢ x)))               ≡⟨ e₂ ⟩
-                    π (⊑-trans lⱼ u) (ε u (ε lᵢ x))         ≡⟨ e₃ ⟩
-                    π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ u) x)   ≡⟨ e₄ ⟩
-                    π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ' u') x) ≡⟨ e₅ ⟩
-                    π (⊑-trans lⱼ u) (ε u' (ε lᵢ' x))       ≡⟨ e₆ ⟩
-                    π (⊑-trans lⱼ' u') (ε u' (ε lᵢ' x))     ≡⟨ e₇ ⟩
-                    π lⱼ' (π u' (ε u' (ε lᵢ' x)))           ≡⟨ e₈ ⟩
-                    π lⱼ' (ε lᵢ' x)                         ∎
-    where
-     e₁ = ap (π lⱼ) (ε-section-of-π u (ε lᵢ x) ⁻¹)
-     e₂ = π-comp lⱼ u (ε u (ε lᵢ x))
-     e₃ = ap (π (⊑-trans lⱼ u)) (ε-comp lᵢ u x)
-     e₄ = ap (π (⊑-trans lⱼ u)) (ap (λ - → ε - x)
-          (⊑-prop-valued i m (⊑-trans lᵢ u) (⊑-trans lᵢ' u')))
-     e₅ = ap (π (⊑-trans lⱼ u)) ((ε-comp lᵢ' u' x) ⁻¹)
-     e₆ = ap (λ - → π - _) (⊑-prop-valued j m (⊑-trans lⱼ u) (⊑-trans lⱼ' u'))
-     e₇ = (π-comp lⱼ' u' (ε u' (ε lᵢ' x))) ⁻¹
-     e₈ = ap (π lⱼ') (ε-section-of-π u' (ε lᵢ' x))
+ κ-wconstant i j x (k , lᵢ , lⱼ) (k' , lᵢ' , lⱼ') =
+  ∥∥-rec (sethood (𝓓 j)) γ (I-weakly-directed k k')
+   where
+    γ : (Σ m ꞉ I , k ⊑ m × k' ⊑ m)
+      → κ x (k , lᵢ , lⱼ) ≡ κ x (k' , lᵢ' , lⱼ')
+    γ (m , u , u') = π lⱼ (ε lᵢ x)                           ≡⟨ e₁ ⟩
+                     π lⱼ (π u (ε u (ε lᵢ x)))               ≡⟨ e₂ ⟩
+                     π (⊑-trans lⱼ u) (ε u (ε lᵢ x))         ≡⟨ e₃ ⟩
+                     π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ u) x)   ≡⟨ e₄ ⟩
+                     π (⊑-trans lⱼ u) (ε (⊑-trans lᵢ' u') x) ≡⟨ e₅ ⟩
+                     π (⊑-trans lⱼ u) (ε u' (ε lᵢ' x))       ≡⟨ e₆ ⟩
+                     π (⊑-trans lⱼ' u') (ε u' (ε lᵢ' x))     ≡⟨ e₇ ⟩
+                     π lⱼ' (π u' (ε u' (ε lᵢ' x)))           ≡⟨ e₈ ⟩
+                     π lⱼ' (ε lᵢ' x)                         ∎
+     where
+      e₁ = ap (π lⱼ) (ε-section-of-π u (ε lᵢ x) ⁻¹)
+      e₂ = π-comp lⱼ u (ε u (ε lᵢ x))
+      e₃ = ap (π (⊑-trans lⱼ u)) (ε-comp lᵢ u x)
+      e₄ = ap (π (⊑-trans lⱼ u)) (ap (λ - → ε - x)
+           (⊑-prop-valued i m (⊑-trans lᵢ u) (⊑-trans lᵢ' u')))
+      e₅ = ap (π (⊑-trans lⱼ u)) ((ε-comp lᵢ' u' x) ⁻¹)
+      e₆ = ap (λ - → π - _) (⊑-prop-valued j m (⊑-trans lⱼ u) (⊑-trans lⱼ' u'))
+      e₇ = (π-comp lⱼ' u' (ε u' (ε lᵢ' x))) ⁻¹
+      e₈ = ap (π lⱼ') (ε-section-of-π u' (ε lᵢ' x))
 
  ρ : (i j : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩
  ρ i j x = wconstant-from-∥∥-to-set (sethood (𝓓 j)) (κ x)
-            (κ-wconstant i j x) (⊑-directed i j)
+            (κ-wconstant i j x) (I-weakly-directed i j)
 
  ρ-in-terms-of-κ : {i j k : I} (lᵢ : i ⊑ k) (lⱼ : j ⊑ k) (x : ⟨ 𝓓 i ⟩)
                  → ρ i j x ≡ κ x (k , lᵢ , lⱼ)
  ρ-in-terms-of-κ {i} {j} {k} lᵢ lⱼ x =
-  ρ i j x             ≡⟨ refl ⟩
-  ν (⊑-directed i j)  ≡⟨ p ⟩
-  ν ∣ (k , lᵢ , lⱼ) ∣ ≡⟨ q ⟩
-  κ x (k , lᵢ , lⱼ)   ∎
+  ρ i j x                    ≡⟨ refl ⟩
+  ν (I-weakly-directed i j)  ≡⟨ p ⟩
+  ν ∣ (k , lᵢ , lⱼ) ∣        ≡⟨ q ⟩
+  κ x (k , lᵢ , lⱼ)          ∎
    where
     s : is-set ⟨ 𝓓 j ⟩
     s = sethood (𝓓 j)
@@ -198,7 +203,7 @@ module Diagram
     ω = κ-wconstant i j x
     ν : (∃ k' ꞉ I , i ⊑ k' × j ⊑ k') → ⟨ 𝓓 j ⟩
     ν = wconstant-from-∥∥-to-set s (κ x) ω
-    p = ap ν (∥∥-is-a-prop (⊑-directed i j) ∣ k , lᵢ , lⱼ ∣)
+    p = ap ν (∥∥-is-a-prop (I-weakly-directed i j) ∣ k , lᵢ , lⱼ ∣)
     q = wconstant-to-set-factors-through-∥∥ s (κ x) ω (k , lᵢ , lⱼ)
 
  ε∞ : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓓∞ ⟩
@@ -207,7 +212,7 @@ module Diagram
    σ : (j : I) → ⟨ 𝓓 j ⟩
    σ j = ρ i j x
    φ : (j₁ j₂ : I) (l : j₁ ⊑ j₂) → π l (σ j₂) ≡ σ j₁
-   φ j₁ j₂ l = ∥∥-rec (sethood (𝓓 j₁)) γ (⊑-directed i j₂)
+   φ j₁ j₂ l = ∥∥-rec (sethood (𝓓 j₁)) γ (I-weakly-directed i j₂)
     where
      γ : (Σ k ꞉ I , i ⊑ k × j₂ ⊑ k) → π l (σ j₂) ≡ σ j₁
      γ (k , lᵢ , l₂) = π l (σ j₂)                  ≡⟨ refl ⟩
@@ -224,6 +229,23 @@ module Diagram
        e₂ = π-comp l l₂ (ε lᵢ x)
        e₃ = (ρ-in-terms-of-κ lᵢ (⊑-trans l l₂) x) ⁻¹
 
+ ε∞-commutes-with-εs : (i j : I) (l : i ⊑ j) → ε∞ j ∘ ε l ∼ ε∞ i
+ ε∞-commutes-with-εs i j l x = to-𝓓∞-≡ (ε∞ j (ε l x)) (ε∞ i x) γ
+  where
+   γ : (k : I) → ⦅ ε∞ j (ε l x) ⦆ k ≡ ⦅ ε∞ i x ⦆ k
+   γ k = ∥∥-rec (sethood (𝓓 k)) g (I-weakly-directed j k)
+    where
+     g : (Σ m ꞉ I , j ⊑ m × k ⊑ m) → ⦅ ε∞ j (ε l x) ⦆ k ≡ ⦅ ε∞ i x ⦆ k
+     g (m , lⱼ , lₖ) =
+      ⦅ ε∞ j (ε l x) ⦆ k          ≡⟨ refl ⟩
+      ρ j k (ε l x)               ≡⟨ ρ-in-terms-of-κ lⱼ lₖ (ε l x) ⟩
+      κ (ε l x) (m , lⱼ , lₖ)     ≡⟨ refl ⟩
+      π lₖ (ε lⱼ (ε l x))         ≡⟨ ap (π lₖ) (ε-comp l lⱼ x) ⟩
+      π lₖ (ε (⊑-trans l lⱼ) x)   ≡⟨ refl ⟩
+      κ x (m , ⊑-trans l lⱼ , lₖ) ≡⟨ (ρ-in-terms-of-κ (⊑-trans l lⱼ) lₖ x) ⁻¹ ⟩
+      ρ i k x                     ≡⟨ refl ⟩
+      ⦅ ε∞ i x ⦆ k                ∎
+
  π∞ε∞ : {i : I} → π∞ i ∘ ε∞ i ∼ id
  π∞ε∞ {i} x = π∞ i (ε∞ i x)             ≡⟨ refl ⟩
               ⦅ ε∞ i x ⦆ i              ≡⟨ refl ⟩
@@ -234,7 +256,7 @@ module Diagram
 
  ε∞π∞ : {i : I} (σ : ⟨ 𝓓∞ ⟩) → ε∞ i (π∞ i σ) ⊑⟨ 𝓓∞ ⟩ σ
  ε∞π∞ {i} σ j = ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i (π∞ i σ) ⦆ j) (⦅ σ ⦆ j)) γ
-                 (⊑-directed i j)
+                 (I-weakly-directed i j)
   where
    γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
      → ⦅ ε∞ i (π∞ i σ) ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ σ ⦆ j
@@ -274,7 +296,7 @@ module Diagram
  ε∞-is-monotone : (i : I) → is-monotone (𝓓 i) 𝓓∞ (ε∞ i)
  ε∞-is-monotone i x y l j =
   ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i x ⦆ j) (⦅ ε∞ i y ⦆ j))
-   γ (⊑-directed i j)
+   γ (I-weakly-directed i j)
     where
      γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
        → ⦅ ε∞ i x ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ ε∞ i y ⦆ j
@@ -310,7 +332,7 @@ module Diagram
         (ε∞ i (∐ (𝓓 i) δ)) (ε∞ i ∘ α)
    γ 𝓐 α δ σ ub j =
     ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i (∐ (𝓓 i) δ) ⦆ j) (⦅ σ ⦆ j))
-     g (⊑-directed i j)
+     g (I-weakly-directed i j)
       where
        g : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
          → ⦅ ε∞ i (∐ (𝓓 i) δ) ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ σ ⦆ j
@@ -355,12 +377,6 @@ module Diagram
 
 \begin{code}
 
- {- ε∞-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓓∞ ⟩
- ε∞-family σ i = ε∞ i (⦅ σ ⦆ i)
-
- ∐-of-ε∞s : (σ : ⟨ 𝓓∞ ⟩) → σ ≡ {!!}
- ∐-of-ε∞s = {!!} -}
-
  module _
          (𝓔 : DCPO {𝓤'} {𝓣'})
          (f : (i : I) → ⟨ 𝓔 ⟩ → ⟨ 𝓓 i ⟩)
@@ -384,5 +400,61 @@ module Diagram
                                   → g ∼ limit-mediating-arrow
   limit-mediating-arrow-is-unique g g-comm y =
    to-𝓓∞-≡ (g y) (limit-mediating-arrow y) (λ i → g-comm i y)
+
+\end{code}
+
+\begin{code}
+
+ {- ε∞-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓓∞ ⟩
+ ε∞-family σ i = ε∞ i (⦅ σ ⦆ i)
+
+ ∐-of-ε∞s : (σ : ⟨ 𝓓∞ ⟩) → σ ≡ {!!}
+ ∐-of-ε∞s = {!!} -}
+
+ module _
+         (𝓔 : DCPO {𝓤'} {𝓣'})
+         (g : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓔 ⟩)
+         (g-cont : (i : I) → is-continuous (𝓓 i) 𝓔 (g i))
+         (comm : (i j : I) (l : i ⊑ j) → g j ∘ ε l ∼ g i)
+        where
+
+  colimit-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓔 ⟩
+  colimit-family σ i = g i (⦅ σ ⦆ i)
+
+  colimit-family-is-monotone : (σ : ⟨ 𝓓∞ ⟩) (i j : I) (l : i ⊑ j)
+                             → colimit-family σ i ⊑⟨ 𝓔 ⟩ colimit-family σ j
+  colimit-family-is-monotone σ i j l =
+   g i (⦅ σ ⦆ i)             ⊑⟨ 𝓔 ⟩[ u ]
+   g i (π l (⦅ σ ⦆ j))       ⊑⟨ 𝓔 ⟩[ v ]
+   g j (ε l (π l (⦅ σ ⦆ j))) ⊑⟨ 𝓔 ⟩[ w ]
+   g j (⦅ σ ⦆ j)             ∎⟨ 𝓔 ⟩
+    where
+     u = ≡-to-⊑ 𝓔 (ap (g i) ((π-equality σ l) ⁻¹))
+     v = ≡-to-⊑ 𝓔 ((comm i j l (π l (⦅ σ ⦆ j))) ⁻¹)
+     w = gm (ε l (π l (⦅ σ ⦆ j))) (⦅ σ ⦆ j) (επ-deflation l (⦅ σ ⦆ j))
+      where
+       gm : is-monotone (𝓓 j) 𝓔 (g j)
+       gm = continuous-implies-monotone (𝓓 j) 𝓔 (g j , g-cont j)
+
+  colimit-family-is-directed : (σ : ⟨ 𝓓∞ ⟩) → is-Directed 𝓔 (colimit-family σ)
+  colimit-family-is-directed σ = I-inhabited , γ
+   where
+    γ : is-weakly-directed (underlying-order 𝓔) (colimit-family σ)
+    γ i j = ∥∥-functor ψ (I-weakly-directed i j)
+     where
+      ψ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+        → (Σ k ꞉ I , colimit-family σ i ⊑⟨ 𝓔 ⟩ colimit-family σ k
+                   × colimit-family σ j ⊑⟨ 𝓔 ⟩ colimit-family σ k)
+      ψ (k , lᵢ , lⱼ) =
+       k , colimit-family-is-monotone σ i k lᵢ ,
+           colimit-family-is-monotone σ j k lⱼ
+
+  colimit-mediating-arrow : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩
+  colimit-mediating-arrow σ = ∐ 𝓔 {I} {φ} δ
+   where
+    φ : I → ⟨ 𝓔 ⟩
+    φ i = colimit-family σ i
+    δ : is-Directed 𝓔 φ
+    δ = colimit-family-is-directed σ
 
 \end{code}

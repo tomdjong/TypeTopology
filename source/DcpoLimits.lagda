@@ -405,11 +405,14 @@ module Diagram
 
 \begin{code}
 
- {- ε∞-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓓∞ ⟩
+ ε∞-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓓∞ ⟩
  ε∞-family σ i = ε∞ i (⦅ σ ⦆ i)
 
- ∐-of-ε∞s : (σ : ⟨ 𝓓∞ ⟩) → σ ≡ {!!}
- ∐-of-ε∞s = {!!} -}
+ ε∞-family-is-directed : (σ : ⟨ 𝓓∞ ⟩) → is-Directed 𝓓∞ (ε∞-family σ)
+ ε∞-family-is-directed σ = {!!}
+
+ ∐-of-ε∞s : (σ : ⟨ 𝓓∞ ⟩) → σ ≡ ∐ 𝓓∞ {I} {ε∞-family σ} (ε∞-family-is-directed σ)
+ ∐-of-ε∞s = {!!}
 
  module _
          (𝓔 : DCPO {𝓤'} {𝓣'})
@@ -456,5 +459,13 @@ module Diagram
     φ i = colimit-family σ i
     δ : is-Directed 𝓔 φ
     δ = colimit-family-is-directed σ
+
+  colimit-mediating-arrow-commutes : (i : I) → colimit-mediating-arrow ∘ ε∞ i ∼ g i
+  colimit-mediating-arrow-commutes i = {!!}
+
+  colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
+                                    → ((i : I) → h ∘ ε∞ i ∼ g i)
+                                    → h ∼ colimit-mediating-arrow
+  colimit-mediating-arrow-is-unique h h-comm σ = {!!}
 
 \end{code}

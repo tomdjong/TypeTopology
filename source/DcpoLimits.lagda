@@ -58,6 +58,15 @@ module Diagram
  π-equality : (σ : 𝓓∞-carrier) {i j : I} (l : i ⊑ j) → π l (⦅ σ ⦆ j) ≡ ⦅ σ ⦆ i
  π-equality σ {i} {j} l = pr₂ σ i j l
 
+ to-𝓓∞-≡ : (σ τ : 𝓓∞-carrier) → ((i : I) → ⦅ σ ⦆ i ≡ ⦅ τ ⦆ i) → σ ≡ τ
+ to-𝓓∞-≡ σ τ h =
+  to-subtype-≡
+   (λ σ → Π-is-prop fe
+    (λ i → Π-is-prop fe
+    (λ j → Π-is-prop fe
+    (λ l → sethood (𝓓 i)))))
+   (dfunext fe h)
+
  family-at-ith-component : {𝓐 : 𝓥 ̇ } (α : 𝓐 → 𝓓∞-carrier) (i : I) → 𝓐 → ⟨ 𝓓 i ⟩
  family-at-ith-component α i a = ⦅ α a ⦆ i
 
@@ -124,13 +133,8 @@ module Diagram
      t : is-transitive
      t σ τ ρ l k i = transitivity (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (⦅ ρ ⦆ i) (l i) (k i)
      a : is-antisymmetric
-     a σ τ l k = to-subtype-≡
-                  (λ σ → Π-is-prop fe
-                          (λ i → Π-is-prop fe
-                          (λ j → Π-is-prop fe
-                          (λ _ → sethood (𝓓 i)))))
-                  (dfunext fe ((λ i → antisymmetry (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i)
-                                      (l i) (k i))))
+     a σ τ l k = to-𝓓∞-≡ σ τ
+                  (λ i → antisymmetry (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (l i) (k i))
    dc : is-directed-complete _≼_
    dc 𝓐 α δ = (𝓓∞-∐ α δ) , ub , lb-of-ubs
     where
@@ -346,5 +350,39 @@ module Diagram
           u₅ = ≡-to-⊑ (𝓓 j)
                 (∐-family-≡ (𝓓 j) (πε ∘ α) (λ a → ⦅ ε∞ i (α a) ⦆ j) p δ₁)
           u₆ = ∐-is-lowerbound-of-upperbounds (𝓓 j) δ₂ (⦅ σ ⦆ j) (λ a → ub a j)
+
+\end{code}
+
+\begin{code}
+
+ {- ε∞-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓓∞ ⟩
+ ε∞-family σ i = ε∞ i (⦅ σ ⦆ i)
+
+ ∐-of-ε∞s : (σ : ⟨ 𝓓∞ ⟩) → σ ≡ {!!}
+ ∐-of-ε∞s = {!!} -}
+
+ module _
+         (𝓔 : DCPO {𝓤'} {𝓣'})
+         (f : (i : I) → ⟨ 𝓔 ⟩ → ⟨ 𝓓 i ⟩)
+         (f-cont : (i : I) → is-continuous 𝓔 (𝓓 i) (f i))
+         (comm : (i j : I) (l : i ⊑ j) → π l ∘ f j ∼ f i)
+        where
+
+  limit-mediating-arrow : ⟨ 𝓔 ⟩ → ⟨ 𝓓∞ ⟩
+  limit-mediating-arrow y = σ , φ
+   where
+    σ : (i : I) → ⟨ 𝓓 i ⟩
+    σ i = f i y
+    φ : (i j : I) (l : i ⊑ j) → π l (f j y) ≡ f i y
+    φ i j l = comm i j l y
+
+  limit-mediating-arrow-commutes : (i : I) → π∞ i ∘ limit-mediating-arrow ∼ f i
+  limit-mediating-arrow-commutes i y = refl
+
+  limit-mediating-arrow-is-unique : (g : ⟨ 𝓔 ⟩ → ⟨ 𝓓∞ ⟩)
+                                  → ((i : I) → π∞ i ∘ g ∼ f i)
+                                  → g ∼ limit-mediating-arrow
+  limit-mediating-arrow-is-unique g g-comm y =
+   to-𝓓∞-≡ (g y) (limit-mediating-arrow y) (λ i → g-comm i y)
 
 \end{code}

@@ -120,11 +120,10 @@ image-is-directed' : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                      (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
                    → is-Directed 𝓓 α
                    → is-Directed 𝓔 ((underlying-function 𝓓 𝓔 f) ∘ α)
-image-is-directed' 𝓓 𝓔 f {I} {α} δ =
- image-is-directed 𝓓 𝓔 m δ
-  where
-   m : is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
-   m = continuous-implies-monotone 𝓓 𝓔 f
+image-is-directed' 𝓓 𝓔 f {I} {α} δ = image-is-directed 𝓓 𝓔 m δ
+ where
+  m : is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
+  m = continuous-implies-monotone 𝓓 𝓔 f
 
 continuous-∐-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                  (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}

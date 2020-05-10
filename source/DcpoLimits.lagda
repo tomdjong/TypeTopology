@@ -23,11 +23,9 @@ open import Poset fe
 
 module Diagram
         {I : 𝓥 ̇ }
---        (I-is-set : is-set I)
         (_⊑_ : I → I → 𝓦 ̇ )
         (⊑-refl : {i : I} → i ⊑ i)
         (⊑-trans : {i j k : I} → i ⊑ j → j ⊑ k → i ⊑ k)
---        (⊑-antisym : (i j : I) → i ⊑ j → j ⊑ i → i ≡ j)
         (⊑-prop-valued : (i j : I) → is-prop (i ⊑ j))
         (I-inhabited : ∥ I ∥)
         (I-weakly-directed : (i j : I) → ∃ k ꞉ I , i ⊑ k × j ⊑ k)
@@ -612,6 +610,8 @@ module Diagram
        v₆ = ∐-is-upperbound 𝓔 δ i
        v₇ = reflexivity 𝓔 (∐ 𝓔 δ)
 
+  -- For some reason, type-checking this is very painful.
+  -- TO DO: Improve this.
   colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
                                     → is-continuous 𝓓∞ 𝓔 h
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
@@ -626,16 +626,16 @@ module Diagram
     where
      p : (λ i → h (ε∞ i (⦅ σ ⦆ i))) ≡ (λ i → g i (⦅ σ ⦆ i))
      p = dfunext fe (λ i → h-comm i (⦅ σ ⦆ i))
-     δ : is-Directed 𝓓∞ (ε∞-family σ)
+     δ : is-Directed 𝓓∞ {I} (ε∞-family σ)
      δ = ε∞-family-is-directed σ
-     δ₁ : is-Directed 𝓔 (h ∘ ε∞-family σ)
-     δ₁ = image-is-directed' 𝓓∞ 𝓔 (h , h-cont) δ
+     δ₁ : is-Directed 𝓔 {I} (λ i → h (ε∞ i (⦅ σ ⦆ i)))
+     δ₁ = image-is-directed' 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
      δ₂ : is-Directed 𝓔 (λ i → g i (⦅ σ ⦆ i))
-     δ₂ = transport (is-Directed 𝓔) p δ₁
+     δ₂ = transport (is-Directed 𝓔 {I}) p δ₁
      δ₃ : is-Directed 𝓔 (colimit-family σ)
      δ₃ = colimit-family-is-directed σ
-     e₁ = continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) δ
-     e₂ = ∐-family-≡ 𝓔 (λ i → h (ε∞ i (⦅ σ ⦆ i))) (λ i → g i (⦅ σ ⦆ i)) p δ₁
+     e₁ = continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
+     e₂ = ∐-family-≡ 𝓔 {I} (λ i → h (ε∞ i (⦅ σ ⦆ i))) (λ i → g i (⦅ σ ⦆ i)) p δ₁
      e₃ = ∐-independent-of-directedness-witness 𝓔 δ₂ δ₃
 
 \end{code}

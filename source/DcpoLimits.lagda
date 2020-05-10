@@ -560,10 +560,57 @@ module Diagram
     δ : is-Directed 𝓔 φ
     δ = colimit-family-is-directed σ
 
-{-
-  colimit-mediating-arrow-commutes : (i : I) → colimit-mediating-arrow ∘ ε∞ i ∼ g i
-  colimit-mediating-arrow-commutes i = {!!}
--}
+  colimit-mediating-arrow-commutes : (i : I)
+                                   → colimit-mediating-arrow ∘ ε∞ i ∼ g i
+  colimit-mediating-arrow-commutes i x =
+   antisymmetry 𝓔 (colimit-mediating-arrow ((ε∞ i) x)) (g i x) a b
+    where
+     δ : is-Directed 𝓔 (colimit-family (ε∞ i x))
+     δ = colimit-family-is-directed (ε∞ i x)
+     a : colimit-mediating-arrow (ε∞ i x) ⊑⟨ 𝓔 ⟩ g i x
+     a = ∐-is-lowerbound-of-upperbounds 𝓔 δ (g i x) γ
+      where
+       γ : (j : I) → colimit-family (ε∞ i x) j ⊑⟨ 𝓔 ⟩ g i x
+       γ j = ∥∥-rec (prop-valuedness 𝓔 (colimit-family (ε∞ i x) j) (g i x))
+              ϕ (I-weakly-directed i j)
+        where
+         ϕ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+           → colimit-family (ε∞ i x) j ⊑⟨ 𝓔 ⟩ g i x
+         ϕ (k , lᵢ , lⱼ) =
+          colimit-family (ε∞ i x) j  ⊑⟨ 𝓔 ⟩[ u₁ ]
+          g j (ρ i j x)              ⊑⟨ 𝓔 ⟩[ u₂ ]
+          g j (κ x (k , lᵢ , lⱼ))    ⊑⟨ 𝓔 ⟩[ u₃ ]
+          g j (π lⱼ (ε lᵢ x))        ⊑⟨ 𝓔 ⟩[ u₄ ]
+          g k (ε lⱼ (π lⱼ (ε lᵢ x))) ⊑⟨ 𝓔 ⟩[ u₅ ]
+          g k (ε lᵢ x)               ⊑⟨ 𝓔 ⟩[ u₆ ]
+          g i x                      ∎⟨ 𝓔 ⟩
+           where
+            u₁ = reflexivity 𝓔 (colimit-family (ε∞ i x) j)
+            u₂ = ≡-to-⊑ 𝓔 (ap (g j) (ρ-in-terms-of-κ lᵢ lⱼ x))
+            u₃ = reflexivity 𝓔 (g j (κ x (k , lᵢ , lⱼ)))
+            u₄ = ≡-to-⊑ 𝓔 ((comm j k lⱼ (π lⱼ (ε lᵢ x))) ⁻¹)
+            u₅ = m (ε lⱼ (π lⱼ (ε lᵢ x))) (ε lᵢ x) (επ-deflation lⱼ (ε lᵢ x))
+             where
+              m : is-monotone (𝓓 k) 𝓔 (g k)
+              m = continuous-implies-monotone (𝓓 k) 𝓔 (g k , g-cont k)
+            u₆ = ≡-to-⊑ 𝓔 (comm i k lᵢ x)
+     b : g i x ⊑⟨ 𝓔 ⟩ colimit-mediating-arrow (ε∞ i x)
+     b = g i x                            ⊑⟨ 𝓔 ⟩[ v₁ ]
+         g i (ε ⊑-refl x)                 ⊑⟨ 𝓔 ⟩[ v₂ ]
+         g i (π ⊑-refl (ε ⊑-refl x))      ⊑⟨ 𝓔 ⟩[ v₃ ]
+         g i (κ x (i , ⊑-refl , ⊑-refl))  ⊑⟨ 𝓔 ⟩[ v₄ ]
+         g i (ρ i i x)                    ⊑⟨ 𝓔 ⟩[ v₅ ]
+         g i (⦅ ε∞ i x ⦆ i)               ⊑⟨ 𝓔 ⟩[ v₆ ]
+         ∐ 𝓔 δ                            ⊑⟨ 𝓔 ⟩[ v₇ ]
+         colimit-mediating-arrow (ε∞ i x) ∎⟨ 𝓔 ⟩
+      where
+       v₁ = ≡-to-⊑ 𝓔 (ap (g i) ((ε-id i x) ⁻¹))
+       v₂ = ≡-to-⊑ 𝓔 (ap (g i) ((π-id i (ε ⊑-refl x)) ⁻¹))
+       v₃ = reflexivity 𝓔 (g i (π ⊑-refl (ε ⊑-refl x)))
+       v₄ = ≡-to-⊑ 𝓔 (ap (g i) ((ρ-in-terms-of-κ ⊑-refl ⊑-refl x) ⁻¹))
+       v₅ = reflexivity 𝓔 (g i (ρ i i x))
+       v₆ = ∐-is-upperbound 𝓔 δ i
+       v₇ = reflexivity 𝓔 (∐ 𝓔 δ)
 
   colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
                                     → is-continuous 𝓓∞ 𝓔 h

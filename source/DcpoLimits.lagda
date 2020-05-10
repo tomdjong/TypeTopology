@@ -108,7 +108,7 @@ module Diagram
      δ₂ : is-Directed (𝓓 i) (β i)
      δ₂ = transport (is-Directed (𝓓 i)) h δ₁
      eq₁ = continuous-∐-≡ (𝓓 j) (𝓓 i) ((π l) , (π-is-continuous l)) (δ' j)
-     eq₂ = ∐-family-≡ (𝓓 i) (π l ∘ β j) (β i) h δ₁
+     eq₂ = ∐-family-≡ (𝓓 i) h δ₁
      eq₃ = ∐-independent-of-directedness-witness (𝓓 i) δ₂ (δ' i)
 
  𝓓∞ : DCPO {𝓥 ⊔ 𝓤 ⊔ 𝓦} {𝓥 ⊔ 𝓣}
@@ -367,8 +367,7 @@ module Diagram
           u₂ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ (∐ (𝓓 i) δ))
           u₃ = reflexivity (𝓓 j) (κ (∐ (𝓓 i) δ) (k , lᵢ , lⱼ))
           u₄ = continuous-∐-⊑ (𝓓 i) (𝓓 j) πε' δ
-          u₅ = ≡-to-⊑ (𝓓 j)
-                (∐-family-≡ (𝓓 j) (πε ∘ α) (λ a → ⦅ ε∞ i (α a) ⦆ j) p δ₁)
+          u₅ = ≡-to-⊑ (𝓓 j) (∐-family-≡ (𝓓 j) p δ₁)
           u₆ = ∐-is-lowerbound-of-upperbounds (𝓓 j) δ₂ (⦅ σ ⦆ j) (λ a → ub a j)
 
 \end{code}
@@ -635,7 +634,7 @@ module Diagram
      δ₃ : is-Directed 𝓔 (colimit-family σ)
      δ₃ = colimit-family-is-directed σ
      e₁ = continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
-     e₂ = ∐-family-≡ 𝓔 {I} (λ i → h (ε∞ i (⦅ σ ⦆ i))) (λ i → g i (⦅ σ ⦆ i)) p δ₁
+     e₂ = ∐-family-≡ 𝓔 {I} p δ₁
      e₃ = ∐-independent-of-directedness-witness 𝓔 δ₂ δ₃
 
 \end{code}

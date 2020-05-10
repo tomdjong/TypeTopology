@@ -302,9 +302,9 @@ DCPO-∘ 𝓓 𝓔 𝓔' (f , cf) (g , cg) = (g ∘ f) , (∘-is-continuous 𝓓
 
 \begin{code}
 
-∐-family-≡ : (𝓓 : DCPO {𝓤} {𝓣}) {I : 𝓥 ̇ } (α β : I → ⟨ 𝓓 ⟩)
+∐-family-≡ : (𝓓 : DCPO {𝓤} {𝓣}) {I : 𝓥 ̇ } {α β : I → ⟨ 𝓓 ⟩}
              (p : α ≡ β) (δ : is-Directed 𝓓 α)
            → ∐ 𝓓 {I} {α} δ ≡ ∐ 𝓓 {I} {β} (transport (is-Directed 𝓓) p δ)
-∐-family-≡ 𝓓 α α refl δ = refl
+∐-family-≡ 𝓓 {I} {α} {α} refl δ = refl
 
 \end{code}

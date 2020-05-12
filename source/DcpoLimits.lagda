@@ -1,4 +1,4 @@
-Tom de Jong, 5 May 2020 -
+Tom de Jong, 5 May 2020 - 10 May 2020
 
 \begin{code}
 
@@ -32,7 +32,7 @@ module Diagram
         (𝓓 : I → DCPO {𝓤} {𝓣})
         (ε : {i j : I} → i ⊑ j → ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩)
         (π : {i j : I} → i ⊑ j → ⟨ 𝓓 j ⟩ → ⟨ 𝓓 i ⟩)
-        (επ-deflation : {i j : I} (l : i ⊑ j) → (x : ⟨ 𝓓 j ⟩)
+        (επ-deflation : {i j : I} (l : i ⊑ j) (x : ⟨ 𝓓 j ⟩)
                       → ε l (π l x) ⊑⟨ 𝓓 j ⟩ x )
         (ε-section-of-π : {i j : I} (l : i ⊑ j) → π l ∘ ε l ∼ id )
         (ε-is-continuous : {i j : I} (l : i ⊑ j)

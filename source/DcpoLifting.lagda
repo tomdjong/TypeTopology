@@ -70,9 +70,8 @@ module _ {𝓤 : Universe}
                    → (δ : is-directed _⊑'_ α )
                    → (∃ i ꞉ I , is-defined (α i)) → X
  lifting-sup-value {I} α δ =
-  wconstant-map-to-set-truncation-of-domain-map
-   (Σ i ꞉ I , is-defined (α i))
-   s (family-value-map α) (directed-family-value-map-is-wconstant α δ)
+  wconstant-from-∥∥-to-set s (family-value-map α)
+   (directed-family-value-map-is-wconstant α δ)
 
  lifting-sup : {I : 𝓣 ̇} → (α : I → 𝓛 X) → (δ : is-directed _⊑'_ α) → 𝓛 X
  lifting-sup {I} α δ =
@@ -89,15 +88,12 @@ module _ {𝓤 : Universe}
      f : is-defined (α i) → is-defined (lifting-sup α δ)
      f d = ∣ i , d ∣
      v : (d : is-defined (α i)) → value (α i) d ≡ value (lifting-sup α δ) (f d)
-     v d = value (α i) d                 ≡⟨ p ⟩
+     v d = value (α i) d                 ≡⟨ p ⁻¹ ⟩
            lifting-sup-value α δ (f d)   ≡⟨ refl ⟩
            value (lifting-sup α δ) (f d) ∎
       where
-       p = wconstant-map-to-set-factors-through-truncation-of-domain
-            (Σ j ꞉ I , is-defined (α j)) s
-            (family-value-map α)
-            (directed-family-value-map-is-wconstant α δ)
-            (i , d)
+       p = wconstant-to-set-factors-through-∥∥ s (family-value-map α)
+            (directed-family-value-map-is-wconstant α δ) (i , d)
 
  family-defined-somewhere-sup-≡ : {I : 𝓣 ̇} {α : I → 𝓛 X}
                                 → (δ : is-directed _⊑'_ α)

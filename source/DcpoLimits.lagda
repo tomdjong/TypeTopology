@@ -399,7 +399,7 @@ module Diagram
    to-𝓓∞-≡ (g y) (limit-mediating-arrow y) (λ i → g-comm i y)
 
   limit-mediating-arrow-is-continuous : is-continuous 𝓔 𝓓∞ limit-mediating-arrow
-  limit-mediating-arrow-is-continuous = ?
+  limit-mediating-arrow-is-continuous = {!!}
 
 \end{code}
 
@@ -642,6 +642,6 @@ module Diagram
 
   colimit-mediating-arrow-is-continuous : is-continuous 𝓓∞ 𝓔
                                            colimit-mediating-arrow
-  colimit-mediating-arrow-is-continuous = ?
+  colimit-mediating-arrow-is-continuous = {!!}
 
 \end{code}

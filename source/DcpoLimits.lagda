@@ -398,6 +398,9 @@ module Diagram
   limit-mediating-arrow-is-unique g g-comm y =
    to-𝓓∞-≡ (g y) (limit-mediating-arrow y) (λ i → g-comm i y)
 
+  limit-mediating-arrow-is-continuous : is-continuous 𝓔 𝓓∞ limit-mediating-arrow
+  limit-mediating-arrow-is-continuous = ?
+
 \end{code}
 
 \begin{code}
@@ -636,5 +639,9 @@ module Diagram
      e₁ = continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
      e₂ = ∐-family-≡ 𝓔 {I} p δ₁
      e₃ = ∐-independent-of-directedness-witness 𝓔 δ₂ δ₃
+
+  colimit-mediating-arrow-is-continuous : is-continuous 𝓓∞ 𝓔
+                                           colimit-mediating-arrow
+  colimit-mediating-arrow-is-continuous = ?
 
 \end{code}

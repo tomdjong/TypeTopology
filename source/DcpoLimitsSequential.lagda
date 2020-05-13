@@ -401,5 +401,6 @@ Finally, we can open the directed preorder module with the above parameters.
        π⁺-id
        ε⁺-comp
        π⁺-comp
+      public
 
 \end{code}

@@ -18,7 +18,8 @@ open PropositionalTruncation pt
 open import Dcpo pt fe 𝓤₀
 open import DcpoBasics pt fe 𝓤₀
 open import DcpoExponential pt fe 𝓤₀
-open import DcpoLimits pt fe 𝓤₀ 𝓤₁ 𝓤₁
+-- open import DcpoLimits pt fe 𝓤₀ 𝓤₁ 𝓤₁
+open import DcpoLimitsSequential pt fe 𝓤₁ 𝓤₁
 open import DcpoLifting pt fe 𝓤₀ pe
 
 open import NaturalsOrder
@@ -31,9 +32,10 @@ open import NaturalsAddition renaming (_+_ to _+'_)
 𝓓 : ℕ → DCPO {𝓤₁} {𝓤₁}
 𝓓 n = 𝓓⊥ n ⁻
 
-𝓓-diagram-succ : (n : ℕ) → DCPO[ 𝓓 n , 𝓓 (succ n) ]
-                         × DCPO[ 𝓓 (succ n) , 𝓓 n ]
-𝓓-diagram-succ zero = (e₀ , e₀-continuity) , p₀ , p₀-continuity
+𝓓-diagram : (n : ℕ)
+          → DCPO[ 𝓓 n , 𝓓 (succ n) ]
+          × DCPO[ 𝓓 (succ n) , 𝓓 n ]
+𝓓-diagram zero = (e₀ , e₀-continuity) , p₀ , p₀-continuity
  where
   e₀ : ⟨ 𝓓 0 ⟩ → ⟨ 𝓓 1 ⟩
   e₀ x = (λ y → x) , (constant-functions-are-continuous (𝓓 0) (𝓓 0) x)
@@ -61,10 +63,10 @@ open import NaturalsAddition renaming (_+_ to _+'_)
       where
        ε : is-Directed (𝓓 0) (pointwise-family (𝓓 0) (𝓓 0) α (⊥ (𝓓⊥ 0)))
        ε = pointwise-family-is-directed (𝓓 0) (𝓓 0) α δ (⊥ (𝓓⊥ 0))
-𝓓-diagram-succ (succ n) = (e , e-continuity) , (p , p-continuity)
+𝓓-diagram (succ n) = (e , e-continuity) , (p , p-continuity)
  where
   IH : DCPO[ 𝓓 n , 𝓓 (succ n) ] × DCPO[ 𝓓 (succ n) , 𝓓 n ]
-  IH = 𝓓-diagram-succ n
+  IH = 𝓓-diagram n
   eₙ : DCPO[ 𝓓 n , 𝓓 (succ n) ]
   eₙ = pr₁ IH
   pₙ : DCPO[ 𝓓 (succ n) , 𝓓 n ]
@@ -100,164 +102,87 @@ open import NaturalsAddition renaming (_+_ to _+'_)
                    (𝓓 (succ n)) eₙ)
                   (DCPO-∘-is-continuous₂ (𝓓 n) (𝓓 (succ n)) (𝓓 n) pₙ)
 
-π'⁺ : (n : ℕ) → DCPO[ 𝓓 (succ n) , 𝓓 n ]
-π'⁺ n = pr₂ (𝓓-diagram-succ n)
+π' : (n : ℕ) → DCPO[ 𝓓 (succ n) , 𝓓 n ]
+π' n = pr₂ (𝓓-diagram n)
 
-π' : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓 n ⟩
-π' n = underlying-function (𝓓 (succ n)) (𝓓 n) (π'⁺ n)
+π : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓 n ⟩
+π n = underlying-function (𝓓 (succ n)) (𝓓 n) (π' n)
 
-π'-is-continuous : (n : ℕ) → is-continuous (𝓓 (succ n)) (𝓓 n) (π' n)
-π'-is-continuous n = pr₂ (pr₂ (𝓓-diagram-succ n))
+π-is-continuous : (n : ℕ) → is-continuous (𝓓 (succ n)) (𝓓 n) (π n)
+π-is-continuous n = pr₂ (pr₂ (𝓓-diagram n))
 
-ε'⁺ : (n : ℕ) → DCPO[ 𝓓 n , 𝓓 (succ n) ]
-ε'⁺ n = pr₁ (𝓓-diagram-succ n)
+ε' : (n : ℕ) → DCPO[ 𝓓 n , 𝓓 (succ n) ]
+ε' n = pr₁ (𝓓-diagram n)
 
-ε' : (n : ℕ) → ⟨ 𝓓 n ⟩ → ⟨ 𝓓 (succ n) ⟩
-ε' n = underlying-function (𝓓 n) (𝓓 (succ n)) (ε'⁺ n)
+ε : (n : ℕ) → ⟨ 𝓓 n ⟩ → ⟨ 𝓓 (succ n) ⟩
+ε n = underlying-function (𝓓 n) (𝓓 (succ n)) (ε' n)
 
-ε'-is-continuous : (n : ℕ) → is-continuous (𝓓 n) (𝓓 (succ n)) (ε' n)
-ε'-is-continuous n = pr₂ (pr₁ (𝓓-diagram-succ n))
+ε-is-continuous : (n : ℕ) → is-continuous (𝓓 n) (𝓓 (succ n)) (ε n)
+ε-is-continuous n = pr₂ (pr₁ (𝓓-diagram n))
 
-π-helper : {n m : ℕ} (k : ℕ) → n +' k ≡ m → ⟨ 𝓓 m ⟩ → ⟨ 𝓓 n ⟩
-π-helper zero refl = id
-π-helper {n} {m} (succ k) refl = IH ∘ π' (n +' k)
- where
-  IH : ⟨ 𝓓 (n +' k) ⟩ → ⟨ 𝓓 n ⟩
-  IH = π-helper {n} {n +' k} k refl
+π-on-0 : (f : ⟨ 𝓓 0 ⟩ → ⟨ 𝓓 0 ⟩) (c : is-continuous (𝓓 0) (𝓓 0) f)
+       → π 0 (f , c) ≡ f (⊥ (𝓓⊥ 0))
+π-on-0 f c = refl
 
-π : {n m : ℕ} → (n ≤ m) → ⟨ 𝓓 m ⟩ → ⟨ 𝓓 n ⟩
-π {n} {m} l = γ (subtraction n m l)
- where
-  γ : (Σ k ꞉ ℕ , k +' n ≡ m) → ⟨ 𝓓 m ⟩ → ⟨ 𝓓 n ⟩
-  γ (k , p) = π-helper {n} {m} k q
-   where
-    q : n +' k ≡ m
-    q = addition-commutativity n k ∙ p
+π-on-succ : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓 (succ n) ⟩)
+            (c : is-continuous (𝓓 (succ n)) (𝓓 (succ n)) f)
+          → [ 𝓓 n , 𝓓 n ]⟨ π (succ n) (f , c) ⟩ ≡ π n ∘ f ∘ ε n
+π-on-succ n f c = refl
 
-π-helper-is-continuous : {n m : ℕ} (k : ℕ) (p : n +' k ≡ m)
-                       → is-continuous (𝓓 m) (𝓓 n) (π-helper k p)
-π-helper-is-continuous {n} {m} zero refl = id-is-continuous (𝓓 n)
-π-helper-is-continuous {n} {m} (succ k) refl = γ
- where
-  f : ⟨ 𝓓 (n +' k) ⟩ → ⟨ 𝓓 n ⟩
-  f = π-helper k refl
-  γ : is-continuous (𝓓 m) (𝓓 n) (f ∘ π' (n +' k))
-  γ = ∘-is-continuous (𝓓 m) (𝓓 (n +' k)) (𝓓 n)
-       (π' (n +' k)) f (π'-is-continuous (n +' k)) IH
-   where
-    IH : is-continuous (𝓓 (n +' k)) (𝓓 n) f
-    IH = π-helper-is-continuous {n} {n +' k} k refl
+ε-on-0 : (x : ⟨ 𝓓 0 ⟩) → [ 𝓓 0 , 𝓓 0 ]⟨ ε 0 x ⟩ ≡ (λ y → x)
+ε-on-0 x = refl
 
-π-is-continuous : {n m : ℕ} (l : n ≤ m) → is-continuous (𝓓 m) (𝓓 n) (π {n} {m} l)
-π-is-continuous {n} {m} l = π-helper-is-continuous k q
- where
-  k : ℕ
-  k = pr₁ (subtraction n m l)
-  q : n +' k ≡ m
-  q = addition-commutativity n k ∙ pr₂ (subtraction n m l)
+ε-on-succ : (n : ℕ) (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩) (c : is-continuous (𝓓 n) (𝓓 n) f)
+          → [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ≡ ε n ∘ f ∘ π n
+ε-on-succ n f c = refl
 
-ε-helper : {n m : ℕ} (k : ℕ) → n +' k ≡ m → ⟨ 𝓓 n ⟩ → ⟨ 𝓓 m ⟩
-ε-helper zero refl = id
-ε-helper {n} {m} (succ k) refl = ε' (n +' k) ∘ IH
- where
-  IH : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 (n +' k) ⟩
-  IH = ε-helper {n} {n +' k} k refl
-
-ε-helper-is-continuous : {n m : ℕ} (k : ℕ) (p : n +' k ≡ m)
-                       → is-continuous (𝓓 n) (𝓓 m) (ε-helper k p)
-ε-helper-is-continuous {n} {m} zero refl = id-is-continuous (𝓓 n)
-ε-helper-is-continuous {n} {m} (succ k) refl = γ
- where
-  f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 (n +' k) ⟩
-  f =  ε-helper k refl
-  γ : is-continuous (𝓓 n) (𝓓 (n +' succ k)) (ε' (n +' k) ∘ f)
-  γ = ∘-is-continuous (𝓓 n) (𝓓 (n +' k)) (𝓓 m)
-       f (ε' (n +' k)) IH (ε'-is-continuous (n +' k))
-   where
-    IH : is-continuous (𝓓 n) (𝓓 (n +' k)) f
-    IH = ε-helper-is-continuous {n} {n +' k} k refl
-
-ε : {n m : ℕ} → (n ≤ m) → ⟨ 𝓓 n ⟩ → ⟨ 𝓓 m ⟩
-ε {n} {m} l = γ (subtraction n m l)
- where
-  γ : Σ k ꞉ ℕ , k +' n ≡ m → ⟨ 𝓓 n ⟩ → ⟨ 𝓓 m ⟩
-  γ (k , p) = ε-helper {n} {m} k q
-   where
-    q : n +' k ≡ m
-    q = addition-commutativity n k ∙ p
-
-ε-is-continuous : {n m : ℕ} (l : n ≤ m) → is-continuous (𝓓 n) (𝓓 m) (ε {n} {m} l)
-ε-is-continuous {n} {m} l = ε-helper-is-continuous k q
- where
-  k : ℕ
-  k = pr₁ (subtraction n m l)
-  q : n +' k ≡ m
-  q = addition-commutativity n k ∙ pr₂ (subtraction n m l)
-
-ε'-section-of-π' : (n : ℕ) → π' n ∘ ε' n ∼ id
-ε'-section-of-π' zero x = refl
-ε'-section-of-π' (succ n) (f , c) =
- to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) γ
+ε-section-of-π : (n : ℕ) → π n ∘ ε n ∼ id
+ε-section-of-π zero x = refl
+ε-section-of-π (succ n) (f , _) =
+ to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) (dfunext fe γ)
   where
-   γ : (λ x → π' n ({!!} (ε' n x))) ≡ f
-   -- (λ x → π' n (pr₁ (ε' (succ n) (f , c)) (ε' n x))) ≡ f
-   γ = {!!}
+   γ : π n ∘ ε n ∘ f ∘ π n ∘ ε n ∼ f
+   γ x = (π n ∘ ε n ∘ f ∘ π n ∘ ε n) x ≡⟨ IH (f (π n (ε n x))) ⟩
+         (f ∘ π n ∘ ε n) x             ≡⟨ ap f (IH x) ⟩
+         f x                           ∎
+    where
+     IH : π n ∘ ε n ∼ id
+     IH = ε-section-of-π n
+
+επ-deflation : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩) → ε n (π n f) ⊑⟨ 𝓓 (succ n) ⟩ f
+επ-deflation zero (f , c) x =
+ f (⊥ (𝓓⊥ 0)) ⊑⟨ 𝓓 0 ⟩[ m (⊥ (𝓓⊥ 0)) x (⊥-is-least (𝓓⊥ 0) x) ]
+ f x          ∎⟨ 𝓓 0 ⟩
+  where
+   m : is-monotone (𝓓 0) (𝓓 0) f
+   m = continuous-implies-monotone (𝓓 0) (𝓓 0) (f , c)
+επ-deflation (succ n) (f , c) x =
+ {- I would use the ⊑⟨ 𝓓 (succ n) ⟩[ ? ] syntax here, but Agda has trouble
+    figuring out some implicit arguments. -}
+ transitivity (𝓓 (succ n))
+  ((ε n ∘ π n ∘ f ∘ ε n ∘ π n) x) (f (ε n (π n x))) (f x)
+  (IH (f (ε n (π n x))))
+  (m (ε n (π n x)) x (IH x))
 {-
- π' (succ n) (ε' (succ n) f) ≡⟨ refl ⟩
- {!!} ≡⟨ {!!} ⟩
- {!!} ≡⟨ {!!} ⟩
- {!!} ≡⟨ {!!} ⟩
- f ∎
+ (ε n ∘ π n ∘ f ∘ ε n ∘ π n) x ⊑⟨ 𝓓 (succ n) ⟩[ IH (f (ε n (π n x)))     ]
+ f (ε n (π n x))               ⊑⟨ 𝓓 (succ n) ⟩[ m (ε n (π n x)) x (IH x) ]
+ f x                           ∎⟨ 𝓓 (succ n) ⟩ -}
   where
-   IH : π' n ∘ ε' n ∼ id
-   IH = ε'-section-of-π' n
--}
+   IH : (g : ⟨ 𝓓 (succ n) ⟩) → ε n (π n g) ⊑⟨ 𝓓 (succ n) ⟩ g
+   IH = επ-deflation n
+   m : is-monotone (𝓓 (succ n)) (𝓓 (succ n)) f
+   m = continuous-implies-monotone (𝓓 (succ n)) (𝓓 (succ n)) (f , c)
 
-open Diagram
-      {𝓤₀} {ℕ} _≤_
-      (λ {n} → ≤-refl n)
-      (λ {n} {m} {k} → ≤-trans n m k)
-      ≤-is-prop-valued
-      ∣ 0 ∣
-      (λ n m → ∣ n +' m , (≤-+ n m) , (≤-+' n m)  ∣)
+open SequentialDiagram
       𝓓
-      (λ {n} {m} → ε {n} {m})
-      (λ {n} {m} → π {n} {m})
-      {!!}
-      {!!}
-      (λ {n} {m} → ε-is-continuous {n} {m})
-      (λ {n} {m} → π-is-continuous {n} {m})
-      {!!}
-      {!!}
-      {!!}
-      {!!}
+      ε
+      π
+      επ-deflation
+      ε-section-of-π
+      ε-is-continuous
+      π-is-continuous
 
-{-
-module Diagram
-        {I : 𝓥 ̇ }
-        (_⊑_ : I → I → 𝓦 ̇ )
-        (⊑-refl : {i : I} → i ⊑ i)
-        (⊑-trans : {i j k : I} → i ⊑ j → j ⊑ k → i ⊑ k)
-        (⊑-prop-valued : (i j : I) → is-prop (i ⊑ j))
-        (I-inhabited : ∥ I ∥)
-        (I-weakly-directed : (i j : I) → ∃ k ꞉ I , i ⊑ k × j ⊑ k)
-        (𝓓 : I → DCPO {𝓤} {𝓣})
-        (ε : {i j : I} → i ⊑ j → ⟨ 𝓓 i ⟩ → ⟨ 𝓓 j ⟩)
-        (π : {i j : I} → i ⊑ j → ⟨ 𝓓 j ⟩ → ⟨ 𝓓 i ⟩)
-        (επ-deflation : {i j : I} (l : i ⊑ j) → (x : ⟨ 𝓓 j ⟩)
-                      → ε l (π l x) ⊑⟨ 𝓓 j ⟩ x )
-        (ε-section-of-π : {i j : I} (l : i ⊑ j) → π l ∘ ε l ∼ id )
-        (ε-is-continuous : {i j : I} (l : i ⊑ j)
-                         → is-continuous (𝓓 i) (𝓓 j) (ε {i} {j} l))
-        (π-is-continuous : {i j : I} (l : i ⊑ j)
-                         → is-continuous (𝓓 j) (𝓓 i) (π {i} {j} l))
-        (ε-id : (i : I ) → ε (⊑-refl {i}) ∼ id)
-        (π-id : (i : I ) → π (⊑-refl {i}) ∼ id)
-        (ε-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
-                → ε m ∘ ε l ∼ ε (⊑-trans l m))
-        (π-comp : {i j k : I} (l : i ⊑ j) (m : j ⊑ k)
-                → π l ∘ π m ∼ π (⊑-trans l m))
-       where
--}
+test : DCPO {𝓤₁} {𝓤₁}
+test = 𝓓∞
 
 \end{code}

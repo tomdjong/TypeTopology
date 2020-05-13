@@ -1,4 +1,4 @@
-Tom de Jong, 12 May 2020 -
+Tom de Jong, 12 & 13 May 2020.
 
 \begin{code}
 
@@ -269,16 +269,7 @@ The most laborious part: composing two ε⁺s is ε⁺ on ≤-trans. And similar
                 → ε⁺-helper m k b q ∘ ε⁺-helper n m a p
                 ∼ ε⁺-helper n k (a +' b)
                    ((addition-associativity n a b) ⁻¹ ∙ ap (λ - → - +' b) p ∙ q)
- ε⁺-comp-helper {n} {m} {k} a zero refl refl x =
-  ε⁺-helper n (n +' a) a refl x       ≡⟨ refl ⟩
-  ε⁺-helper-Σ n (n +' a) (a , refl) x ≡⟨ e ⟩
-  ε⁺-helper-Σ n (n +' a) (a , p   ) x ≡⟨ refl ⟩
-  ε⁺-helper n (n +' a) a p x          ∎
-   where
-    p : n +' (a +' 0) ≡ n +' a +' 0
-    p = addition-associativity n a 0 ⁻¹
-    e = ap (λ - → ε⁺-helper-Σ n (n +' a) - x)
-         (left-addition-is-embedding n (n +' a) (a , refl) (a , p))
+ ε⁺-comp-helper {n} {m} {k} a zero refl refl x = refl
  ε⁺-comp-helper {n} {m} {k} a (succ b) refl refl x =
   ε _ (ε⁺-helper (n +' a) _ b refl (ε⁺-helper n _ a refl x)) ≡⟨ i    ⟩
   ε _ (ε⁺-helper n (n +' a +' b) (a +' b) p x)               ≡⟨ refl ⟩
@@ -332,12 +323,64 @@ The most laborious part: composing two ε⁺s is ε⁺ on ≤-trans. And similar
       h : a +' b , r ≡ s
       h = left-addition-is-embedding n k (a +' b , r) s
 
+ π⁺-comp-helper : {n m k : ℕ} (a b : ℕ) (p : n +' a ≡ m) (q : m +' b ≡ k)
+                → π⁺-helper n m a p ∘ π⁺-helper m k b q
+                ∼ π⁺-helper n k (a +' b)
+                   ((addition-associativity n a b) ⁻¹ ∙ ap (λ - → - +' b) p ∙ q)
+ π⁺-comp-helper {n} {m} {k} a zero refl refl x = refl
+ π⁺-comp-helper {n} {m} {k} a (succ b) refl refl x =
+  π⁺-helper n _ a refl (π⁺-helper (n +' a) _ b refl (π _ x)) ≡⟨ IH   ⟩
+  π⁺-helper n (n +' a +' b) (a +' b) p (π _ x)               ≡⟨ refl ⟩
+  π⁺-helper-Σ n (n +' a +' b) (a +' b , p) (π _ x)           ≡⟨ i    ⟩
+  π⁺-helper-Σ n (n +' a +' b) (a +' b , succ-lc p') (π _ x)  ≡⟨ refl ⟩
+  π⁺-helper n (n +' a +' b) (a +' b) (succ-lc p') (π _ x)    ≡⟨ ii ⟩
+  π⁺-helper n (n +' a +' succ b) (a +' succ b) p' x          ∎
+   where
+    p : n +' (a +' b) ≡ n +' a +' b
+    p = addition-associativity n a b ⁻¹
+    p' : n +' (a +' succ b) ≡ n +' a +' succ b
+    p' = addition-associativity n a (succ b) ⁻¹
+    IH = π⁺-comp-helper a b refl refl (π (n +' a +' b) x)
+    i  = ap (λ - → π⁺-helper-Σ n (n +' a +' b) - (π _ x)) h
+     where
+      h : a +' b , p ≡ a +' b , succ-lc p'
+      h = left-addition-is-embedding n (n +' a +' b)
+           (a +' b , p) (a +' b , succ-lc p')
+    ii = π⁺-helper-on-succ n (n +' a +' b) (a +' b) p' x ⁻¹
+
+ π⁺-comp : {n m k : ℕ} (l₁ : n ≤ m) (l₂ : m ≤ k)
+         → π⁺ {n} {m} l₁ ∘ π⁺ {m} {k} l₂  ∼ π⁺ (≤-trans n m k l₁ l₂)
+ π⁺-comp {n} {m} {k} l₁ l₂ x =
+  π⁺ {n} {m} l₁ (π⁺ {m} {k} l₂ x)         ≡⟨ refl ⟩
+  π⁺-helper n m a p (π⁺-helper m k b q x) ≡⟨ i    ⟩
+  π⁺-helper n k (a +' b) r x              ≡⟨ refl ⟩
+  π⁺-helper-Σ n k (a +' b , r) x          ≡⟨ ii   ⟩
+  π⁺-helper-Σ n k s x                     ≡⟨ refl ⟩
+  π⁺ (≤-trans n m k l₁ l₂) x              ∎
+   where
+    a : ℕ
+    a = pr₁ (subtraction' n m l₁)
+    p : n +' a ≡ m
+    p = pr₂ (subtraction' n m l₁)
+    b : ℕ
+    b = pr₁ (subtraction' m k l₂)
+    q : m +' b ≡ k
+    q = pr₂ (subtraction' m k l₂)
+    r : n +' (a +' b) ≡ k
+    r = (addition-associativity n a b) ⁻¹ ∙ ap (λ - → - +' b) p ∙ q
+    s : Σ c ꞉ ℕ , n +' c ≡ k
+    s = subtraction' n k (≤-trans n m k l₁ l₂)
+    i  = π⁺-comp-helper a b p q x
+    ii = ap (λ - → π⁺-helper-Σ n k - x) h
+     where
+      h : a +' b , r ≡ s
+      h = left-addition-is-embedding n k (a +' b , r) s
+
 \end{code}
 
 Finally, we can open the directed preorder module with the above parameters.
 
 \begin{code}
-
 
  open Diagram
        {𝓤₀} {ℕ}
@@ -357,6 +400,6 @@ Finally, we can open the directed preorder module with the above parameters.
        ε⁺-id
        π⁺-id
        ε⁺-comp
-       {!!}
+       π⁺-comp
 
 \end{code}

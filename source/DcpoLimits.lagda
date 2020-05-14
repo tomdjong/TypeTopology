@@ -398,8 +398,32 @@ module Diagram
   limit-mediating-arrow-is-unique g g-comm y =
    to-𝓓∞-≡ (g y) (limit-mediating-arrow y) (λ i → g-comm i y)
 
+  limit-mediating-arrow-is-monotone : is-monotone 𝓔 𝓓∞ limit-mediating-arrow
+  limit-mediating-arrow-is-monotone x y l i = f i x ⊑⟨ 𝓓 i ⟩[ m x y l ]
+                                              f i y ∎⟨ 𝓓 i ⟩
+   where
+    m : is-monotone 𝓔 (𝓓 i) (f i)
+    m = continuous-implies-monotone 𝓔 (𝓓 i) (f i , f-cont i)
+
   limit-mediating-arrow-is-continuous : is-continuous 𝓔 𝓓∞ limit-mediating-arrow
-  limit-mediating-arrow-is-continuous = {!!}
+  limit-mediating-arrow-is-continuous = continuity-criterion' 𝓔 𝓓∞ m mon γ
+   where
+    m : ⟨ 𝓔 ⟩ → ⟨ 𝓓∞ ⟩
+    m = limit-mediating-arrow
+    mon : is-monotone 𝓔 𝓓∞ m
+    mon = limit-mediating-arrow-is-monotone
+    γ : (J : 𝓥 ̇) (α : J → ⟨ 𝓔 ⟩) (δ : is-Directed 𝓔 α)
+      → is-lowerbound-of-upperbounds (underlying-order 𝓓∞) (m (∐ 𝓔 δ)) (m ∘ α)
+    γ J α δ σ ub i = ⦅ m (∐ 𝓔 δ) ⦆ i ⊑⟨ 𝓓 i ⟩[ u₁ ]
+                     f i (∐ 𝓔 δ)     ⊑⟨ 𝓓 i ⟩[ u₂ ]
+                     ∐ (𝓓 i) δ'      ⊑⟨ 𝓓 i ⟩[ u₃ ]
+                     ⦅ σ ⦆ i          ∎⟨ 𝓓 i ⟩
+     where
+      δ' : is-Directed (𝓓 i) (f i ∘ α)
+      δ' = image-is-directed' 𝓔 (𝓓 i) (f i , f-cont i) δ
+      u₁ = reflexivity (𝓓 i) (⦅ m (∐ 𝓔 δ) ⦆ i)
+      u₂ = continuous-∐-⊑ 𝓔 (𝓓 i) (f i , f-cont i) δ
+      u₃ = ∐-is-lowerbound-of-upperbounds (𝓓 i) δ' (⦅ σ ⦆ i) (λ j → ub j i)
 
 \end{code}
 
@@ -614,6 +638,7 @@ module Diagram
 
   -- For some reason, type-checking this is very painful.
   -- TO DO: Improve this.
+  {-
   colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
                                     → is-continuous 𝓓∞ 𝓔 h
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
@@ -639,6 +664,7 @@ module Diagram
      e₁ = continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
      e₂ = ∐-family-≡ 𝓔 {I} p δ₁
      e₃ = ∐-independent-of-directedness-witness 𝓔 δ₂ δ₃
+  -}
 
   colimit-mediating-arrow-is-continuous : is-continuous 𝓓∞ 𝓔
                                            colimit-mediating-arrow

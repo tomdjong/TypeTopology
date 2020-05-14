@@ -182,7 +182,43 @@ open SequentialDiagram
       ε-is-continuous
       π-is-continuous
 
-α : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 (succ n) ⟩
-α n (f , c) = (π∞ n ∘ f ∘ ε∞ n) , ?
+α-to-succ : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 (succ n) ⟩
+α-to-succ n (f , c) = (π∞ n ∘ f ∘ ε∞ n) , {!!}
+-- Why is this slow?!
+{-              ∘-is-continuous₃ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n)
+                               (ε∞ n) f (π∞ n)
+                               (ε∞-is-continuous n) c (π∞-is-continuous n) -}
+
+α : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 n ⟩
+α zero     = π 0 ∘ α-to-succ 0
+α (succ n) = α-to-succ n
+
+α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
+α-commutes-with-π zero f = refl
+α-commutes-with-π (succ n) (f , c) =
+ to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) (dfunext fe γ)
+  where
+--   γ : {!!}
+--   γ : (x : ⟨ 𝓓 n ⟩)
+--     → {!!} -- π n (π∞ (succ n) (f (ε∞ (succ n) (ε n x)))) ≡ π∞ n (f (ε∞ n x))
+--   γ : π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n ∼ π∞ n ∘ f ∘ ε∞ n
+   γ = {!!}
+
+β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+β-from-succ n (f , c) = (ε∞ n ∘ f ∘ π∞ n) , {!!}
+
+β : (n : ℕ) → ⟨ 𝓓 n ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+β zero     = β-from-succ 0 ∘ ε 0
+β (succ n) = β-from-succ n
+
+β-commutes-with-ε : (n : ℕ) → β (succ n) ∘ ε n ∼ β n
+β-commutes-with-ε zero x = {!!}
+β-commutes-with-ε (succ n) (f , c) =
+ to-subtype-≡ (λ g → being-continuous-is-a-prop 𝓓∞ 𝓓∞ g) (dfunext fe γ)
+  where
+   γ : (σ : ⟨ 𝓓∞ ⟩)
+     → {!!} -- ε∞ (succ n) (ε n (f (π n (π∞ (succ n) σ)))) ≡ ε∞ n (f (π∞ n σ))
+   -- γ : ε∞ (succ n) ∘ ε n ∘ f ∘ π n ∘ π∞ (succ n) ∼ ε∞ n ∘ f ∘ π∞ n
+   γ = {!!}
 
 \end{code}

@@ -182,7 +182,7 @@ open SequentialDiagram
       ε-is-continuous
       π-is-continuous
 
-test : DCPO {𝓤₁} {𝓤₁}
-test = 𝓓∞
+α : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 (succ n) ⟩
+α n (f , c) = (π∞ n ∘ f ∘ ε∞ n) , ?
 
 \end{code}

@@ -412,9 +412,9 @@ module Diagram
     m = limit-mediating-arrow
     mon : is-monotone 𝓔 𝓓∞ m
     mon = limit-mediating-arrow-is-monotone
-    γ : (J : 𝓥 ̇) (α : J → ⟨ 𝓔 ⟩) (δ : is-Directed 𝓔 α)
+    γ : (A : 𝓥 ̇) (α : A → ⟨ 𝓔 ⟩) (δ : is-Directed 𝓔 α)
       → is-lowerbound-of-upperbounds (underlying-order 𝓓∞) (m (∐ 𝓔 δ)) (m ∘ α)
-    γ J α δ σ ub i = ⦅ m (∐ 𝓔 δ) ⦆ i ⊑⟨ 𝓓 i ⟩[ u₁ ]
+    γ A α δ σ ub i = ⦅ m (∐ 𝓔 δ) ⦆ i ⊑⟨ 𝓓 i ⟩[ u₁ ]
                      f i (∐ 𝓔 δ)     ⊑⟨ 𝓓 i ⟩[ u₂ ]
                      ∐ (𝓓 i) δ'      ⊑⟨ 𝓓 i ⟩[ u₃ ]
                      ⦅ σ ⦆ i          ∎⟨ 𝓓 i ⟩
@@ -423,7 +423,7 @@ module Diagram
       δ' = image-is-directed' 𝓔 (𝓓 i) (f i , f-cont i) δ
       u₁ = reflexivity (𝓓 i) (⦅ m (∐ 𝓔 δ) ⦆ i)
       u₂ = continuous-∐-⊑ 𝓔 (𝓓 i) (f i , f-cont i) δ
-      u₃ = ∐-is-lowerbound-of-upperbounds (𝓓 i) δ' (⦅ σ ⦆ i) (λ j → ub j i)
+      u₃ = ∐-is-lowerbound-of-upperbounds (𝓓 i) δ' (⦅ σ ⦆ i) (λ a → ub a i)
 
 \end{code}
 
@@ -638,7 +638,6 @@ module Diagram
 
   -- For some reason, type-checking this is very painful.
   -- TO DO: Improve this.
-  {-
   colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
                                     → is-continuous 𝓓∞ 𝓔 h
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
@@ -664,10 +663,55 @@ module Diagram
      e₁ = continuous-∐-≡ 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
      e₂ = ∐-family-≡ 𝓔 {I} p δ₁
      e₃ = ∐-independent-of-directedness-witness 𝓔 δ₂ δ₃
-  -}
+
+  colimit-mediating-arrow-is-monotone : is-monotone 𝓓∞ 𝓔
+                                         colimit-mediating-arrow
+  colimit-mediating-arrow-is-monotone σ τ l = γ
+   where
+    δ₁ : is-Directed 𝓔 (colimit-family σ)
+    δ₁ = colimit-family-is-directed σ
+    δ₂ : is-Directed 𝓔 (colimit-family τ)
+    δ₂ = colimit-family-is-directed τ
+    γ : ∐ 𝓔 δ₁ ⊑⟨ 𝓔 ⟩ ∐ 𝓔 δ₂
+    γ = ∐-is-monotone 𝓔 δ₁ δ₂ ψ
+     where
+      ψ : (i : I) → colimit-family σ i ⊑⟨ 𝓔 ⟩ colimit-family τ i
+      ψ i = g i (⦅ σ ⦆ i) ⊑⟨ 𝓔 ⟩[ m (⦅ σ ⦆ i) (⦅ τ ⦆ i) (l i) ]
+            g i (⦅ τ ⦆ i) ∎⟨ 𝓔 ⟩
+       where
+        m : is-monotone (𝓓 i) 𝓔 (g i)
+        m = continuous-implies-monotone (𝓓 i) 𝓔 (g i , g-cont i)
 
   colimit-mediating-arrow-is-continuous : is-continuous 𝓓∞ 𝓔
                                            colimit-mediating-arrow
-  colimit-mediating-arrow-is-continuous = {!!}
+  colimit-mediating-arrow-is-continuous = continuity-criterion' 𝓓∞ 𝓔 m mon γ
+   where
+    m : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩
+    m = colimit-mediating-arrow
+    mon : is-monotone 𝓓∞ 𝓔 colimit-mediating-arrow
+    mon = colimit-mediating-arrow-is-monotone
+    γ : (A : 𝓥 ̇) (α : A → ⟨ 𝓓∞ ⟩) (δ : is-Directed 𝓓∞ α)
+      → is-lowerbound-of-upperbounds (underlying-order 𝓔) (m (∐ 𝓓∞ {A} {α} δ)) (m ∘ α)
+    γ A α δ y ub =
+     ∐-is-lowerbound-of-upperbounds 𝓔 (colimit-family-is-directed (∐ 𝓓∞ δ)) y ψ
+      where
+       ψ : (i : I) → g i (⦅ ∐ 𝓓∞ {A} {α} δ ⦆ i) ⊑⟨ 𝓔 ⟩ y
+       ψ i = g i (⦅ ∐ 𝓓∞ {A} {α} δ ⦆ i)         ⊑⟨ 𝓔 ⟩[ u₁ ]
+             ∐ 𝓔 {A} {λ a → g i (⦅ α a ⦆ i)} δ₂ ⊑⟨ 𝓔 ⟩[ u₂ ]
+             y                                  ∎⟨ 𝓔 ⟩
+        where
+         δ₁ : is-Directed (𝓓 i) (family-at-ith-component α i)
+         δ₁ = family-at-ith-component-is-directed α δ i
+         δ₂ : is-Directed 𝓔 (λ a → g i (⦅ α a ⦆ i))
+         δ₂ = image-is-directed' (𝓓 i) 𝓔 (g i , g-cont i) δ₁
+         u₁ = continuous-∐-⊑ (𝓓 i) 𝓔 (g i , g-cont i) δ₁
+         u₂ = ∐-is-lowerbound-of-upperbounds 𝓔 δ₂ y ϕ
+          where
+           ϕ : (a : A) → g i (⦅ α a ⦆ i) ⊑⟨ 𝓔 ⟩ y
+           ϕ a = g i (⦅ α a ⦆ i)                         ⊑⟨ 𝓔 ⟩[ v    ]
+                 ∐ 𝓔 (colimit-family-is-directed (α a)) ⊑⟨ 𝓔 ⟩[ ub a ]
+                 y                                      ∎⟨ 𝓔 ⟩
+            where
+             v = ∐-is-upperbound 𝓔 (colimit-family-is-directed (α a)) i
 
 \end{code}

@@ -211,13 +211,13 @@ DCPO-∘-is-continuous₂ 𝓓 𝓔 𝓔' g I α δ =
         ≡ ∐ 𝓔' (pointwise-family-is-directed 𝓓 𝓔' β ε x)
       ψ x = [ 𝓔 , 𝓔' ]⟨ g ⟩ ([ 𝓓 , 𝓔 ]⟨ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔) {I} {α} δ ⟩ x) ≡⟨ refl ⟩
             [ 𝓔 , 𝓔' ]⟨ g ⟩ (∐ 𝓔 ε')                                 ≡⟨ e₁ ⟩
-            ∐ 𝓔' ε''                                                    ≡⟨ e₂ ⟩
+            ∐ 𝓔' ε''                                                 ≡⟨ e₂ ⟩
             ∐ 𝓔' (pointwise-family-is-directed 𝓓 𝓔' β ε x)           ∎
        where
         ε' : is-Directed 𝓔 (pointwise-family 𝓓 𝓔 α x)
         ε' = pointwise-family-is-directed 𝓓 𝓔 α δ x
         ε'' : is-Directed 𝓔' ([ 𝓔 , 𝓔' ]⟨ g ⟩ ∘ pointwise-family 𝓓 𝓔 α x)
-        ε'' = image-is-directed 𝓔 𝓔' (continuous-implies-monotone 𝓔 𝓔' g) ε'
+        ε'' = image-is-directed' 𝓔 𝓔' g ε'
         e₁ = continuous-∐-≡ 𝓔 𝓔' g ε'
         e₂ = ∐-independent-of-directedness-witness 𝓔' ε''
               (pointwise-family-is-directed 𝓓 𝓔' β ε x)

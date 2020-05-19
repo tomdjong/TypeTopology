@@ -120,10 +120,13 @@ image-is-directed' : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                      (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
                    → is-Directed 𝓓 α
                    → is-Directed 𝓔 ((underlying-function 𝓓 𝓔 f) ∘ α)
-image-is-directed' 𝓓 𝓔 f {I} {α} δ = image-is-directed 𝓓 𝓔 m δ
+image-is-directed' 𝓓 𝓔 f {I} {α} δ = γ
  where
-  m : is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
-  m = continuous-implies-monotone 𝓓 𝓔 f
+  abstract
+   γ = image-is-directed 𝓓 𝓔 m δ
+    where
+     m : is-monotone 𝓓 𝓔 (underlying-function 𝓓 𝓔 f)
+     m = continuous-implies-monotone 𝓓 𝓔 f
 
 continuous-∐-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
                  (f : DCPO[ 𝓓 , 𝓔 ]) {I : 𝓥 ̇} {α : I → ⟨ 𝓓 ⟩}
@@ -276,33 +279,36 @@ id-is-continuous 𝓓 = continuity-criterion 𝓓 𝓓 id (id-is-monotone 𝓓) 
                 → is-continuous 𝓓 𝓔 f
                 → is-continuous 𝓔 𝓔' g
                 → is-continuous 𝓓 𝓔' (g ∘ f)
-∘-is-continuous 𝓓 𝓔 𝓔' f g cf cg = continuity-criterion 𝓓 𝓔' (g ∘ f) m γ
+∘-is-continuous 𝓓 𝓔 𝓔' f g cf cg = γ
  where
-  mf : is-monotone 𝓓 𝓔 f
-  mf = continuous-implies-monotone 𝓓 𝓔 (f , cf)
-  mg : is-monotone 𝓔 𝓔' g
-  mg = continuous-implies-monotone 𝓔 𝓔' (g , cg)
-  m : is-monotone 𝓓 𝓔' (g ∘ f)
-  m x y l = mg (f x) (f y) (mf x y l)
-  γ : (I : 𝓥 ̇) (α : I → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
-    → g (f (∐ 𝓓 δ)) ⊑⟨ 𝓔' ⟩ ∐ 𝓔' (image-is-directed 𝓓 𝓔' m δ)
-  γ I α δ = g (f (∐ 𝓓 δ)) ⊑⟨ 𝓔' ⟩[ l₁  ]
-            g (∐ 𝓔 εf)    ⊑⟨ 𝓔' ⟩[ l₂ ]
-            ∐ 𝓔' εg       ⊑⟨ 𝓔' ⟩[ l₃ ]
-            ∐ 𝓔' ε        ∎⟨ 𝓔' ⟩
-   where
-    ε : is-Directed 𝓔' (g ∘ f ∘ α)
-    ε = image-is-directed 𝓓 𝓔' m δ
-    εf : is-Directed 𝓔 (f ∘ α)
-    εf = image-is-directed' 𝓓 𝓔 (f , cf) δ
-    εg : is-Directed 𝓔' (g ∘ f ∘ α)
-    εg = image-is-directed' 𝓔 𝓔' (g , cg) εf
-    l₁ = mg (f (∐ 𝓓 δ)) (∐ 𝓔 εf) h
-     where
-      h : f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 εf
-      h = continuous-∐-⊑ 𝓓 𝓔 (f , cf) δ
-    l₂ = continuous-∐-⊑ 𝓔 𝓔' (g , cg) εf
-    l₃ = ≡-to-⊑ 𝓔' (∐-independent-of-directedness-witness 𝓔' εg ε)
+  abstract
+   γ = continuity-criterion 𝓓 𝓔' (g ∘ f) m ψ
+    where
+     mf : is-monotone 𝓓 𝓔 f
+     mf = continuous-implies-monotone 𝓓 𝓔 (f , cf)
+     mg : is-monotone 𝓔 𝓔' g
+     mg = continuous-implies-monotone 𝓔 𝓔' (g , cg)
+     m : is-monotone 𝓓 𝓔' (g ∘ f)
+     m x y l = mg (f x) (f y) (mf x y l)
+     ψ : (I : 𝓥 ̇) (α : I → ⟨ 𝓓 ⟩) (δ : is-Directed 𝓓 α)
+       → g (f (∐ 𝓓 δ)) ⊑⟨ 𝓔' ⟩ ∐ 𝓔' (image-is-directed 𝓓 𝓔' m δ)
+     ψ I α δ = g (f (∐ 𝓓 δ)) ⊑⟨ 𝓔' ⟩[ l₁  ]
+               g (∐ 𝓔 εf)    ⊑⟨ 𝓔' ⟩[ l₂ ]
+               ∐ 𝓔' εg       ⊑⟨ 𝓔' ⟩[ l₃ ]
+               ∐ 𝓔' ε        ∎⟨ 𝓔' ⟩
+      where
+       ε : is-Directed 𝓔' (g ∘ f ∘ α)
+       ε = image-is-directed 𝓓 𝓔' m δ
+       εf : is-Directed 𝓔 (f ∘ α)
+       εf = image-is-directed' 𝓓 𝓔 (f , cf) δ
+       εg : is-Directed 𝓔' (g ∘ f ∘ α)
+       εg = image-is-directed' 𝓔 𝓔' (g , cg) εf
+       l₁ = mg (f (∐ 𝓓 δ)) (∐ 𝓔 εf) h
+        where
+         h : f (∐ 𝓓 δ) ⊑⟨ 𝓔 ⟩ ∐ 𝓔 εf
+         h = continuous-∐-⊑ 𝓓 𝓔 (f , cf) δ
+       l₂ = continuous-∐-⊑ 𝓔 𝓔' (g , cg) εf
+       l₃ = ≡-to-⊑ 𝓔' (∐-independent-of-directedness-witness 𝓔' εg ε)
 
 ∘-is-continuous₃ : {𝓦₁ 𝓣₁ 𝓦₂ 𝓣₂ 𝓦₃ 𝓣₃ 𝓦₄ 𝓣₄ : Universe}
                    (𝓓₁ : DCPO {𝓦₁} {𝓣₁}) (𝓓₂ : DCPO {𝓦₂} {𝓣₂})

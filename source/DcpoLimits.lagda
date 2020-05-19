@@ -636,8 +636,6 @@ module Diagram
        v₆ = ∐-is-upperbound 𝓔 δ i
        v₇ = reflexivity 𝓔 (∐ 𝓔 δ)
 
-  -- For some reason, type-checking this is very painful.
-  -- TO DO: Improve this.
   colimit-mediating-arrow-is-unique : (h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓔 ⟩)
                                     → is-continuous 𝓓∞ 𝓔 h
                                     → ((i : I) → h ∘ ε∞ i ∼ g i)
@@ -650,11 +648,11 @@ module Diagram
    ∐ 𝓔 {I} {λ i → g i (⦅ σ ⦆ i)} δ₃      ≡⟨ refl ⟩
    colimit-mediating-arrow σ             ∎
     where
-     p : (λ i → h (ε∞ i (⦅ σ ⦆ i))) ≡ (λ i → g i (⦅ σ ⦆ i))
+     p : (λ i → (h ∘ ε∞ i) (pr₁ σ i)) ≡ (λ i → g i (⦅ σ ⦆ i))
      p = dfunext fe (λ i → h-comm i (⦅ σ ⦆ i))
      δ : is-Directed 𝓓∞ {I} (ε∞-family σ)
      δ = ε∞-family-is-directed σ
-     δ₁ : is-Directed 𝓔 {I} (λ i → h (ε∞ i (⦅ σ ⦆ i)))
+     δ₁ : is-Directed 𝓔 (h ∘ ε∞-family σ)
      δ₁ = image-is-directed' 𝓓∞ 𝓔 (h , h-cont) {I} {ε∞-family σ} δ
      δ₂ : is-Directed 𝓔 (λ i → g i (⦅ σ ⦆ i))
      δ₂ = transport (is-Directed 𝓔 {I}) p δ₁
@@ -693,7 +691,8 @@ module Diagram
     γ : (A : 𝓥 ̇) (α : A → ⟨ 𝓓∞ ⟩) (δ : is-Directed 𝓓∞ α)
       → is-lowerbound-of-upperbounds (underlying-order 𝓔) (m (∐ 𝓓∞ {A} {α} δ)) (m ∘ α)
     γ A α δ y ub =
-     ∐-is-lowerbound-of-upperbounds 𝓔 (colimit-family-is-directed (∐ 𝓓∞ δ)) y ψ
+     ∐-is-lowerbound-of-upperbounds 𝓔
+      (colimit-family-is-directed (∐ 𝓓∞ {A} {α} δ)) y ψ
       where
        ψ : (i : I) → g i (⦅ ∐ 𝓓∞ {A} {α} δ ⦆ i) ⊑⟨ 𝓔 ⟩ y
        ψ i = g i (⦅ ∐ 𝓓∞ {A} {α} δ ⦆ i)         ⊑⟨ 𝓔 ⟩[ u₁ ]

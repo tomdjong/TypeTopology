@@ -30,7 +30,7 @@ open import NaturalsAddition renaming (_+_ to _+'_)
 𝓓⊥ (succ n) = 𝓓⊥ n ⟹ᵈᶜᵖᵒ⊥ 𝓓⊥ n
 
 𝓓 : ℕ → DCPO {𝓤₁} {𝓤₁}
-𝓓 n = 𝓓⊥ n ⁻
+𝓓 n = pr₁ (𝓓⊥ n)
 
 𝓓-diagram : (n : ℕ)
           → DCPO[ 𝓓 n , 𝓓 (succ n) ]
@@ -72,10 +72,12 @@ open import NaturalsAddition renaming (_+_ to _+'_)
   pₙ : DCPO[ 𝓓 (succ n) , 𝓓 n ]
   pₙ = pr₂ IH
   e : ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓 (succ (succ n)) ⟩
-  e f = DCPO-∘ (𝓓 (succ n)) (𝓓 n) (𝓓 (succ n)) pₙ h
+  e f = DCPO-∘₃ (𝓓 (succ n)) (𝓓 n) (𝓓 n) (𝓓 (succ n))
+        pₙ f eₙ
+        {- DCPO-∘ (𝓓 (succ n)) (𝓓 n) (𝓓 (succ n)) pₙ h
    where
     h : DCPO[ 𝓓 n , 𝓓 (succ n) ]
-    h = DCPO-∘ (𝓓 n) (𝓓 n) (𝓓 (succ n)) f eₙ
+    h = DCPO-∘ (𝓓 n) (𝓓 n) (𝓓 (succ n)) f eₙ -}
   e-continuity : is-continuous (𝓓 (succ n)) (𝓓 (succ (succ n))) e
   e-continuity = ∘-is-continuous
                   (𝓓 (succ n))
@@ -87,10 +89,12 @@ open import NaturalsAddition renaming (_+_ to _+'_)
                   (DCPO-∘-is-continuous₁ (𝓓 (succ n)) (𝓓 n)
                    (𝓓 (succ n)) pₙ)
   p : ⟨ 𝓓 (succ (succ n)) ⟩ → ⟨ 𝓓 (succ n) ⟩
-  p f = DCPO-∘ (𝓓 n) (𝓓 (succ n)) (𝓓 n) eₙ h
+  p f = DCPO-∘₃ (𝓓 n) (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) eₙ f pₙ
+  {- DCPO-∘ (𝓓 n) (𝓓 (succ n)) (𝓓 n) eₙ (DCPO-∘ (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) f pₙ)
+  -- h
    where
     h : DCPO[ 𝓓 (succ n) , 𝓓 n ]
-    h = DCPO-∘ (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) f pₙ
+    h = DCPO-∘ (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) f pₙ -}
   p-continuity : is-continuous (𝓓 (succ (succ n))) (𝓓 (succ n)) p
   p-continuity = ∘-is-continuous
                   (𝓓 (succ (succ n)))
@@ -128,6 +132,11 @@ open import NaturalsAddition renaming (_+_ to _+'_)
             (c : is-continuous (𝓓 (succ n)) (𝓓 (succ n)) f)
           → [ 𝓓 n , 𝓓 n ]⟨ π (succ n) (f , c) ⟩ ≡ π n ∘ f ∘ ε n
 π-on-succ n f c = refl
+
+π-on-succ' : (n : ℕ) (f : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ])
+           → [ 𝓓 n , 𝓓 n ]⟨ π (succ n) f ⟩
+           ≡ π n ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ f ⟩ ∘ ε n
+π-on-succ' n f = refl
 
 ε-on-0 : (x : ⟨ 𝓓 0 ⟩) → [ 𝓓 0 , 𝓓 0 ]⟨ ε 0 x ⟩ ≡ (λ y → x)
 ε-on-0 x = refl
@@ -182,27 +191,68 @@ open SequentialDiagram
       ε-is-continuous
       π-is-continuous
 
+ε∞' : (n : ℕ) → DCPO[ 𝓓 n , 𝓓∞ ]
+ε∞' n = ε∞ n , ε∞-is-continuous n
+
+π∞' : (n : ℕ) → DCPO[ 𝓓∞ , 𝓓 n ]
+π∞' n = π∞ n , π∞-is-continuous n
+
 α-to-succ : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 (succ n) ⟩
-α-to-succ n (f , c) = (π∞ n ∘ f ∘ ε∞ n) , {!!}
--- Why is this slow?!
-{-              ∘-is-continuous₃ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n)
-                               (ε∞ n) f (π∞ n)
-                               (ε∞-is-continuous n) c (π∞-is-continuous n) -}
+α-to-succ n f = DCPO-∘₃ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n) (ε∞' n) f (π∞' n)
 
 α : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 n ⟩
 α zero     = π 0 ∘ α-to-succ 0
 α (succ n) = α-to-succ n
 
+
+help : (n : ℕ) (f g : DCPO[ 𝓓 n , 𝓓 n ])
+     → [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∼ [ 𝓓 n , 𝓓 n ]⟨ g ⟩
+     → f ≡ g
+help n f g h = to-subtype-≡ (being-continuous-is-a-prop (𝓓 n) (𝓓 n)) (dfunext fe h)
+
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
-α-commutes-with-π (succ n) (f , c) =
- to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) (dfunext fe γ)
+α-commutes-with-π (succ n) (f , c) = help n ((π (succ n) ∘ α (succ (succ n))) (f , c)) (α (succ n) (f , c)) ϕ
+     where
+      ϕ : {-underlying-function (𝓓 n) (𝓓 n)
+            (π (succ n) (α (succ (succ n)) (f , c))) -}
+          ([ 𝓓 n , 𝓓 n ]⟨ π (succ n) (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))) ⟩)
+            ∼ π∞ n ∘ f ∘ ε∞ n -- underlying-function (𝓓 n) (𝓓 n) (α (succ n) (f , c)) -- π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n ∼ π∞ n ∘ f ∘ ε∞ n
+      ϕ x = underlying-function (𝓓 n) (𝓓 n)
+              (π (succ n)
+               (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c)
+                (π∞' (succ n))))
+              x ≡⟨ happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x ⟩
+          (π n ∘
+             underlying-function (𝓓 (succ n)) (𝓓 (succ n))
+             (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c)
+              (π∞' (succ n)))
+             ∘ ε n)
+            x ≡⟨ refl ⟩
+          (π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n) x ≡⟨ {!!} ⟩
+          (π∞ n ∘ f ∘ ε∞ n) x ∎
+
+{-
+ to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) γ -- (dfunext fe γ)
   where
+   γ : (λ x →
+            pr₁ (π' n)
+            (pr₁ (α (succ (succ n)) f) (pr₁ (ε' n) x)))
+         ≡ (λ x → pr₁ (π∞' n) (pr₁ f (pr₁ (ε∞' n) x)))
+   γ = {!!}
+{-
 --   γ : {!!}
 --   γ : (x : ⟨ 𝓓 n ⟩)
 --     → {!!} -- π n (π∞ (succ n) (f (ε∞ (succ n) (ε n x)))) ≡ π∞ n (f (ε∞ n x))
 --   γ : π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n ∼ π∞ n ∘ f ∘ ε∞ n
-   γ = {!!}
+   γ : (x : ⟨ 𝓓 n ⟩)
+     → (π n ∘ pr₁ (π∞' (succ n)) ∘ (pr₁ f) ∘ pr₁ (ε∞' (succ n)) ∘ ε n) x ≡ (pr₁ (π∞' n) ∘ pr₁ f ∘ pr₁ (ε∞' n)) x
+      {- {!pr₁ (DcpoDinfinity.h n (α (succ (succ n)) (f , c)))
+         (pr₁ (DcpoDinfinity.eₙ n) x)
+         ≡ pr₁ (π∞' n) (f (pr₁ (ε∞' n) x))!} -}
+     -- π n (π∞ (succ n) (f (ε∞ (succ n) (ε n x)))) ≡ π∞ n (f (ε∞ n x))
+   γ = {!!} -}
+-}
 
 β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β-from-succ n (f , c) = (ε∞ n ∘ f ∘ π∞ n) , {!!}

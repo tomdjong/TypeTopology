@@ -105,15 +105,9 @@ _⟹ᵈᶜᵖᵒ_ : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'}
     t (f , _) (g , _) (h , _) l m x = transitivity 𝓔 (f x) (g x) (h x)
                                       (l x) (m x)
     a : (f g : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ g → g ⊑ f → f ≡ g
-    a f g l m =
-     to-Σ-≡
-      (dfunext fe
-       (λ d → antisymmetry 𝓔
-              ((underlying-function 𝓓 𝓔 f) d)
-              ((underlying-function 𝓓 𝓔 g) d)
-              (l d) (m d)) ,
-      being-continuous-is-a-prop 𝓓 𝓔 (underlying-function 𝓓 𝓔 g) _
-       (continuity-of-function 𝓓 𝓔 g))
+    a f g l m = to-continuous-function-≡ 𝓓 𝓔 f g
+                 (λ x → antisymmetry 𝓔 ([ 𝓓 , 𝓔 ]⟨ f ⟩ x) ([ 𝓓 , 𝓔 ]⟨ g ⟩ x)
+                  (l x) (m x))
     c : (I : _ ̇) (α : I → DCPO[ 𝓓 , 𝓔 ]) → is-directed _⊑_ α → has-sup _⊑_ α
     c I α δ = (continuous-functions-sup 𝓓 𝓔 α δ) , u , v
      where
@@ -172,7 +166,8 @@ DCPO-∘-is-continuous₁ 𝓓 𝓔 𝓔' f I α δ =
      ε = image-is-directed (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {DCPO-∘ 𝓓 𝓔 𝓔' f}
           (DCPO-∘-is-monotone₁ 𝓓 𝓔 𝓔' f) {I} {α} δ
      γ : DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ) ≡ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε
-     γ = to-subtype-≡ (λ g → being-continuous-is-a-prop 𝓓 𝓔' g) (dfunext fe ψ)
+     γ = to-continuous-function-≡ 𝓓 𝓔'
+          (DCPO-∘ 𝓓 𝓔 𝓔' f (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') δ)) (∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') ε) ψ
       where
        ψ : (x : ⟨ 𝓓 ⟩)
          → [ 𝓔 , 𝓔' ]⟨ (∐ (𝓔 ⟹ᵈᶜᵖᵒ 𝓔') {I} {α} δ) ⟩ ([ 𝓓 , 𝓔 ]⟨ f ⟩ x)
@@ -204,7 +199,8 @@ DCPO-∘-is-continuous₂ 𝓓 𝓔 𝓔' g I α δ =
     ε = image-is-directed (𝓓 ⟹ᵈᶜᵖᵒ 𝓔) (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {λ f → DCPO-∘ 𝓓 𝓔 𝓔' f g}
          (DCPO-∘-is-monotone₂ 𝓓 𝓔 𝓔' g) {I} {α} δ
     γ : DCPO-∘ 𝓓 𝓔 𝓔' (∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔) {I} {α} δ) g ≡ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') {I} {β} ε
-    γ = to-subtype-≡ (λ f → being-continuous-is-a-prop 𝓓 𝓔' f) (dfunext fe ψ)
+    γ = to-continuous-function-≡ 𝓓 𝓔'
+         (DCPO-∘ 𝓓 𝓔 𝓔' (∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔) δ) g) (∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔') ε) ψ
      where
       ψ : (x : ⟨ 𝓓 ⟩)
         → [ 𝓔 , 𝓔' ]⟨ g ⟩ ([ 𝓓 , 𝓔 ]⟨ ∐ (𝓓 ⟹ᵈᶜᵖᵒ 𝓔) {I} {α} δ ⟩ x)

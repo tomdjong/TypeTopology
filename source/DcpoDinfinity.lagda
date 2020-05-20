@@ -204,33 +204,29 @@ open SequentialDiagram
 α zero     = π 0 ∘ α-to-succ 0
 α (succ n) = α-to-succ n
 
-
-help : (n : ℕ) (f g : DCPO[ 𝓓 n , 𝓓 n ])
-     → [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∼ [ 𝓓 n , 𝓓 n ]⟨ g ⟩
-     → f ≡ g
-help n f g h = to-subtype-≡ (being-continuous-is-a-prop (𝓓 n) (𝓓 n)) (dfunext fe h)
-
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
-α-commutes-with-π (succ n) (f , c) = help n ((π (succ n) ∘ α (succ (succ n))) (f , c)) (α (succ n) (f , c)) ϕ
+α-commutes-with-π (succ n) (f , c) = to-continuous-function-≡ (𝓓 n) (𝓓 n) ((π (succ n) ∘ α (succ (succ n))) (f , c)) (α (succ n) (f , c)) ϕ
      where
       ϕ : {-underlying-function (𝓓 n) (𝓓 n)
             (π (succ n) (α (succ (succ n)) (f , c))) -}
           ([ 𝓓 n , 𝓓 n ]⟨ π (succ n) (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))) ⟩)
             ∼ π∞ n ∘ f ∘ ε∞ n -- underlying-function (𝓓 n) (𝓓 n) (α (succ n) (f , c)) -- π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n ∼ π∞ n ∘ f ∘ ε∞ n
-      ϕ x = underlying-function (𝓓 n) (𝓓 n)
-              (π (succ n)
-               (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c)
-                (π∞' (succ n))))
-              x ≡⟨ happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x ⟩
-          (π n ∘
-             underlying-function (𝓓 (succ n)) (𝓓 (succ n))
-             (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c)
-              (π∞' (succ n)))
-             ∘ ε n)
-            x ≡⟨ refl ⟩
-          (π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n) x ≡⟨ {!!} ⟩
-          (π∞ n ∘ f ∘ ε∞ n) x ∎
+      ϕ x = [ 𝓓 n , 𝓓 n ]⟨ (π (succ n) h) ⟩ x                ≡⟨ u₁ ⟩
+            (π n ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ h ⟩ ∘ ε n) x ≡⟨ refl ⟩
+            (π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n) x    ≡⟨ refl ⟩
+            (π n ∘ π∞ (succ n)) (f (ε∞ (succ n) (ε n x)))    ≡⟨ refl ⟩
+            (π⁺ (≤-succ n) ∘ π∞ (succ n)) (f (ε∞ (succ n) (ε n x))) ≡⟨ π∞-commutes-with-πs n (succ n) (≤-succ n) (f (ε∞ (succ n) (ε n x))) ⟩
+            (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε n) x                 ≡⟨ {!!} ⟩
+            (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε⁺ (≤-succ n)) x ≡⟨ {!!} ⟩
+            {!!} ≡⟨ {!!} ⟩
+            (π∞ n ∘ f ∘ ε∞ n) x                              ∎
+             where
+              h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ]
+              h = DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))
+              n₁ : ℕ
+              n₁ = pr₁ (subtraction {!n!} {!!} (≤-succ n))
+              u₁ = happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x
 
 {-
  to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) γ -- (dfunext fe γ)

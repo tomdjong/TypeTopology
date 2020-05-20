@@ -378,6 +378,20 @@ The most laborious part: composing two ε⁺s is ε⁺ on ≤-trans. And similar
 
 \end{code}
 
+\begin{code}
+
+ ε-in-terms-of-ε⁺ : (n : ℕ) → ε n ∼ ε⁺ {n} {succ n} (≤-succ n)
+ ε-in-terms-of-ε⁺ zero x = refl
+ ε-in-terms-of-ε⁺ (succ n) x = ε (succ n) x ≡⟨ (ap (ε (succ n)) (ε⁺-id (succ n) x)) ⁻¹ ⟩
+                               ε (succ n) (ε⁺ (≤-refl n) x) ≡⟨ {!!} ⟩
+                               ε⁺-helper (succ n) (succ (succ n)) (succ 0) {!refl!} {!!} ≡⟨ refl ⟩
+                               ε⁺ (≤-succ (succ n)) x ∎
+  where
+   IH : ε n ∼ ε⁺ (≤-succ n)
+   IH = ε-in-terms-of-ε⁺ n
+
+\end{code}
+
 Finally, we can open the directed preorder module with the above parameters.
 
 \begin{code}

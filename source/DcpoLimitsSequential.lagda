@@ -403,4 +403,62 @@ Finally, we can open the directed preorder module with the above parameters.
        π⁺-comp
       public
 
+ module _
+         (𝓔 : DCPO {𝓤'} {𝓣'})
+         (f : (n : ℕ) → ⟨ 𝓔 ⟩ → ⟨ 𝓓 n ⟩)
+         (h : (n : ℕ) → π n ∘ f (succ n) ∼ f n)
+        where
+
+  commute-with-πs-lemma-helper : (n m k : ℕ) (p : n +' k ≡ m)
+                               → π⁺-helper n m k p ∘ f m ∼ f n
+  commute-with-πs-lemma-helper n n zero refl y = refl
+  commute-with-πs-lemma-helper n m (succ k) refl y =
+   (π⁺-helper n (n +' succ k) (succ k) refl ∘ f (n +' succ k)) y  ≡⟨ refl ⟩
+   (π⁺-helper n (n +' k) k refl ∘ π (n +' k) ∘ f (n +' succ k)) y ≡⟨ q    ⟩
+   π⁺-helper n (n +' k) k refl (f (n +' k) y)                     ≡⟨ IH y ⟩
+   f n y                                                          ∎
+    where
+     IH : π⁺-helper n (n +' k) k refl ∘ f (n +' k) ∼ f n
+     IH = commute-with-πs-lemma-helper n (n +' k) k refl
+     q = ap (π⁺-helper n (n +' k) k refl) (h (n +' k) y)
+
+  commute-with-πs-lemma : (n m : ℕ) (l : n ≤ m)
+                        → π⁺ l ∘ f m ∼ f n
+  commute-with-πs-lemma n m l y = π⁺ l (f m y)              ≡⟨ refl ⟩
+                                  π⁺-helper-Σ n m s (f m y) ≡⟨ q    ⟩
+                                  f n y                     ∎
+    where
+     s : Σ k ꞉ ℕ , n +' k ≡ m
+     s = subtraction' n m l
+     q = commute-with-πs-lemma-helper n m (pr₁ s) (pr₂ s) y
+
+ module _
+         (𝓔 : DCPO {𝓤'} {𝓣'})
+         (g : (n : ℕ) → ⟨ 𝓓 n ⟩ → ⟨ 𝓔 ⟩)
+         (h : (n : ℕ) → g (succ n) ∘ ε n ∼ g n)
+        where
+
+  commute-with-εs-lemma-helper : (n m k : ℕ) (p : n +' k ≡ m)
+                               → g m ∘ ε⁺-helper n m k p ∼ g n
+  commute-with-εs-lemma-helper n n zero refl x = refl
+  commute-with-εs-lemma-helper n m (succ k) refl x =
+   (g (succ (n +' k)) ∘ ε⁺-helper n (n +' succ k) (succ k) refl) x  ≡⟨ refl ⟩
+   (g (succ (n +' k)) ∘ ε (n +' k) ∘ ε⁺-helper n (n +' k) k refl) x ≡⟨ q    ⟩
+   g (n +' k) (ε⁺-helper n (n +' k) k refl x)                       ≡⟨ IH x ⟩
+   g n x                                                            ∎
+    where
+     IH : g (n +' k) ∘ ε⁺-helper n (n +' k) k refl ∼ g n
+     IH = commute-with-εs-lemma-helper n (n +' k) k refl
+     q = h (n +' k) (ε⁺-helper n (n +' k) k refl x)
+
+  commute-with-εs-lemma : (n m : ℕ) (l : n ≤ m)
+                        → g m ∘ ε⁺ l ∼ g n
+  commute-with-εs-lemma n m l x = g m (ε⁺ l x)              ≡⟨ refl ⟩
+                                  g m (ε⁺-helper-Σ n m s x) ≡⟨ q ⟩
+                                  g n x                     ∎
+   where
+    s : Σ k ꞉ ℕ , n +' k ≡ m
+    s = subtraction' n m l
+    q = commute-with-εs-lemma-helper n m (pr₁ s) (pr₂ s) x
+
 \end{code}

@@ -380,15 +380,34 @@ The most laborious part: composing two ε⁺s is ε⁺ on ≤-trans. And similar
 
 \begin{code}
 
+-- ε-in-terms-of-ε⁺-helper : (n : ℕ) → ε n ∼ ε⁺-helper n (succ n) 1 refl
+-- ε-in-terms-of-ε⁺-helper n x = refl
+
  ε-in-terms-of-ε⁺ : (n : ℕ) → ε n ∼ ε⁺ {n} {succ n} (≤-succ n)
- ε-in-terms-of-ε⁺ zero x = refl
- ε-in-terms-of-ε⁺ (succ n) x = ε (succ n) x ≡⟨ (ap (ε (succ n)) (ε⁺-id (succ n) x)) ⁻¹ ⟩
-                               ε (succ n) (ε⁺ (≤-refl n) x) ≡⟨ {!!} ⟩
-                               ε⁺-helper (succ n) (succ (succ n)) (succ 0) {!refl!} {!!} ≡⟨ refl ⟩
-                               ε⁺ (≤-succ (succ n)) x ∎
-  where
-   IH : ε n ∼ ε⁺ (≤-succ n)
-   IH = ε-in-terms-of-ε⁺ n
+ ε-in-terms-of-ε⁺ n x =
+  ε n x                               ≡⟨ refl ⟩
+  ε⁺-helper n (succ n) 1 refl x       ≡⟨ refl ⟩
+  ε⁺-helper-Σ n (succ n) (1 , refl) x ≡⟨ p    ⟩
+  ε⁺-helper-Σ n (succ n) s          x ≡⟨ refl ⟩
+  ε⁺ (≤-succ n) x                     ∎
+   where
+    s : Σ k ꞉ ℕ , n +' k ≡ succ n
+    s = subtraction' n (succ n) (≤-succ n)
+    p = ap (λ - → ε⁺-helper-Σ n (succ n) - x)
+         (left-addition-is-embedding n (succ n) (1 , refl) s)
+
+ π-in-terms-of-π⁺ : (n : ℕ) → π n ∼ π⁺ {n} {succ n} (≤-succ n)
+ π-in-terms-of-π⁺ n x =
+  π n x                               ≡⟨ refl ⟩
+  π⁺-helper n (succ n) 1 refl x       ≡⟨ refl ⟩
+  π⁺-helper-Σ n (succ n) (1 , refl) x ≡⟨ p ⟩
+  π⁺-helper-Σ n (succ n) s x          ≡⟨ refl ⟩
+  π⁺ (≤-succ n) x                     ∎
+   where
+    s : Σ k ꞉ ℕ , n +' k ≡ succ n
+    s = subtraction' n (succ n) (≤-succ n)
+    p = ap (λ - → π⁺-helper-Σ n (succ n) - x)
+         (left-addition-is-embedding n (succ n) (1 , refl) s)
 
 \end{code}
 

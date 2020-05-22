@@ -206,49 +206,24 @@ open SequentialDiagram
 
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
-α-commutes-with-π (succ n) (f , c) = to-continuous-function-≡ (𝓓 n) (𝓓 n) ((π (succ n) ∘ α (succ (succ n))) (f , c)) (α (succ n) (f , c)) ϕ
-     where
-      ϕ : {-underlying-function (𝓓 n) (𝓓 n)
-            (π (succ n) (α (succ (succ n)) (f , c))) -}
-          ([ 𝓓 n , 𝓓 n ]⟨ π (succ n) (DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))) ⟩)
-            ∼ π∞ n ∘ f ∘ ε∞ n -- underlying-function (𝓓 n) (𝓓 n) (α (succ n) (f , c)) -- π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n ∼ π∞ n ∘ f ∘ ε∞ n
-      ϕ x = [ 𝓓 n , 𝓓 n ]⟨ (π (succ n) h) ⟩ x                ≡⟨ u₁ ⟩
-            (π n ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ h ⟩ ∘ ε n) x ≡⟨ refl ⟩
-            (π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n) x    ≡⟨ refl ⟩
-            (π n ∘ π∞ (succ n)) (f (ε∞ (succ n) (ε n x)))    ≡⟨ refl ⟩
-            (π⁺ (≤-succ n) ∘ π∞ (succ n)) (f (ε∞ (succ n) (ε n x))) ≡⟨ π∞-commutes-with-πs n (succ n) (≤-succ n) (f (ε∞ (succ n) (ε n x))) ⟩
-            (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε n) x                 ≡⟨ {!!} ⟩
-            (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε⁺ (≤-succ n)) x ≡⟨ {!!} ⟩
-            {!!} ≡⟨ {!!} ⟩
-            (π∞ n ∘ f ∘ ε∞ n) x                              ∎
-             where
-              h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ]
-              h = DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))
-              n₁ : ℕ
-              n₁ = pr₁ (subtraction {!n!} {!!} (≤-succ n))
-              u₁ = happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n)) (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x
-
-{-
- to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) γ -- (dfunext fe γ)
-  where
-   γ : (λ x →
-            pr₁ (π' n)
-            (pr₁ (α (succ (succ n)) f) (pr₁ (ε' n) x)))
-         ≡ (λ x → pr₁ (π∞' n) (pr₁ f (pr₁ (ε∞' n) x)))
-   γ = {!!}
-{-
---   γ : {!!}
---   γ : (x : ⟨ 𝓓 n ⟩)
---     → {!!} -- π n (π∞ (succ n) (f (ε∞ (succ n) (ε n x)))) ≡ π∞ n (f (ε∞ n x))
---   γ : π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n ∼ π∞ n ∘ f ∘ ε∞ n
-   γ : (x : ⟨ 𝓓 n ⟩)
-     → (π n ∘ pr₁ (π∞' (succ n)) ∘ (pr₁ f) ∘ pr₁ (ε∞' (succ n)) ∘ ε n) x ≡ (pr₁ (π∞' n) ∘ pr₁ f ∘ pr₁ (ε∞' n)) x
-      {- {!pr₁ (DcpoDinfinity.h n (α (succ (succ n)) (f , c)))
-         (pr₁ (DcpoDinfinity.eₙ n) x)
-         ≡ pr₁ (π∞' n) (f (pr₁ (ε∞' n) x))!} -}
-     -- π n (π∞ (succ n) (f (ε∞ (succ n) (ε n x)))) ≡ π∞ n (f (ε∞ n x))
-   γ = {!!} -}
--}
+α-commutes-with-π (succ n) (f , c) =
+ to-continuous-function-≡ (𝓓 n) (𝓓 n) ((π (succ n) ∘ α (succ (succ n))) (f , c)) (α (succ n) (f , c)) ϕ
+   where
+    h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ]
+    h = DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n))
+         (ε∞' (succ n)) (f , c) (π∞' (succ n))
+    ϕ : ([ 𝓓 n , 𝓓 n ]⟨ π (succ n) h ⟩) ∼ π∞ n ∘ f ∘ ε∞ n
+    ϕ x = [ 𝓓 n , 𝓓 n ]⟨ (π (succ n) h) ⟩ x                ≡⟨ u₁ ⟩
+          (π n ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ h ⟩ ∘ ε n) x ≡⟨ refl ⟩
+          (π n ∘ π∞ (succ n) ∘ f ∘ ε∞ (succ n) ∘ ε n) x    ≡⟨ refl ⟩
+          (π n ∘ π∞ (succ n)) (f (ε∞ (succ n) (ε n x)))    ≡⟨ π-in-terms-of-π⁺ n (π∞ (succ n) (f (ε∞ (succ n) (ε n x)))) ⟩
+          (π⁺ {n} {succ n} (≤-succ n) ∘ π∞ (succ n)) (f (ε∞ (succ n) (ε n x))) ≡⟨ π∞-commutes-with-πs n (succ n) (≤-succ n) (f (ε∞ (succ n) (ε n x))) ⟩
+          (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε n) x                 ≡⟨ ap (π∞ n ∘ f ∘ ε∞ (succ n)) (ε-in-terms-of-ε⁺ n x) ⟩
+          (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε⁺ {n} {succ n} (≤-succ n)) x ≡⟨ ap (π∞ n ∘ f) (ε∞-commutes-with-εs n (succ n) (≤-succ n) x) ⟩
+          (π∞ n ∘ f ∘ ε∞ n) x                              ∎
+           where
+            u₁ = happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n))
+                  (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x
 
 β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β-from-succ n (f , c) = (ε∞ n ∘ f ∘ π∞ n) , {!!}

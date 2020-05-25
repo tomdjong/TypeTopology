@@ -259,14 +259,23 @@ open SequentialDiagram
 α' : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
 α' = limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
 
-{-
 β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β-from-succ n f = DCPO-∘₃ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)
+
+β-from-succ-is-continuous : (n : ℕ)
+                          → is-continuous (𝓓 (succ n)) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
+                             (β-from-succ n)
+β-from-succ-is-continuous n = DCPO-∘₃-is-continuous₂ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) (ε∞' n)
 
 β : (n : ℕ) → ⟨ 𝓓 n ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β zero     = β-from-succ zero ∘ ε zero
 β (succ n) = β-from-succ n
 
+β-is-continuous : (n : ℕ) → is-continuous (𝓓 n) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (β n)
+β-is-continuous zero x = ∘-is-continuous (𝓓 0) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε 0) {!β-from-succ zero!} {!!} {!!} {!!} -- ∘-is-continuous (𝓓 zero) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε zero) {β-from-succ zero} {!!} {!!}
+β-is-continuous (succ n) = {!!}
+
+{-
 foo : ε 0 ∼ ε zero
 foo x = apd (ε 0) refl
 
@@ -285,7 +294,8 @@ silly'' x = β 1 (ε zero x) ≡⟨ ap (β 1) ((foo x) ⁻¹) ⟩
             β 0 x          ∎
 -}
 
-{- bar : β-from-succ 0 ∼ β-from-succ zero
+{-
+bar : β-from-succ 0 ∼ β-from-succ zero
 bar x = apd {!β-from-succ 0!} {!!} -}
 
 β-commutes-with-ε : (n : ℕ) → β (succ n) ∘ ε n ∼ β n

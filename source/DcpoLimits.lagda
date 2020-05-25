@@ -714,3 +714,16 @@ module Diagram
              v = ∐-is-upperbound 𝓔 (colimit-family-is-directed (α a)) i
 
 \end{code}
+
+Experimenting with packaged parameters
+
+\begin{code}
+
+ limit-mediating-arrow' : (𝓔 : DCPO {𝓤'} {𝓣'})
+                        → (f : (i : I) → DCPO[ 𝓔 , 𝓓 i ])
+                        → ((i j : I) (l : i ⊑ j) → π l ∘ pr₁ (f j) ∼ pr₁ (f i))
+                        → ⟨ 𝓔 ⟩ → ⟨ 𝓓∞ ⟩
+ limit-mediating-arrow' 𝓔 f =
+  limit-mediating-arrow 𝓔 (λ i → pr₁ (f i)) (λ i → pr₂ (f i))
+
+\end{code}

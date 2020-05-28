@@ -200,10 +200,13 @@ open SequentialDiagram
 α zero     = π 0 ∘ α-to-succ 0
 α (succ n) = α-to-succ n
 
+-- KINDA SLOW
+{-
 α-is-continuous : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
 α-is-continuous zero = ∘-is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 1) (𝓓 0) (α-to-succ 0) (π 0)
                         (α-to-succ-is-continuous 0) (π-is-continuous 0)
 α-is-continuous (succ n) = α-to-succ-is-continuous n
+-}
 
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
@@ -264,11 +267,14 @@ open SequentialDiagram
 β zero     = β-from-succ 0 ∘ ε zero
 β (succ n) = β-from-succ n
 
+-- SLOW
+{-
 β-is-continuous : (n : ℕ) → is-continuous (𝓓 n) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (β n)
 β-is-continuous zero = ∘-is-continuous (𝓓 0) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
                         (ε 0) (β-from-succ 0)
                         (ε-is-continuous 0) (β-from-succ-is-continuous 0)
 β-is-continuous (succ n) = β-from-succ-is-continuous n
+-}
 
 {-
  This should really be proven as
@@ -309,15 +315,13 @@ open SequentialDiagram
     h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ] → DCPO[ 𝓓∞ , 𝓓∞ ]
     h g = DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) g (ε∞' (succ n))
     γ : β₁ ∼ β₂
-    γ σ = β₁ σ ≡⟨ {!β-on-succ (succ n) (ε (succ n) (f , c))!} ⟩
-          {!!} ≡⟨ {!!} ⟩
-          [ 𝓓∞ , 𝓓∞ ]⟨ DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) (ε (succ n) (f , c)) (ε∞' (succ n)) ⟩ σ ≡⟨ refl ⟩
-          ({!ε∞ (succ n)!} ∘ {!!}) σ ≡⟨ {!!} ⟩
---          ([ 𝓓 (succ n) , 𝓓∞ ]⟨ {!ε∞' (succ n)!} ⟩ ∘ [ {!!} , {!!} ]⟨ {!!} ⟩ ∘ [ {!!} , 𝓓∞ ]⟨ {!!} ⟩) σ ≡⟨ {!!} ⟩
-          ({!ε∞ (succ n)!} ∘ {!!} ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
-          {!(ε∞ (succ n) ∘ ? ∘ π∞ (succ n)) σ!} ≡⟨ {!!} ⟩
---          {!(ε∞ (succ n) ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ∘ π∞ (succ n)) σ!} ≡⟨ {!!} ⟩
-          {!!} ≡⟨ {!!} ⟩
+    γ σ = β₁ σ ≡⟨ {!!} ⟩ -- β-on-succ (succ n) (ε (succ n) (f , c)) σ ⟩
+{-          (ε∞ (succ n) ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ∘ π∞ (succ n)) σ ≡⟨ happly (ap (λ - → ε∞ (succ n) ∘ - ∘ π∞ (succ n)) {!!}) σ ⟩ -}
+          (ε∞ (succ n) ∘ ε n ∘ f ∘ π n ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+          (ε∞ (succ n) ∘ ε⁺ {n} {succ n} (≤-succ n) ∘ f ∘ π n ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+          (ε∞ n ∘ f ∘ π n ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+          (ε∞ n ∘ f ∘ π⁺ {n} {succ n} (≤-succ n) ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+          (ε∞ n ∘ f ∘ π∞ n) σ ≡⟨ {!!} ⟩
           β₂ σ ∎
 
 --           → [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ≡ ε n ∘ f ∘ π n

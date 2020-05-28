@@ -57,8 +57,8 @@ module Diagram
  π-equality : (σ : 𝓓∞-carrier) {i j : I} (l : i ⊑ j) → π l (⦅ σ ⦆ j) ≡ ⦅ σ ⦆ i
  π-equality σ {i} {j} l = pr₂ σ i j l
 
- to-𝓓∞-≡ : (σ τ : 𝓓∞-carrier) → ((i : I) → ⦅ σ ⦆ i ≡ ⦅ τ ⦆ i) → σ ≡ τ
- to-𝓓∞-≡ σ τ h =
+ to-𝓓∞-≡ : {σ τ : 𝓓∞-carrier} → ((i : I) → ⦅ σ ⦆ i ≡ ⦅ τ ⦆ i) → σ ≡ τ
+ to-𝓓∞-≡ h =
   to-subtype-≡
    (λ σ → Π-is-prop fe
     (λ i → Π-is-prop fe
@@ -132,8 +132,8 @@ module Diagram
      t : is-transitive
      t σ τ ρ l k i = transitivity (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (⦅ ρ ⦆ i) (l i) (k i)
      a : is-antisymmetric
-     a σ τ l k = to-𝓓∞-≡ σ τ
-                  (λ i → antisymmetry (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (l i) (k i))
+     a σ τ l k =
+      to-𝓓∞-≡ (λ i → antisymmetry (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (l i) (k i))
    dc : is-directed-complete _≼_
    dc 𝓐 α δ = (𝓓∞-∐ α δ) , ub , lb-of-ubs
     where
@@ -228,7 +228,7 @@ module Diagram
        e₃ = (ρ-in-terms-of-κ lᵢ (⊑-trans l l₂) x) ⁻¹
 
  ε∞-commutes-with-εs : (i j : I) (l : i ⊑ j) → ε∞ j ∘ ε l ∼ ε∞ i
- ε∞-commutes-with-εs i j l x = to-𝓓∞-≡ (ε∞ j (ε l x)) (ε∞ i x) γ
+ ε∞-commutes-with-εs i j l x = to-𝓓∞-≡ γ
   where
    γ : (k : I) → ⦅ ε∞ j (ε l x) ⦆ k ≡ ⦅ ε∞ i x ⦆ k
    γ k = ∥∥-rec (sethood (𝓓 k)) g (I-weakly-directed j k)
@@ -396,7 +396,7 @@ module Diagram
                                   → ((i : I) → π∞ i ∘ g ∼ f i)
                                   → g ∼ limit-mediating-arrow
   limit-mediating-arrow-is-unique g g-comm y =
-   to-𝓓∞-≡ (g y) (limit-mediating-arrow y) (λ i → g-comm i y)
+   to-𝓓∞-≡ (λ i → g-comm i y)
 
   limit-mediating-arrow-is-monotone : is-monotone 𝓔 𝓓∞ limit-mediating-arrow
   limit-mediating-arrow-is-monotone x y l i = f i x ⊑⟨ 𝓓 i ⟩[ m x y l ]

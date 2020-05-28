@@ -72,12 +72,7 @@ open import NaturalsAddition renaming (_+_ to _+'_)
   pₙ : DCPO[ 𝓓 (succ n) , 𝓓 n ]
   pₙ = pr₂ IH
   e : ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓 (succ (succ n)) ⟩
-  e f = DCPO-∘₃ (𝓓 (succ n)) (𝓓 n) (𝓓 n) (𝓓 (succ n))
-        pₙ f eₙ
-        {- DCPO-∘ (𝓓 (succ n)) (𝓓 n) (𝓓 (succ n)) pₙ h
-   where
-    h : DCPO[ 𝓓 n , 𝓓 (succ n) ]
-    h = DCPO-∘ (𝓓 n) (𝓓 n) (𝓓 (succ n)) f eₙ -}
+  e f = DCPO-∘₃ (𝓓 (succ n)) (𝓓 n) (𝓓 n) (𝓓 (succ n)) pₙ f eₙ
   e-continuity : is-continuous (𝓓 (succ n)) (𝓓 (succ (succ n))) e
   e-continuity = ∘-is-continuous
                   (𝓓 (succ n))
@@ -90,11 +85,6 @@ open import NaturalsAddition renaming (_+_ to _+'_)
                    (𝓓 (succ n)) pₙ)
   p : ⟨ 𝓓 (succ (succ n)) ⟩ → ⟨ 𝓓 (succ n) ⟩
   p f = DCPO-∘₃ (𝓓 n) (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) eₙ f pₙ
-  {- DCPO-∘ (𝓓 n) (𝓓 (succ n)) (𝓓 n) eₙ (DCPO-∘ (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) f pₙ)
-  -- h
-   where
-    h : DCPO[ 𝓓 (succ n) , 𝓓 n ]
-    h = DCPO-∘ (𝓓 (succ n)) (𝓓 (succ n)) (𝓓 n) f pₙ -}
   p-continuity : is-continuous (𝓓 (succ (succ n))) (𝓓 (succ n)) p
   p-continuity = ∘-is-continuous
                   (𝓓 (succ (succ n)))
@@ -235,8 +225,7 @@ open SequentialDiagram
            where
             f' : ⟨ 𝓓 n ⟩ → ⟨ 𝓓∞ ⟩
             f' = f ∘ ε∞ (succ n) ∘ ε n
-            e₁ = happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n))
-                  (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x
+            e₁ = happly (π-on-succ' n h) x
             e₂ = π-in-terms-of-π⁺ n (π∞ (succ n) (f' x))
             e₃ = π∞-commutes-with-πs n (succ n) (≤-succ n)
                   (f (ε∞ (succ n) (ε n x)))
@@ -256,8 +245,10 @@ open SequentialDiagram
 -}
 
 -- α-is-continuous is very slow to typecheck in this term. Why?
-α' : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-α' = limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
+{-
+α∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
+α∞ = limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
+-}
 
 β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β-from-succ n f = DCPO-∘₃ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)
@@ -265,45 +256,66 @@ open SequentialDiagram
 β-from-succ-is-continuous : (n : ℕ)
                           → is-continuous (𝓓 (succ n)) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
                              (β-from-succ n)
-β-from-succ-is-continuous n = DCPO-∘₃-is-continuous₂ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) (ε∞' n)
+β-from-succ-is-continuous n = DCPO-∘₃-is-continuous₂ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞
+                               (π∞' n) (ε∞' n)
 
 β : (n : ℕ) → ⟨ 𝓓 n ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
-β zero     = β-from-succ zero ∘ ε zero
+-- because of Agda's idiosyncrasies, it's faster to have "ε zero" than "ε 0".
+β zero     = β-from-succ 0 ∘ ε zero
 β (succ n) = β-from-succ n
 
 β-is-continuous : (n : ℕ) → is-continuous (𝓓 n) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (β n)
-β-is-continuous zero x = ∘-is-continuous (𝓓 0) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε 0) {!β-from-succ zero!} {!!} {!!} {!!} -- ∘-is-continuous (𝓓 zero) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε zero) {β-from-succ zero} {!!} {!!}
-β-is-continuous (succ n) = {!!}
+β-is-continuous zero = ∘-is-continuous (𝓓 0) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
+                        (ε 0) (β-from-succ 0)
+                        (ε-is-continuous 0) (β-from-succ-is-continuous 0)
+β-is-continuous (succ n) = β-from-succ-is-continuous n
+
+β-from-succ-underlying-function : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩)
+                                  -- (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩)
+                                  -- (c : is-continuous (𝓓 n) (𝓓 n) f)
+                                → [ 𝓓∞ , 𝓓∞ ]⟨ β-from-succ n f ⟩
+                                ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
+β-from-succ-underlying-function n f σ = to-𝓓∞-≡ (λ m → ap (λ - → ⦅ - ⦆ m) (happly (DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)) σ))
 
 {-
-foo : ε 0 ∼ ε zero
-foo x = apd (ε 0) refl
-
--- silly : β 1 ∘ ε 0 ∼ β 0
--- silly x = refl
-
--- This is *very* slow
--- silly' : β 1 ∘ ε zero ∼ β 0
--- silly' x = refl
-
--- This too
-{-
-silly'' : β 1 ∘ ε zero ∼ β 0
-silly'' x = β 1 (ε zero x) ≡⟨ ap (β 1) ((foo x) ⁻¹) ⟩
-            β 1 (ε 0 x)    ≡⟨ silly x ⟩
-            β 0 x          ∎
+β-on-succ : (n : ℕ) (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩) (c : is-continuous (𝓓 n) (𝓓 n) f)
+          → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) (f , c) ⟩ ≡ ε∞ n ∘ f ∘ π∞ n
+β-on-succ n f c = DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) (f , c) {!ε∞' n!}
+--happly (DCPO-∘₃-underlying-function {!!} {!!} {!𝓓 n!} 𝓓∞ (π∞' n) (f , c) (ε∞' n)) σ
 -}
 
-{-
-bar : β-from-succ 0 ∼ β-from-succ zero
-bar x = apd {!β-from-succ 0!} {!!} -}
-
 β-commutes-with-ε : (n : ℕ) → β (succ n) ∘ ε n ∼ β n
-β-commutes-with-ε zero x = γ
- where
-  γ : (β (succ zero) ∘ ε zero) x ≡ β zero x
-  γ = {!!}
-β-commutes-with-ε (succ n) (f , c) = {!!}
+β-commutes-with-ε zero x = refl
+β-commutes-with-ε (succ n) (f , c) =
+ to-continuous-function-≡ 𝓓∞ 𝓓∞ ((β (succ (succ n)) ∘ ε (succ n)) (f , c))
+  (β (succ n) (f , c)) γ
+   where
+    β₁ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
+    β₁ = [ 𝓓∞ , 𝓓∞ ]⟨ β (succ (succ n)) (ε (succ n) (f , c)) ⟩
+    β₂ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
+    β₂ = [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) (f , c) ⟩
+    h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ] → DCPO[ 𝓓∞ , 𝓓∞ ]
+    h g = DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) g (ε∞' (succ n))
+    γ : β₁ ∼ β₂
+    γ σ = β₁ σ ≡⟨ refl ⟩
+          -- [ 𝓓∞ , 𝓓∞ ]⟨ h ⟩ σ ≡⟨ {!!} ⟩
+          [ 𝓓∞ , 𝓓∞ ]⟨ h (ε (succ n) (f , c)) ⟩ σ ≡⟨ {!!} ⟩
+          {- happly (DCPO-∘₃-underlying-function 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) (ε (succ n) (f , c)) (ε∞' (succ n))) σ ⟩
+          {!(underlying-function (𝓓 (succ n)) 𝓓∞ (ε∞' (succ n)) ∘
+             underlying-function (𝓓 (succ n)) (𝓓 (succ n)) (ε (succ n) (f , c))
+             ∘ underlying-function 𝓓∞ (𝓓 (succ n)) (π∞' (succ n)))
+            σ!} ≡⟨ {!!} ⟩ -}
+--          ([ 𝓓 (succ n) , 𝓓∞ ]⟨ {!ε∞' (succ n)!} ⟩ ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+          [ 𝓓∞ , 𝓓∞ ]⟨ DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) (ε (succ n) (f , c)) (ε∞' (succ n)) ⟩ σ ≡⟨ refl ⟩
+          ({!ε∞ (succ n)!} ∘ {!!}) σ ≡⟨ {!!} ⟩
+--          ([ 𝓓 (succ n) , 𝓓∞ ]⟨ {!ε∞' (succ n)!} ⟩ ∘ [ {!!} , {!!} ]⟨ {!!} ⟩ ∘ [ {!!} , 𝓓∞ ]⟨ {!!} ⟩) σ ≡⟨ {!!} ⟩
+          ({!ε∞ (succ n)!} ∘ {!!} ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+          {!(ε∞ (succ n) ∘ ? ∘ π∞ (succ n)) σ!} ≡⟨ {!!} ⟩
+--          {!(ε∞ (succ n) ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ∘ π∞ (succ n)) σ!} ≡⟨ {!!} ⟩
+          {!!} ≡⟨ {!!} ⟩
+          β₂ σ ∎
+
+--           → [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ≡ ε n ∘ f ∘ π n
 
 {-
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
@@ -333,7 +345,6 @@ bar x = apd {!β-from-succ 0!} {!!} -}
                   (f (ε∞ (succ n) (ε n x)))
             e₄ = ap (π∞ n ∘ f ∘ ε∞ (succ n)) (ε-in-terms-of-ε⁺ n x)
             e₅ = ap (π∞ n ∘ f) (ε∞-commutes-with-εs n (succ n) (≤-succ n) x)
--}
 -}
 
 \end{code}

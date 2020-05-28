@@ -336,6 +336,16 @@ DCPO-∘₃ : {𝓦₁ 𝓣₁ 𝓦₂ 𝓣₂ 𝓦₃ 𝓣₃ 𝓦₄ 𝓣₄ :
         → DCPO[ 𝓓₁ , 𝓓₄ ]
 DCPO-∘₃ 𝓓₁ 𝓓₂ 𝓓₃ 𝓓₄ f g h = DCPO-∘ 𝓓₁ 𝓓₂ 𝓓₄ f (DCPO-∘ 𝓓₂ 𝓓₃ 𝓓₄ g h)
 
+DCPO-∘₃-underlying-function : {𝓦₁ 𝓣₁ 𝓦₂ 𝓣₂ 𝓦₃ 𝓣₃ 𝓦₄ 𝓣₄ : Universe}
+                              (𝓓₁ : DCPO {𝓦₁} {𝓣₁}) (𝓓₂ : DCPO {𝓦₂} {𝓣₂})
+                              (𝓓₃ : DCPO {𝓦₃} {𝓣₃}) (𝓓₄ : DCPO {𝓦₄} {𝓣₄})
+                              (f : DCPO[ 𝓓₁ , 𝓓₂ ]) (g : DCPO[ 𝓓₂ , 𝓓₃ ])
+                              (h : DCPO[ 𝓓₃ , 𝓓₄ ])
+                            → [ 𝓓₁ , 𝓓₄ ]⟨ DCPO-∘₃ 𝓓₁ 𝓓₂ 𝓓₃ 𝓓₄ f g h ⟩
+                            ≡ [ 𝓓₃ , 𝓓₄ ]⟨ h ⟩ ∘ [ 𝓓₂ , 𝓓₃ ]⟨ g ⟩
+                               ∘ [ 𝓓₁ , 𝓓₂ ]⟨ f ⟩
+DCPO-∘₃-underlying-function 𝓓₁ 𝓓₂ 𝓓₃ 𝓓₄ f g h = refl
+
 \end{code}
 
 \begin{code}

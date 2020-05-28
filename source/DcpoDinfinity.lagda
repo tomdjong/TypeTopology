@@ -270,19 +270,31 @@ open SequentialDiagram
                         (ε-is-continuous 0) (β-from-succ-is-continuous 0)
 β-is-continuous (succ n) = β-from-succ-is-continuous n
 
+{-
+ This should really be proven as
+
+  β-on-succ' : (n : ℕ) (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩) (c : is-continuous (𝓓 n) (𝓓 n) f)
+             → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) (f , c) ⟩ ≡ ε∞ n ∘ f ∘ π∞ n
+  β-on-succ' n f c = refl
+
+  or at the very least,
+
+  β-on-succ' n f c = DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) (f , c) (ε∞' n)
+
+  but Agda takes forever :(
+-}
+
 β-from-succ-underlying-function : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩)
-                                  -- (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩)
-                                  -- (c : is-continuous (𝓓 n) (𝓓 n) f)
                                 → [ 𝓓∞ , 𝓓∞ ]⟨ β-from-succ n f ⟩
                                 ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
-β-from-succ-underlying-function n f σ = to-𝓓∞-≡ (λ m → ap (λ - → ⦅ - ⦆ m) (happly (DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)) σ))
+β-from-succ-underlying-function n f σ =
+ to-𝓓∞-≡ (λ m → ap (λ - → ⦅ - ⦆ m)
+  (happly (DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)) σ))
 
-{-
-β-on-succ : (n : ℕ) (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩) (c : is-continuous (𝓓 n) (𝓓 n) f)
-          → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) (f , c) ⟩ ≡ ε∞ n ∘ f ∘ π∞ n
-β-on-succ n f c = DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) (f , c) {!ε∞' n!}
---happly (DCPO-∘₃-underlying-function {!!} {!!} {!𝓓 n!} 𝓓∞ (π∞' n) (f , c) (ε∞' n)) σ
--}
+β-on-succ : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩)
+          → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) f ⟩ ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
+β-on-succ n f σ = ap (λ - → [ 𝓓∞ , 𝓓∞ ]⟨ - ⟩ σ) (refl─ (β (succ n) f))
+                   ∙ β-from-succ-underlying-function n f σ
 
 β-commutes-with-ε : (n : ℕ) → β (succ n) ∘ ε n ∼ β n
 β-commutes-with-ε zero x = refl
@@ -297,15 +309,8 @@ open SequentialDiagram
     h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ] → DCPO[ 𝓓∞ , 𝓓∞ ]
     h g = DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) g (ε∞' (succ n))
     γ : β₁ ∼ β₂
-    γ σ = β₁ σ ≡⟨ refl ⟩
-          -- [ 𝓓∞ , 𝓓∞ ]⟨ h ⟩ σ ≡⟨ {!!} ⟩
-          [ 𝓓∞ , 𝓓∞ ]⟨ h (ε (succ n) (f , c)) ⟩ σ ≡⟨ {!!} ⟩
-          {- happly (DCPO-∘₃-underlying-function 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) (ε (succ n) (f , c)) (ε∞' (succ n))) σ ⟩
-          {!(underlying-function (𝓓 (succ n)) 𝓓∞ (ε∞' (succ n)) ∘
-             underlying-function (𝓓 (succ n)) (𝓓 (succ n)) (ε (succ n) (f , c))
-             ∘ underlying-function 𝓓∞ (𝓓 (succ n)) (π∞' (succ n)))
-            σ!} ≡⟨ {!!} ⟩ -}
---          ([ 𝓓 (succ n) , 𝓓∞ ]⟨ {!ε∞' (succ n)!} ⟩ ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
+    γ σ = β₁ σ ≡⟨ {!β-on-succ (succ n) (ε (succ n) (f , c))!} ⟩
+          {!!} ≡⟨ {!!} ⟩
           [ 𝓓∞ , 𝓓∞ ]⟨ DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) (ε (succ n) (f , c)) (ε∞' (succ n)) ⟩ σ ≡⟨ refl ⟩
           ({!ε∞ (succ n)!} ∘ {!!}) σ ≡⟨ {!!} ⟩
 --          ([ 𝓓 (succ n) , 𝓓∞ ]⟨ {!ε∞' (succ n)!} ⟩ ∘ [ {!!} , {!!} ]⟨ {!!} ⟩ ∘ [ {!!} , 𝓓∞ ]⟨ {!!} ⟩) σ ≡⟨ {!!} ⟩

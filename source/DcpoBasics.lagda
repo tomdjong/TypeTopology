@@ -360,10 +360,10 @@ DCPO-∘₃-underlying-function 𝓓₁ 𝓓₂ 𝓓₃ 𝓓₄ f g h = refl
 \begin{code}
 
 to-continuous-function-≡ : (𝓓 : DCPO {𝓤} {𝓣}) (𝓔 : DCPO {𝓤'} {𝓣'})
-                           (f g : DCPO[ 𝓓 , 𝓔 ])
+                           {f g : DCPO[ 𝓓 , 𝓔 ]}
                          → [ 𝓓 , 𝓔 ]⟨ f ⟩ ∼ [ 𝓓 , 𝓔 ]⟨ g ⟩
                          → f ≡ g
-to-continuous-function-≡ 𝓓 𝓔 f g h =
+to-continuous-function-≡ 𝓓 𝓔 h =
  to-subtype-≡ (being-continuous-is-a-prop 𝓓 𝓔) (dfunext fe h)
 
 \end{code}

@@ -201,12 +201,10 @@ open SequentialDiagram
 α (succ n) = α-to-succ n
 
 -- KINDA SLOW
-{-
 α-is-continuous : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
 α-is-continuous zero = ∘-is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 1) (𝓓 0) (α-to-succ 0) (π 0)
                         (α-to-succ-is-continuous 0) (π-is-continuous 0)
 α-is-continuous (succ n) = α-to-succ-is-continuous n
--}
 
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
@@ -247,10 +245,8 @@ open SequentialDiagram
 -}
 
 -- α-is-continuous is very slow to typecheck in this term. Why?
-{-
 α∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
 α∞ = limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
--}
 
 β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β-from-succ n f = DCPO-∘₃ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)
@@ -267,13 +263,11 @@ open SequentialDiagram
 β (succ n) = β-from-succ n
 
 -- SLOW
-{-
 β-is-continuous : (n : ℕ) → is-continuous (𝓓 n) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (β n)
 β-is-continuous zero = ∘-is-continuous (𝓓 0) (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
                         (ε 0) (β-from-succ 0)
                         (ε-is-continuous 0) (β-from-succ-is-continuous 0)
 β-is-continuous (succ n) = β-from-succ-is-continuous n
--}
 
 {-
  This should really be proven as
@@ -336,5 +330,11 @@ open SequentialDiagram
         e₃ = ap (λ - → ⦅ ε∞ n (f -) ⦆ m) (π-in-terms-of-π⁺ n (π∞ (succ n) σ))
         e₄ = ap (λ - → ⦅ ε∞ n (f -) ⦆ m) (π∞-commutes-with-πs n (succ n) (≤-succ n) σ)
 
+β-commutes-with-ε⁺ : (n m : ℕ) (l : n ≤ m) → β m ∘ ε⁺ {n} {m} l ∼ β n
+β-commutes-with-ε⁺ n m l = commute-with-εs-lemma (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β
+                            β-commutes-with-ε n m l
+
+β∞ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+β∞ = colimit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
 
 \end{code}

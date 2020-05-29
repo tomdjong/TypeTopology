@@ -211,8 +211,7 @@ open SequentialDiagram
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
 α-commutes-with-π (succ n) (f , c) =
- to-continuous-function-≡ (𝓓 n) (𝓓 n) ((π (succ n) ∘ α (succ (succ n))) (f , c))
-  (α (succ n) (f , c)) γ
+ to-continuous-function-≡ (𝓓 n) (𝓓 n) γ
    where
     h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ]
     h = DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n))
@@ -290,6 +289,7 @@ open SequentialDiagram
   but Agda takes forever :(
 -}
 
+{-
 β-from-succ-underlying-function : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩)
                                 → [ 𝓓∞ , 𝓓∞ ]⟨ β-from-succ n f ⟩
                                 ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
@@ -301,59 +301,40 @@ open SequentialDiagram
           → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) f ⟩ ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
 β-on-succ n f σ = ap (λ - → [ 𝓓∞ , 𝓓∞ ]⟨ - ⟩ σ) (refl─ (β (succ n) f))
                    ∙ β-from-succ-underlying-function n f σ
+-}
 
 β-commutes-with-ε : (n : ℕ) → β (succ n) ∘ ε n ∼ β n
 β-commutes-with-ε zero x = refl
 β-commutes-with-ε (succ n) (f , c) =
- to-continuous-function-≡ 𝓓∞ 𝓓∞ ((β (succ (succ n)) ∘ ε (succ n)) (f , c))
-  (β (succ n) (f , c)) γ
+ to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
    where
     β₁ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
     β₁ = [ 𝓓∞ , 𝓓∞ ]⟨ β (succ (succ n)) (ε (succ n) (f , c)) ⟩
     β₂ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
     β₂ = [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) (f , c) ⟩
-    h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ] → DCPO[ 𝓓∞ , 𝓓∞ ]
-    h g = DCPO-∘₃ 𝓓∞ (𝓓 (succ n)) (𝓓 (succ n)) 𝓓∞ (π∞' (succ n)) g (ε∞' (succ n))
     γ : β₁ ∼ β₂
-    γ σ = β₁ σ ≡⟨ {!!} ⟩ -- β-on-succ (succ n) (ε (succ n) (f , c)) σ ⟩
-{-          (ε∞ (succ n) ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ∘ π∞ (succ n)) σ ≡⟨ happly (ap (λ - → ε∞ (succ n) ∘ - ∘ π∞ (succ n)) {!!}) σ ⟩ -}
-          (ε∞ (succ n) ∘ ε n ∘ f ∘ π n ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
-          (ε∞ (succ n) ∘ ε⁺ {n} {succ n} (≤-succ n) ∘ f ∘ π n ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
-          (ε∞ n ∘ f ∘ π n ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
-          (ε∞ n ∘ f ∘ π⁺ {n} {succ n} (≤-succ n) ∘ π∞ (succ n)) σ ≡⟨ {!!} ⟩
-          (ε∞ n ∘ f ∘ π∞ n) σ ≡⟨ {!!} ⟩
-          β₂ σ ∎
+    {- It should be possible to prove equality on 𝓓∞ directly (i.e. we shouldn't
+       need to boil it down to ⦅ ... ⦆ m, as witnessed by all the
+       ap (λ - → ⦅ ... - ⦆ m) in the terms below), but Agda is very slow to typecheck
+       otherwise. -}
+    γ σ = to-𝓓∞-≡ ψ
+     where
+      ψ : (m : ℕ) → ⦅ β₁ σ ⦆ m ≡ ⦅ β₂ σ ⦆ m
+      ψ m = ⦅ β₁ σ ⦆ m                                                    ≡⟨ refl ⟩
+            ⦅ (ε∞ (succ n) ∘ ε n ∘ h) σ ⦆ m                               ≡⟨ e₁   ⟩
+            ⦅ (ε∞ (succ n) ∘ ε⁺ {n} {succ n} (≤-succ n) ∘ h) σ ⦆ m        ≡⟨ e₂   ⟩
+            ⦅ (ε∞ n ∘ h) σ ⦆ m                                            ≡⟨ refl ⟩
+            ⦅ (ε∞ n ∘ f ∘ π n ∘ π∞ (succ n)) σ ⦆ m                        ≡⟨ e₃   ⟩
+            ⦅ (ε∞ n ∘ f ∘ π⁺ {n} {succ n} (≤-succ n) ∘ π∞ (succ n)) σ ⦆ m ≡⟨ e₄   ⟩
+            ⦅ (ε∞ n ∘ f ∘ π∞ n) σ ⦆ m                                     ≡⟨ refl ⟩
+            ⦅ β₂ σ ⦆ m                                                    ∎
+       where
+        h : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓 n ⟩
+        h = f ∘ π n ∘ π∞ (succ n)
+        e₁ = ap (λ - → ⦅ ε∞ (succ n) - ⦆ m) (ε-in-terms-of-ε⁺ n (h σ))
+        e₂ = ap (λ - → ⦅ - ⦆ m) (ε∞-commutes-with-εs n (succ n) (≤-succ n) (h σ))
+        e₃ = ap (λ - → ⦅ ε∞ n (f -) ⦆ m) (π-in-terms-of-π⁺ n (π∞ (succ n) σ))
+        e₄ = ap (λ - → ⦅ ε∞ n (f -) ⦆ m) (π∞-commutes-with-πs n (succ n) (≤-succ n) σ)
 
---           → [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ ε (succ n) (f , c) ⟩ ≡ ε n ∘ f ∘ π n
-
-{-
-α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
-α-commutes-with-π zero f = refl
-α-commutes-with-π (succ n) (f , c) =
- to-continuous-function-≡ (𝓓 n) (𝓓 n) ((π (succ n) ∘ α (succ (succ n))) (f , c))
-  (α (succ n) (f , c)) γ
-   where
-    h : DCPO[ 𝓓 (succ n) , 𝓓 (succ n) ]
-    h = DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n))
-         (ε∞' (succ n)) (f , c) (π∞' (succ n))
-    γ : ([ 𝓓 n , 𝓓 n ]⟨ π (succ n) h ⟩) ∼ π∞ n ∘ f ∘ ε∞ n
-    γ x = [ 𝓓 n , 𝓓 n ]⟨ (π (succ n) h) ⟩ x                       ≡⟨ e₁   ⟩
-          (π n ∘ [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ h ⟩ ∘ ε n) x        ≡⟨ refl ⟩
-          (π n ∘ π∞ (succ n) ∘ f') x                              ≡⟨ e₂    ⟩
-          (π⁺ {n} {succ n} (≤-succ n) ∘ π∞ (succ n) ∘ f') x       ≡⟨ e₃    ⟩
-          (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε n) x                        ≡⟨ e₄    ⟩
-          (π∞ n ∘ f ∘ ε∞ (succ n) ∘ ε⁺ {n} {succ n} (≤-succ n)) x ≡⟨ e₅    ⟩
-          (π∞ n ∘ f ∘ ε∞ n) x                                     ∎
-           where
-            f' : ⟨ 𝓓 n ⟩ → ⟨ 𝓓∞ ⟩
-            f' = f ∘ ε∞ (succ n) ∘ ε n
-            e₁ = happly (π-on-succ' n ((DCPO-∘₃ (𝓓 (succ n)) 𝓓∞ 𝓓∞ (𝓓 (succ n))
-                  (ε∞' (succ n)) (f , c) (π∞' (succ n))))) x
-            e₂ = π-in-terms-of-π⁺ n (π∞ (succ n) (f' x))
-            e₃ = π∞-commutes-with-πs n (succ n) (≤-succ n)
-                  (f (ε∞ (succ n) (ε n x)))
-            e₄ = ap (π∞ n ∘ f ∘ ε∞ (succ n)) (ε-in-terms-of-ε⁺ n x)
-            e₅ = ap (π∞ n ∘ f) (ε∞-commutes-with-εs n (succ n) (≤-succ n) x)
--}
 
 \end{code}

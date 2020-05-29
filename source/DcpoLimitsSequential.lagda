@@ -240,24 +240,24 @@ Since ε and π are continuous, so are ε⁺ and π⁺.
  ε⁺-id : (n : ℕ) → ε⁺ {n} {n} (≤-refl n) ∼ id
  ε⁺-id n x = ε⁺ {n} {n} (≤-refl n) x      ≡⟨ refl ⟩
              ε⁺-helper-Σ n n s x          ≡⟨ q    ⟩
-             ε⁺-helper-Σ n n (0 , refl) x ≡⟨ refl ⟩
+             ε⁺-helper-Σ n n (zero , refl) x ≡⟨ refl ⟩
              x                            ∎
   where
    s : Σ k ꞉ ℕ , n +' k ≡ n
    s = subtraction' n n (≤-refl n)
    q = ap (λ - → ε⁺-helper-Σ n n - x)
-        (left-addition-is-embedding n n s (0 , refl))
+        (left-addition-is-embedding n n s (zero , refl))
 
  π⁺-id : (n : ℕ) → π⁺ {n} {n} (≤-refl n) ∼ id
  π⁺-id n x = π⁺ {n} {n} (≤-refl n) x      ≡⟨ refl ⟩
              π⁺-helper-Σ n n s x          ≡⟨ q    ⟩
-             π⁺-helper-Σ n n (0 , refl) x ≡⟨ refl ⟩
+             π⁺-helper-Σ n n (zero , refl) x ≡⟨ refl ⟩
              x                            ∎
   where
    s : Σ k ꞉ ℕ , n +' k ≡ n
    s = subtraction' n n (≤-refl n)
    q = ap (λ - → π⁺-helper-Σ n n - x)
-        (left-addition-is-embedding n n s (0 , refl))
+        (left-addition-is-embedding n n s (zero , refl))
 
 \end{code}
 
@@ -421,7 +421,7 @@ Finally, we can open the directed preorder module with the above parameters.
        (λ {n} → ≤-refl n)
        (λ {n} {m} {k} → ≤-trans n m k)
        ≤-is-prop-valued
-       ∣ 0 ∣
+       ∣ zero ∣
        (λ n m → ∣ n +' m , ≤-+ n m , ≤-+' n m ∣)
        𝓓
        ε⁺

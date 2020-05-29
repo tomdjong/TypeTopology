@@ -137,17 +137,15 @@ open import NaturalsAddition renaming (_+_ to _+'_)
 
 ε-section-of-π : (n : ℕ) → π n ∘ ε n ∼ id
 ε-section-of-π zero x = refl
-ε-section-of-π (succ n) (f , _) =
- -- TO DO
- to-subtype-≡ (λ g → being-continuous-is-a-prop (𝓓 n) (𝓓 n) g) (dfunext fe γ)
-  where
-   γ : π n ∘ ε n ∘ f ∘ π n ∘ ε n ∼ f
-   γ x = (π n ∘ ε n ∘ f ∘ π n ∘ ε n) x ≡⟨ IH (f (π n (ε n x))) ⟩
-         (f ∘ π n ∘ ε n) x             ≡⟨ ap f (IH x) ⟩
-         f x                           ∎
-    where
-     IH : π n ∘ ε n ∼ id
-     IH = ε-section-of-π n
+ε-section-of-π (succ n) (f , _) = to-continuous-function-≡ (𝓓 n) (𝓓 n) γ
+ where
+  γ : π n ∘ ε n ∘ f ∘ π n ∘ ε n ∼ f
+  γ x = (π n ∘ ε n ∘ f ∘ π n ∘ ε n) x ≡⟨ IH (f (π n (ε n x))) ⟩
+        (f ∘ π n ∘ ε n) x             ≡⟨ ap f (IH x) ⟩
+        f x                           ∎
+   where
+    IH : π n ∘ ε n ∼ id
+    IH = ε-section-of-π n
 
 επ-deflation : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩) → ε n (π n f) ⊑⟨ 𝓓 (succ n) ⟩ f
 επ-deflation zero (f , c) x =
@@ -200,7 +198,7 @@ open SequentialDiagram
 α zero     = π 0 ∘ α-to-succ 0
 α (succ n) = α-to-succ n
 
--- KINDA SLOW
+-- Kinda slow, why?
 α-is-continuous : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
 α-is-continuous zero = ∘-is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 1) (𝓓 0) (α-to-succ 0) (π 0)
                         (α-to-succ-is-continuous 0) (π-is-continuous 0)
@@ -236,15 +234,7 @@ open SequentialDiagram
 α-commutes-with-π⁺ n m l = commute-with-πs-lemma (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
                             α α-commutes-with-π n m l
 
-{-
-α⁺ : (n : ℕ) → DCPO[ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ , 𝓓 n ]
-α⁺ n = α n , α-is-continuous n
-
-α' : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-α' = limit-mediating-arrow' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α⁺ α-commutes-with-π⁺
--}
-
--- α-is-continuous is very slow to typecheck in this term. Why?
+-- α-is-continuous is VERY SLOW to typecheck in this term. Why?
 α∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
 α∞ = limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
 
@@ -268,34 +258,6 @@ open SequentialDiagram
                         (ε 0) (β-from-succ 0)
                         (ε-is-continuous 0) (β-from-succ-is-continuous 0)
 β-is-continuous (succ n) = β-from-succ-is-continuous n
-
-{-
- This should really be proven as
-
-  β-on-succ' : (n : ℕ) (f : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩) (c : is-continuous (𝓓 n) (𝓓 n) f)
-             → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) (f , c) ⟩ ≡ ε∞ n ∘ f ∘ π∞ n
-  β-on-succ' n f c = refl
-
-  or at the very least,
-
-  β-on-succ' n f c = DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) (f , c) (ε∞' n)
-
-  but Agda takes forever :(
--}
-
-{-
-β-from-succ-underlying-function : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩)
-                                → [ 𝓓∞ , 𝓓∞ ]⟨ β-from-succ n f ⟩
-                                ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
-β-from-succ-underlying-function n f σ =
- to-𝓓∞-≡ (λ m → ap (λ - → ⦅ - ⦆ m)
-  (happly (DCPO-∘₃-underlying-function 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)) σ))
-
-β-on-succ : (n : ℕ) (f : ⟨ 𝓓 (succ n) ⟩)
-          → [ 𝓓∞ , 𝓓∞ ]⟨ β (succ n) f ⟩ ∼ ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ f ⟩ ∘ π∞ n
-β-on-succ n f σ = ap (λ - → [ 𝓓∞ , 𝓓∞ ]⟨ - ⟩ σ) (refl─ (β (succ n) f))
-                   ∙ β-from-succ-underlying-function n f σ
--}
 
 β-commutes-with-ε : (n : ℕ) → β (succ n) ∘ ε n ∼ β n
 β-commutes-with-ε zero x = refl

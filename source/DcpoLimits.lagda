@@ -244,33 +244,35 @@ module Diagram
       ρ i k x                     ≡⟨ refl ⟩
       ⦅ ε∞ i x ⦆ k                ∎
 
- π∞ε∞ : {i : I} → π∞ i ∘ ε∞ i ∼ id
- π∞ε∞ {i} x = π∞ i (ε∞ i x)             ≡⟨ refl ⟩
-              ⦅ ε∞ i x ⦆ i              ≡⟨ refl ⟩
-              ρ i i x                   ≡⟨ ρ-in-terms-of-κ ⊑-refl ⊑-refl x ⟩
-              κ x (i , ⊑-refl , ⊑-refl) ≡⟨ refl ⟩
-              π ⊑-refl (ε ⊑-refl x)     ≡⟨ ε-section-of-π ⊑-refl x ⟩
-              x                         ∎
+ ε∞-section-of-π∞ : {i : I} → π∞ i ∘ ε∞ i ∼ id
+ ε∞-section-of-π∞ {i} x =
+  π∞ i (ε∞ i x)  ≡⟨ refl ⟩
+  ⦅ ε∞ i x ⦆ i              ≡⟨ refl ⟩
+  ρ i i x                   ≡⟨ ρ-in-terms-of-κ ⊑-refl ⊑-refl x ⟩
+  κ x (i , ⊑-refl , ⊑-refl) ≡⟨ refl ⟩
+  π ⊑-refl (ε ⊑-refl x)     ≡⟨ ε-section-of-π ⊑-refl x ⟩
+  x                         ∎
 
- ε∞π∞ : {i : I} (σ : ⟨ 𝓓∞ ⟩) → ε∞ i (π∞ i σ) ⊑⟨ 𝓓∞ ⟩ σ
- ε∞π∞ {i} σ j = ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i (π∞ i σ) ⦆ j) (⦅ σ ⦆ j)) γ
-                 (I-weakly-directed i j)
-  where
-   γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
-     → ⦅ ε∞ i (π∞ i σ) ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ σ ⦆ j
-   γ (k , lᵢ , lⱼ) = ⦅ ε∞ i (π∞ i σ) ⦆ j          ⊑⟨ 𝓓 j ⟩[ reflexivity (𝓓 j) _ ]
-                     ρ i j (⦅ σ ⦆ i)              ⊑⟨ 𝓓 j ⟩[ u₁ ]
-                     κ (⦅ σ ⦆ i) (k , lᵢ , lⱼ)    ⊑⟨ 𝓓 j ⟩[ reflexivity (𝓓 j) _ ]
-                     π lⱼ (ε lᵢ (⦅ σ ⦆ i))        ⊑⟨ 𝓓 j ⟩[ u₂ ]
-                     π lⱼ (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) ⊑⟨ 𝓓 j ⟩[ u₃ ]
-                     π lⱼ (⦅ σ ⦆ k)               ⊑⟨ 𝓓 j ⟩[ u₄ ]
-                     ⦅ σ ⦆ j                      ∎⟨ 𝓓 j ⟩
-    where
-     u₁ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ (⦅ σ ⦆ i))
-     u₂ = ≡-to-⊑ (𝓓 j) (ap (π lⱼ ∘ ε lᵢ) ((π-equality σ lᵢ) ⁻¹))
-     u₃ = continuous-implies-monotone (𝓓 k) (𝓓 j) (π lⱼ , π-is-continuous lⱼ)
-           (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) (⦅ σ ⦆ k) (επ-deflation lᵢ (⦅ σ ⦆ k))
-     u₄ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
+ ε∞π∞-deflation : {i : I} (σ : ⟨ 𝓓∞ ⟩) → ε∞ i (π∞ i σ) ⊑⟨ 𝓓∞ ⟩ σ
+ ε∞π∞-deflation {i} σ j =
+  ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i (π∞ i σ) ⦆ j) (⦅ σ ⦆ j)) γ
+   (I-weakly-directed i j)
+   where
+    γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+      → ⦅ ε∞ i (π∞ i σ) ⦆ j ⊑⟨ 𝓓 j ⟩ ⦅ σ ⦆ j
+    γ (k , lᵢ , lⱼ) = ⦅ ε∞ i (π∞ i σ) ⦆ j          ⊑⟨ 𝓓 j ⟩[ reflexivity (𝓓 j) _ ]
+                      ρ i j (⦅ σ ⦆ i)              ⊑⟨ 𝓓 j ⟩[ u₁ ]
+                      κ (⦅ σ ⦆ i) (k , lᵢ , lⱼ)    ⊑⟨ 𝓓 j ⟩[ reflexivity (𝓓 j) _ ]
+                      π lⱼ (ε lᵢ (⦅ σ ⦆ i))        ⊑⟨ 𝓓 j ⟩[ u₂ ]
+                      π lⱼ (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) ⊑⟨ 𝓓 j ⟩[ u₃ ]
+                      π lⱼ (⦅ σ ⦆ k)               ⊑⟨ 𝓓 j ⟩[ u₄ ]
+                      ⦅ σ ⦆ j                      ∎⟨ 𝓓 j ⟩
+     where
+      u₁ = ≡-to-⊑ (𝓓 j) (ρ-in-terms-of-κ lᵢ lⱼ (⦅ σ ⦆ i))
+      u₂ = ≡-to-⊑ (𝓓 j) (ap (π lⱼ ∘ ε lᵢ) ((π-equality σ lᵢ) ⁻¹))
+      u₃ = continuous-implies-monotone (𝓓 k) (𝓓 j) (π lⱼ , π-is-continuous lⱼ)
+            (ε lᵢ (π lᵢ (⦅ σ ⦆ k))) (⦅ σ ⦆ k) (επ-deflation lᵢ (⦅ σ ⦆ k))
+      u₄ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
 
  π∞-is-continuous : (i : I) → is-continuous 𝓓∞ (𝓓 i) (π∞ i)
  π∞-is-continuous i 𝓐 α δ = ub , lb-of-ubs
@@ -374,7 +376,7 @@ module Diagram
 
 \begin{code}
 
- module _
+ module DcpoCone
          (𝓔 : DCPO {𝓤'} {𝓣'})
          (f : (i : I) → ⟨ 𝓔 ⟩ → ⟨ 𝓓 i ⟩)
          (f-cont : (i : I) → is-continuous 𝓔 (𝓓 i) (f i))
@@ -538,7 +540,7 @@ module Diagram
                   (π lⱼ , π-is-continuous lⱼ)
          u₇ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
 
- module _
+ module DcpoCocone
          (𝓔 : DCPO {𝓤'} {𝓣'})
          (g : (i : I) → ⟨ 𝓓 i ⟩ → ⟨ 𝓔 ⟩)
          (g-cont : (i : I) → is-continuous (𝓓 i) 𝓔 (g i))
@@ -580,7 +582,7 @@ module Diagram
   colimit-mediating-arrow σ = ∐ 𝓔 {I} {φ} δ
    where
     φ : I → ⟨ 𝓔 ⟩
-    φ i = colimit-family σ i
+    φ = colimit-family σ
     δ : is-Directed 𝓔 φ
     δ = colimit-family-is-directed σ
 
@@ -724,6 +726,6 @@ Experimenting with packaged parameters
                         → ((i j : I) (l : i ⊑ j) → π l ∘ pr₁ (f j) ∼ pr₁ (f i))
                         → ⟨ 𝓔 ⟩ → ⟨ 𝓓∞ ⟩
  limit-mediating-arrow' 𝓔 f =
-  limit-mediating-arrow 𝓔 (λ i → pr₁ (f i)) (λ i → pr₂ (f i))
+  DcpoCone.limit-mediating-arrow 𝓔 (λ i → pr₁ (f i)) (λ i → pr₂ (f i))
 
 \end{code}

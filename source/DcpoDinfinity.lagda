@@ -180,6 +180,7 @@ open SequentialDiagram
       ε-is-continuous
       π-is-continuous
 
+-- (ε∞-is-continuous n) is slow
 ε∞' : (n : ℕ) → DCPO[ 𝓓 n , 𝓓∞ ]
 ε∞' n = ε∞ n , ε∞-is-continuous n
 
@@ -191,8 +192,10 @@ open SequentialDiagram
 
 α-to-succ-is-continuous : (n : ℕ)
                         → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 (succ n)) (α-to-succ n)
-α-to-succ-is-continuous n =
- DCPO-∘₃-is-continuous₂ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n) (ε∞' n) (π∞' n)
+α-to-succ-is-continuous n = γ
+ where
+  abstract
+   γ = DCPO-∘₃-is-continuous₂ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n) (ε∞' n) (π∞' n)
 
 α : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 n ⟩
 α zero     = π 0 ∘ α-to-succ 0
@@ -200,9 +203,14 @@ open SequentialDiagram
 
 -- Kinda slow, why?
 α-is-continuous : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
-α-is-continuous zero = ∘-is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 1) (𝓓 0) (α-to-succ 0) (π 0)
-                        (α-to-succ-is-continuous 0) (π-is-continuous 0)
-α-is-continuous (succ n) = α-to-succ-is-continuous n
+α-is-continuous = γ
+ where
+  abstract
+   γ : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
+   γ zero = ∘-is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 1) (𝓓 0)
+             (α-to-succ 0) (π 0)
+             (α-to-succ-is-continuous 0) (π-is-continuous 0)
+   γ (succ n) = α-to-succ-is-continuous n
 
 α-commutes-with-π : (n : ℕ) → π n ∘ α (succ n) ∼ α n
 α-commutes-with-π zero f = refl
@@ -234,9 +242,11 @@ open SequentialDiagram
 α-commutes-with-π⁺ n m l = commute-with-πs-lemma (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
                             α α-commutes-with-π n m l
 
+open DcpoCone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
+
 -- α-is-continuous is VERY SLOW to typecheck in this term. Why?
 α∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-α∞ = limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
+α∞ = limit-mediating-arrow -- (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
 
 β-from-succ : (n : ℕ) → ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β-from-succ n f = DCPO-∘₃ 𝓓∞ (𝓓 n) (𝓓 n) 𝓓∞ (π∞' n) f (ε∞' n)
@@ -296,7 +306,35 @@ open SequentialDiagram
 β-commutes-with-ε⁺ n m l = commute-with-εs-lemma (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β
                             β-commutes-with-ε n m l
 
+open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
+
 β∞ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
-β∞ = colimit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
+β∞ = colimit-mediating-arrow -- (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
+
+α∞-after-β∞-is-id : α∞ ∘ β∞ ∼ id
+α∞-after-β∞-is-id σ = to-𝓓∞-≡ γ
+ where
+  γ : (n : ℕ) → ⦅ α∞ (β∞ σ) ⦆ n ≡ ⦅ σ ⦆ n
+  γ n = ⦅ α∞ (β∞ σ) ⦆ n ≡⟨ refl ⟩
+        α n (β∞ σ) ≡⟨ continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n , α-is-continuous n) (colimit-family-is-directed σ) ⟩
+        ∐ (𝓓 n) {!!} ≡⟨ {!!} ⟩
+        α n (∐ {!!} {ℕ} {colimit-family σ} (colimit-family-is-directed σ)) ≡⟨ {!!} ⟩
+--        α n (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (colimit-family-is-directed σ)) ≡⟨ {!!} ⟩
+        {!!} ∎
+
+{-
+β∞-after-α∞-is-id : β∞ ∘ α∞ ∼ id
+β∞-after-α∞-is-id φ = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
+ where
+  γ : [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (α∞ φ) ⟩ ∼ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
+  γ σ = to-𝓓∞-≡ ψ
+   where
+    ψ : (n : ℕ) → ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (α∞ φ) ⟩ σ ⦆ n ≡ ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n
+    ψ n = ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (α∞ φ) ⟩ σ ⦆ n ≡⟨ {!!} ⟩
+--          ⦅ ∐ 𝓓∞ (pointwise-family-is-directed 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) (colimit-family-is-directed (α∞ φ)) σ) ⦆ n ≡⟨ {!!} ⟩
+          ∐ (𝓓 n) (family-at-ith-component-is-directed (pointwise-family 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) σ) (pointwise-family-is-directed 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) (colimit-family-is-directed (α∞ φ)) σ) n) ≡⟨ {!!} ⟩
+          {!!} ≡⟨ {!!} ⟩
+          ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n ∎
+-}
 
 \end{code}

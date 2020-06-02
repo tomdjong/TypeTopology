@@ -180,13 +180,6 @@ open SequentialDiagram
       ε-is-continuous
       π-is-continuous
 
--- (ε∞-is-continuous n) is slow
-ε∞' : (n : ℕ) → DCPO[ 𝓓 n , 𝓓∞ ]
-ε∞' n = ε∞ n , ε∞-is-continuous n
-
-π∞' : (n : ℕ) → DCPO[ 𝓓∞ , 𝓓 n ]
-π∞' n = π∞ n , π∞-is-continuous n
-
 α-to-succ : (n : ℕ) → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓 (succ n) ⟩
 α-to-succ n f = DCPO-∘₃ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n) (ε∞' n) f (π∞' n)
 
@@ -203,7 +196,7 @@ open SequentialDiagram
 
 -- Kinda slow, why?
 α-is-continuous : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
-α-is-continuous = γ
+α-is-continuous  = γ
  where
   abstract
    γ : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
@@ -242,9 +235,9 @@ open SequentialDiagram
 α-commutes-with-π⁺ n m l = commute-with-πs-lemma (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
                             α α-commutes-with-π n m l
 
+-- α-is-continuous is VERY SLOW to typecheck here. Why?
 open DcpoCone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
 
--- α-is-continuous is VERY SLOW to typecheck in this term. Why?
 α∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
 α∞ = limit-mediating-arrow -- (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-with-π⁺
 
@@ -311,6 +304,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commute
 β∞ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 β∞ = colimit-mediating-arrow -- (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
 
+{-
 α∞-after-β∞-is-id : α∞ ∘ β∞ ∼ id
 α∞-after-β∞-is-id σ = to-𝓓∞-≡ γ
  where
@@ -321,6 +315,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commute
         α n (∐ {!!} {ℕ} {colimit-family σ} (colimit-family-is-directed σ)) ≡⟨ {!!} ⟩
 --        α n (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (colimit-family-is-directed σ)) ≡⟨ {!!} ⟩
         {!!} ∎
+-}
 
 {-
 β∞-after-α∞-is-id : β∞ ∘ α∞ ∼ id
@@ -338,3 +333,54 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commute
 -}
 
 \end{code}
+
+Experimenting stuff
+
+foo : (n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
+foo = α-is-continuous
+
+helper : (𝓓 𝓓' 𝓔 𝓔' : DCPO {𝓤₁} {𝓤₁})
+         (α₁ : ⟨ 𝓓 ⟩ → ⟨ 𝓓' ⟩)
+         (p : 𝓓 ≡ 𝓔) (q : 𝓓' ≡ 𝓔')
+       → ⟨ 𝓔 ⟩ → ⟨ 𝓔' ⟩
+helper 𝓓₁ 𝓓' .𝓓₁ .𝓓' α₁ refl refl = α₁
+
+transport-is-continuous : (𝓓 𝓓' 𝓔 𝓔' : DCPO {𝓤₁} {𝓤₁})
+                          (α₁ : ⟨ 𝓓 ⟩ → ⟨ 𝓓' ⟩)
+                          (β₁ : ⟨ 𝓔 ⟩ → ⟨ 𝓔' ⟩)
+                          (c : is-continuous 𝓓 𝓓' α₁)
+                          (p : 𝓓 ≡ 𝓔) (q : 𝓓' ≡ 𝓔')
+                          (r : helper 𝓓 𝓓' 𝓔 𝓔' α₁ p q ≡ β₁)
+                        → is-continuous 𝓔 𝓔' β₁
+transport-is-continuous 𝓓₁ 𝓓' .𝓓₁ .𝓓' α₁ β₁ c refl refl refl = γ
+ where
+  abstract
+   γ = c
+
+bar : (((n : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)) → 𝟙{𝓤₀}) → 𝟙{𝓤₀}
+bar f = f α-is-continuous
+
+open DcpoCone
+cone : DcpoCone 𝓤₁ 𝓤₁
+𝓔 cone = 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞
+f cone = α
+(f-cont cone) n = transport-is-continuous
+                  (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (𝓔 cone) (𝓓 n)
+                  (α n) ((f cone) n) {!γ!} refl refl refl
+ where
+  γ : is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n)
+  -- (n : ℕ) → is-continuous (𝓔 cone) (𝓓 n) {!f cone n!}
+  γ = α-is-continuous n
+  test : (i : ℕ) → is-continuous (𝓔 cone) (𝓓 i) (f cone i) ≡ is-continuous (𝓔 cone) (𝓓 i) (f cone i)
+  test i = refl
+comm cone = α-commutes-with-π⁺
+
+-- record { 𝓔 = {!!} ; f = {!!} ; f-cont = {!!} ; comm = {!!} }
+
+{-
+foo : {!!}
+foo = DcpoCone.limit-mediating-arrow (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α γ α-commutes-with-π⁺
+ where
+  γ : {!(i : ℕ) → is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 i) (α i)!}
+  γ = {!!}
+-}

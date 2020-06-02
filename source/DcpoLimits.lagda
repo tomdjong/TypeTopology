@@ -114,36 +114,38 @@ module Diagram
  𝓓∞ : DCPO {𝓥 ⊔ 𝓤 ⊔ 𝓦} {𝓥 ⊔ 𝓣}
  𝓓∞ = (𝓓∞-carrier , _≼_ , pa , dc)
   where
-   pa : PosetAxioms.poset-axioms _≼_
-   pa = sl , pv , r , t , a
-    where
-     open PosetAxioms {𝓥 ⊔ 𝓤 ⊔ 𝓦} {𝓥 ⊔ 𝓣} {𝓓∞-carrier} _≼_
-     sl : is-set 𝓓∞-carrier
-     sl = subsets-of-sets-are-sets _ _
-           (Π-is-set fe (λ i → sethood (𝓓 i)))
-           (Π-is-prop fe
-             (λ i → Π-is-prop fe
-             (λ j → Π-is-prop fe
-             (λ l → sethood (𝓓 i)))))
-     pv : is-prop-valued
-     pv σ τ = Π-is-prop fe (λ i → prop-valuedness (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i))
-     r : is-reflexive
-     r σ i = reflexivity (𝓓 i) (⦅ σ ⦆ i)
-     t : is-transitive
-     t σ τ ρ l k i = transitivity (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (⦅ ρ ⦆ i) (l i) (k i)
-     a : is-antisymmetric
-     a σ τ l k =
-      to-𝓓∞-≡ (λ i → antisymmetry (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (l i) (k i))
+   abstract
+    pa : PosetAxioms.poset-axioms _≼_
+    pa = sl , pv , r , t , a
+     where
+      open PosetAxioms {𝓥 ⊔ 𝓤 ⊔ 𝓦} {𝓥 ⊔ 𝓣} {𝓓∞-carrier} _≼_
+      sl : is-set 𝓓∞-carrier
+      sl = subsets-of-sets-are-sets _ _
+            (Π-is-set fe (λ i → sethood (𝓓 i)))
+            (Π-is-prop fe
+              (λ i → Π-is-prop fe
+              (λ j → Π-is-prop fe
+              (λ l → sethood (𝓓 i)))))
+      pv : is-prop-valued
+      pv σ τ = Π-is-prop fe (λ i → prop-valuedness (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i))
+      r : is-reflexive
+      r σ i = reflexivity (𝓓 i) (⦅ σ ⦆ i)
+      t : is-transitive
+      t σ τ ρ l k i = transitivity (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (⦅ ρ ⦆ i) (l i) (k i)
+      a : is-antisymmetric
+      a σ τ l k =
+       to-𝓓∞-≡ (λ i → antisymmetry (𝓓 i) (⦅ σ ⦆ i) (⦅ τ ⦆ i) (l i) (k i))
    dc : is-directed-complete _≼_
    dc 𝓐 α δ = (𝓓∞-∐ α δ) , ub , lb-of-ubs
     where
-     δ' : (i : I) → is-Directed (𝓓 i) (family-at-ith-component α i)
-     δ' = family-at-ith-component-is-directed α δ
-     ub : (a : 𝓐) → α a ≼ (𝓓∞-∐ α δ)
-     ub a i = ∐-is-upperbound (𝓓 i) (δ' i) a
-     lb-of-ubs : is-lowerbound-of-upperbounds _≼_ (𝓓∞-∐ α δ) α
-     lb-of-ubs τ ub i = ∐-is-lowerbound-of-upperbounds (𝓓 i) (δ' i) (⦅ τ ⦆ i)
-                        (λ a → ub a i)
+     abstract
+      δ' : (i : I) → is-Directed (𝓓 i) (family-at-ith-component α i)
+      δ' = family-at-ith-component-is-directed α δ
+      ub : (a : 𝓐) → α a ≼ (𝓓∞-∐ α δ)
+      ub a i = ∐-is-upperbound (𝓓 i) (δ' i) a
+      lb-of-ubs : is-lowerbound-of-upperbounds _≼_ (𝓓∞-∐ α δ) α
+      lb-of-ubs τ ub i = ∐-is-lowerbound-of-upperbounds (𝓓 i) (δ' i) (⦅ τ ⦆ i)
+                         (λ a → ub a i)
 
  π∞ : (i : I) → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓 i ⟩
  π∞ i (σ , _) = σ i
@@ -293,6 +295,9 @@ module Diagram
     where
      l = ∐-is-lowerbound-of-upperbounds (𝓓 i) (δ' i) x ub
 
+ π∞' : (i : I) → DCPO[ 𝓓∞ , 𝓓 i ]
+ π∞' i = π∞ i , π∞-is-continuous i
+
  ε∞-is-monotone : (i : I) → is-monotone (𝓓 i) 𝓓∞ (ε∞ i)
  ε∞-is-monotone i x y l j =
   ∥∥-rec (prop-valuedness (𝓓 j) (⦅ ε∞ i x ⦆ j) (⦅ ε∞ i y ⦆ j))
@@ -371,6 +376,9 @@ module Diagram
           u₄ = continuous-∐-⊑ (𝓓 i) (𝓓 j) πε' δ
           u₅ = ≡-to-⊑ (𝓓 j) (∐-family-≡ (𝓓 j) p δ₁)
           u₆ = ∐-is-lowerbound-of-upperbounds (𝓓 j) δ₂ (⦅ σ ⦆ j) (λ a → ub a j)
+
+ ε∞' : (i : I) → DCPO[ 𝓓 i , 𝓓∞ ]
+ ε∞' i = ε∞ i , ε∞-is-continuous i
 
 \end{code}
 
@@ -721,11 +729,13 @@ Experimenting with packaged parameters
 
 \begin{code}
 
+ {-
  limit-mediating-arrow' : (𝓔 : DCPO {𝓤'} {𝓣'})
                         → (f : (i : I) → DCPO[ 𝓔 , 𝓓 i ])
                         → ((i j : I) (l : i ⊑ j) → π l ∘ pr₁ (f j) ∼ pr₁ (f i))
                         → ⟨ 𝓔 ⟩ → ⟨ 𝓓∞ ⟩
  limit-mediating-arrow' 𝓔 f =
   DcpoCone.limit-mediating-arrow 𝓔 (λ i → pr₁ (f i)) (λ i → pr₂ (f i))
+ -}
 
 \end{code}

@@ -16,6 +16,8 @@ open PropositionalTruncation pt
 open import Dcpo pt fe 𝓥
 open import DcpoBasics pt fe 𝓥
 
+open import Poset fe
+
 module _ (𝓓 : DCPO {𝓤} {𝓣})
          (𝓔 : DCPO {𝓤'} {𝓣'})
        where
@@ -86,37 +88,40 @@ infixr 20 _⟹ᵈᶜᵖᵒ_
 
 _⟹ᵈᶜᵖᵒ_ : DCPO {𝓤} {𝓣} → DCPO {𝓤'} {𝓣'}
         → DCPO {(𝓥 ⁺) ⊔ 𝓤 ⊔ 𝓣 ⊔ 𝓤' ⊔ 𝓣'} {𝓤 ⊔ 𝓣'}
-𝓓 ⟹ᵈᶜᵖᵒ 𝓔 = DCPO[ 𝓓 , 𝓔 ] , _⊑_ , d
+𝓓 ⟹ᵈᶜᵖᵒ 𝓔 = DCPO[ 𝓓 , 𝓔 ] , _⊑_ , pa , dc
  where
   _⊑_ = 𝓓 hom-⊑ 𝓔
-  d : dcpo-axioms _⊑_
-  d = (s , p , r , t , a) , c
+  abstract
+   pa : PosetAxioms.poset-axioms _⊑_
+   pa = s , p , r , t , a
+    where
+     open PosetAxioms _⊑_
+     s : is-set DCPO[ 𝓓 , 𝓔 ]
+     s = subsets-of-sets-are-sets (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) (is-continuous 𝓓 𝓔)
+         (Π-is-set fe (λ (x : ⟨ 𝓓 ⟩) → sethood 𝓔))
+         (λ {f} → being-continuous-is-a-prop 𝓓 𝓔 f)
+     p : (f g : DCPO[ 𝓓 , 𝓔 ]) → is-prop (f ⊑ g)
+     p (f , _) (g , _) = Π-is-prop fe
+                         (λ (x : ⟨ 𝓓 ⟩) → prop-valuedness 𝓔 (f x) (g x))
+     r : (f : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ f
+     r (f , _) x = reflexivity 𝓔 (f x)
+     t : (f g h : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ g → g ⊑ h → f ⊑ h
+     t (f , _) (g , _) (h , _) l m x = transitivity 𝓔 (f x) (g x) (h x)
+                                       (l x) (m x)
+     a : (f g : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ g → g ⊑ f → f ≡ g
+     a f g l m = to-continuous-function-≡ 𝓓 𝓔
+                  (λ x → antisymmetry 𝓔 ([ 𝓓 , 𝓔 ]⟨ f ⟩ x) ([ 𝓓 , 𝓔 ]⟨ g ⟩ x)
+                   (l x) (m x))
+  dc : is-directed-complete _⊑_
+  dc I α δ = (continuous-functions-sup 𝓓 𝓔 α δ) , u , v
    where
-    s : is-set DCPO[ 𝓓 , 𝓔 ]
-    s = subsets-of-sets-are-sets (⟨ 𝓓 ⟩ → ⟨ 𝓔 ⟩) (is-continuous 𝓓 𝓔)
-        (Π-is-set fe (λ (x : ⟨ 𝓓 ⟩) → sethood 𝓔))
-        (λ {f} → being-continuous-is-a-prop 𝓓 𝓔 f)
-    p : (f g : DCPO[ 𝓓 , 𝓔 ]) → is-prop (f ⊑ g)
-    p (f , _) (g , _) = Π-is-prop fe
-                        (λ (x : ⟨ 𝓓 ⟩) → prop-valuedness 𝓔 (f x) (g x))
-    r : (f : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ f
-    r (f , _) x = reflexivity 𝓔 (f x)
-    t : (f g h : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ g → g ⊑ h → f ⊑ h
-    t (f , _) (g , _) (h , _) l m x = transitivity 𝓔 (f x) (g x) (h x)
-                                      (l x) (m x)
-    a : (f g : DCPO[ 𝓓 , 𝓔 ]) → f ⊑ g → g ⊑ f → f ≡ g
-    a f g l m = to-continuous-function-≡ 𝓓 𝓔
-                 (λ x → antisymmetry 𝓔 ([ 𝓓 , 𝓔 ]⟨ f ⟩ x) ([ 𝓓 , 𝓔 ]⟨ g ⟩ x)
-                  (l x) (m x))
-    c : (I : _ ̇) (α : I → DCPO[ 𝓓 , 𝓔 ]) → is-directed _⊑_ α → has-sup _⊑_ α
-    c I α δ = (continuous-functions-sup 𝓓 𝓔 α δ) , u , v
-     where
-      u : (i : I) → α i ⊑ continuous-functions-sup 𝓓 𝓔 α δ
-      u i d = ∐-is-upperbound 𝓔 (pointwise-family-is-directed 𝓓 𝓔 α δ d) i
-      v : (g : DCPO[ 𝓓 , 𝓔 ])
-        → ((i : I) → α i ⊑ g)
-        → continuous-functions-sup 𝓓 𝓔 α δ ⊑ g
-      v (g , _) l d = ∐-is-lowerbound-of-upperbounds 𝓔
+    abstract
+     u : (i : I) → α i ⊑ continuous-functions-sup 𝓓 𝓔 α δ
+     u i d = ∐-is-upperbound 𝓔 (pointwise-family-is-directed 𝓓 𝓔 α δ d) i
+     v : (g : DCPO[ 𝓓 , 𝓔 ])
+       → ((i : I) → α i ⊑ g)
+       → continuous-functions-sup 𝓓 𝓔 α δ ⊑ g
+     v (g , _) l d = ∐-is-lowerbound-of-upperbounds 𝓔
                       (pointwise-family-is-directed 𝓓 𝓔 α δ d)
                       (g d) (λ (i : I) → l i d)
 

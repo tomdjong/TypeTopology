@@ -113,6 +113,9 @@ univalence of 𝓤, of course.
 
 \begin{code}
 
+-- Slow in Agda version 2.6.2-82228cd-dirty (without
+-- --experimental-lossy-unification), so commented out now.
+{-
 eqtoid-comp : (ua : is-univalent 𝓤) {X Y Z : 𝓤 ̇} (f : X ≃ Y) (g : Y ≃ Z)
             → (eqtoid ua X Y f) ∙ (eqtoid ua Y Z g) ≡ eqtoid ua X Z (f ● g)
 eqtoid-comp {𝓤} ua {X} {Y} {Z} f =
@@ -132,5 +135,6 @@ eqtoid-comp {𝓤} ua {X} {Y} {Z} f =
        fe = funext-from-univalence ua
        l : ⌜ f ⌝ ≡ ⌜ f ● ≃-refl Y ⌝
        l = dfunext fe (λ x → refl)
+-}
 
 \end{code}

@@ -251,8 +251,12 @@ open import DecidableAndDetachable
 
 Bounded minimization (added 14th December 2019):
 
+This does not pass the termination checker in Agda version 2.6.2-82228cd-dirty,
+so commented out for now.
+
 \begin{code}
 
+{-
 βμ : (A : ℕ → 𝓤 ̇ ) → detachable A
   → (k : ℕ) → (Σ m ꞉ ℕ , (m < k) × A m × ((n : ℕ) → A n → m ≤ n))
             + ((n : ℕ) → A n → n ≥ k)
@@ -286,6 +290,7 @@ Bounded minimization (added 14th December 2019):
         II p = transport (λ - → ¬ A -) p u a
         III : k ≤ n
         III = ≤-down k n I II
+-}
 
 \end{code}
 
@@ -294,6 +299,7 @@ bounded minimization:
 
 \begin{code}
 
+{-
 Σμ : (ℕ → 𝓤 ̇ ) → 𝓤 ̇
 Σμ A = Σ m ꞉ ℕ , A m × ((n : ℕ) → A n → m ≤ n)
 
@@ -305,5 +311,6 @@ minimal-from-given A δ (k , a) = cases f g (βμ A δ k)
   f (m , l , a' , φ) = m , a' , φ
   g : ((n : ℕ) → A n → k ≤ n) → conclusion
   g φ = k , a , φ
+-}
 
 \end{code}

@@ -309,32 +309,6 @@ open DcpoCone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) α α-is-continuous α-commutes-
 open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
 
 β∞ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
-β∞ = colimit-mediating-arrow -- (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) β β-is-continuous β-commutes-with-ε⁺
-
-α∞-after-β∞-is-id : α∞ ∘ β∞ ∼ id
-α∞-after-β∞-is-id σ = to-𝓓∞-≡ γ
- where
-  γ : (n : ℕ) → ⦅ α∞ (β∞ σ) ⦆ n ≡ ⦅ σ ⦆ n
-  γ n = ⦅ α∞ (β∞ σ) ⦆ n ≡⟨ refl ⟩
-        α n (β∞ σ) ≡⟨ continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (α n , α-is-continuous n) (colimit-family-is-directed σ) ⟩
-        ∐ (𝓓 n) {!!} ≡⟨ {!!} ⟩
-        α n (∐ {!!} {ℕ} {colimit-family σ} (colimit-family-is-directed σ)) ≡⟨ {!!} ⟩
---        α n (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (colimit-family-is-directed σ)) ≡⟨ {!!} ⟩
-        {!!} ∎
-
-{-
-β∞-after-α∞-is-id : β∞ ∘ α∞ ∼ id
-β∞-after-α∞-is-id φ = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
- where
-  γ : [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (α∞ φ) ⟩ ∼ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
-  γ σ = to-𝓓∞-≡ ψ
-   where
-    ψ : (n : ℕ) → ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (α∞ φ) ⟩ σ ⦆ n ≡ ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n
-    ψ n = ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (α∞ φ) ⟩ σ ⦆ n ≡⟨ {!!} ⟩
---          ⦅ ∐ 𝓓∞ (pointwise-family-is-directed 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) (colimit-family-is-directed (α∞ φ)) σ) ⦆ n ≡⟨ {!!} ⟩
-          ∐ (𝓓 n) (family-at-ith-component-is-directed (pointwise-family 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) σ) (pointwise-family-is-directed 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) (colimit-family-is-directed (α∞ φ)) σ) n) ≡⟨ {!!} ⟩
-          {!!} ≡⟨ {!!} ⟩
-          ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n ∎
--}
+β∞ = colimit-mediating-arrow
 
 \end{code}

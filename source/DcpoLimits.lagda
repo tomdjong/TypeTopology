@@ -650,7 +650,7 @@ module Diagram
    ∐ 𝓔 {I} {λ i → g i (⦅ σ ⦆ i)} δ₃      ≡⟨ refl ⟩
    colimit-mediating-arrow σ             ∎
     where
-     p : (λ i → (h ∘ ε∞ i) (pr₁ σ i)) ≡ (λ i → g i (⦅ σ ⦆ i))
+     -- p : (λ i → (h ∘ ε∞ i) (⦅ σ ⦆ i)) ≡ (λ i → g i (⦅ σ ⦆ i))
      p = dfunext fe (λ i → h-comm i (⦅ σ ⦆ i))
      δ : is-Directed 𝓓∞ {I} (ε∞-family σ)
      δ = ε∞-family-is-directed σ

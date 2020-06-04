@@ -234,6 +234,9 @@ open DcpoCone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) π-exp π-exp-is-continuous π-e
 π-exp∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
 π-exp∞ = limit-mediating-arrow
 
+π-exp∞' : DCPO[ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ , 𝓓∞ ]
+π-exp∞' = limit-mediating-arrow , limit-mediating-arrow-is-continuous
+
 \end{code}
 
 \begin{code}
@@ -387,7 +390,57 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 
 π-exp∞-alt : (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩)
            → π-exp∞ φ ≡ ∐ 𝓓∞ (π-exp-family-is-directed φ)
-π-exp∞-alt φ = {!!}
+π-exp∞-alt φ = σ                              ≡⟨ ∐-of-ε∞s σ ⟩
+               ∐ 𝓓∞ (ε∞-family-is-directed σ) ≡⟨ γ ⟩
+               ∐ 𝓓∞ (π-exp-family-is-directed φ) ∎
+ where
+  σ : ⟨ 𝓓∞ ⟩
+  σ = π-exp∞ φ
+  γ : ∐ 𝓓∞ (ε∞-family-is-directed σ) ≡ ∐ 𝓓∞ (π-exp-family-is-directed φ)
+  γ = antisymmetry 𝓓∞ (∐ 𝓓∞ δ₁) (∐ 𝓓∞ δ₂) a b
+   where
+    δ₁ : is-Directed 𝓓∞ (ε∞-family σ)
+    δ₁ = ε∞-family-is-directed σ
+    δ₂ : is-Directed 𝓓∞ (π-exp-family φ)
+    δ₂ = π-exp-family-is-directed φ
+    a : ∐ 𝓓∞ δ₁ ⊑⟨ 𝓓∞ ⟩ ∐ 𝓓∞ δ₂
+    a = ∐-is-monotone 𝓓∞ δ₁ δ₂ h
+     where
+      h : (n : ℕ) → ε∞-family σ n ⊑⟨ 𝓓∞ ⟩ π-exp-family φ n
+      h n = ε∞-family σ n        ⊑⟨ 𝓓∞ ⟩[ ε∞-family-is-monotone σ n (succ n) (≤-succ n) ]
+            ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (ε∞-family σ (succ n)) ]
+            π-exp-family φ n     ∎⟨ 𝓓∞ ⟩
+    b : ∐ 𝓓∞ δ₂ ⊑⟨ 𝓓∞ ⟩ ∐ 𝓓∞ δ₁
+    b = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ₂ (∐ 𝓓∞ δ₁) h
+     where
+      h : is-upperbound (underlying-order 𝓓∞) (∐ 𝓓∞ δ₁) (π-exp-family φ)
+      h n = π-exp-family φ n     ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ n) ]
+            ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩[ ∐-is-upperbound 𝓓∞ δ₁ (succ n) ]
+            ∐ 𝓓∞ δ₁              ∎⟨ 𝓓∞ ⟩
+
+ε-exp∞-is-section-of-π-exp∞ : π-exp∞ ∘ ε-exp∞ ∼ id
+ε-exp∞-is-section-of-π-exp∞ σ =
+ π-exp∞ (ε-exp∞ σ)           ≡⟨ ap π-exp∞ (ε-exp∞-alt σ) ⟩
+ π-exp∞ (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁) ≡⟨ continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ (π-exp∞ , limit-mediating-arrow-is-continuous) δ₁ ⟩
+ ∐ 𝓓∞ {ℕ} {π-exp∞ ∘ ε-exp-family σ}
+   (image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞
+    (π-exp∞ , limit-mediating-arrow-is-continuous) δ₁) ≡⟨ {!!} ⟩
+ {!!} ≡⟨ π-exp∞-alt (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁) ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → ε∞ (succ n) (π-exp (succ n) (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁))} δ₂                     ≡⟨ {!!} ⟩
+ ∐ 𝓓∞ δ₃                        ≡⟨ (∐-of-ε∞s σ) ⁻¹ ⟩
+ σ                           ∎
+  where
+   δ₁ : {!!}
+   δ₁ = ε-exp-family-is-directed σ
+   δ₂ : {!!}
+   δ₂ = π-exp-family-is-directed (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁)
+   δ₃ : {!!}
+   δ₃ = ε∞-family-is-directed σ
+
+{-
+∐-of-ε∞-after-π∞-is-id : ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) {ℕ} {λ n → ε∞' n ∘ π∞' n} ? ≡ ?
+∐-of-ε∞-after-π∞-is-id = ?
+-}
 
 {-
 ε-expπ-exp-succ-deflation : (n : ℕ) (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩)

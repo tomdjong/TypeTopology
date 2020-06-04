@@ -349,7 +349,44 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
          (ε-exp∞ σ) (ε-exp-family σ)
     γ n = ∐-is-upperbound (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁ (succ n)
 
-π-exp∞-alt : (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩) → π-exp∞ φ ≡ ∐ 𝓓∞ {ℕ} {λ n → ε∞ (succ n) (π-exp (succ n) φ)} {!!}
+π-exp-family : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ℕ → ⟨ 𝓓∞ ⟩
+π-exp-family φ n = ε∞ (succ n) (π-exp (succ n) φ)
+
+π-exp-family-is-directed : (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩)
+                         → is-Directed 𝓓∞ (π-exp-family φ)
+π-exp-family-is-directed φ = ∣ 0 ∣ , γ
+ where
+  γ : is-weakly-directed (underlying-order 𝓓∞) (π-exp-family φ)
+  γ n m = ∥∥-functor g h
+   where
+    σ : ⟨ 𝓓∞ ⟩
+    σ = π-exp∞ φ
+    δ : is-Directed 𝓓∞ (ε∞-family σ)
+    δ = ε∞-family-is-directed σ
+    h : ∃ k ꞉ ℕ , ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩ ε∞-family σ k
+                × ε∞-family σ (succ m) ⊑⟨ 𝓓∞ ⟩ ε∞-family σ k
+    h = Directed-implies-weakly-directed 𝓓∞ δ (succ n) (succ m)
+    g : (Σ k ꞉ ℕ , ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩ ε∞-family σ k
+                 × ε∞-family σ (succ m) ⊑⟨ 𝓓∞ ⟩ ε∞-family σ k)
+      → Σ k ꞉ ℕ , π-exp-family φ n ⊑⟨ 𝓓∞ ⟩ π-exp-family φ k
+                × π-exp-family φ m ⊑⟨ 𝓓∞ ⟩ π-exp-family φ k
+    g (k , lₙ , lₘ) = k , lₙ' , lₘ'
+     where
+      lₖ : ε∞-family σ k ⊑⟨ 𝓓∞ ⟩ ε∞-family σ (succ k)
+      lₖ = ε∞-family-is-monotone σ k (succ k) (≤-succ k)
+      lₙ' = π-exp-family φ n     ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ n) ]
+            ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩[ lₙ ]
+            ε∞-family σ k        ⊑⟨ 𝓓∞ ⟩[ lₖ ]
+            ε∞-family σ (succ k) ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ k) ]
+            π-exp-family φ k     ∎⟨ 𝓓∞ ⟩
+      lₘ' = π-exp-family φ m     ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ m) ]
+            ε∞-family σ (succ m) ⊑⟨ 𝓓∞ ⟩[ lₘ ]
+            ε∞-family σ k        ⊑⟨ 𝓓∞ ⟩[ lₖ ]
+            ε∞-family σ (succ k) ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ k) ]
+            π-exp-family φ k     ∎⟨ 𝓓∞ ⟩
+
+π-exp∞-alt : (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩)
+           → π-exp∞ φ ≡ ∐ 𝓓∞ (π-exp-family-is-directed φ)
 π-exp∞-alt φ = {!!}
 
 {-

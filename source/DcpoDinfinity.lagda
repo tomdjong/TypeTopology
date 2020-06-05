@@ -471,7 +471,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
  ∐ 𝓓∞ {ℕ} {λ n → ε∞ n (⦅ σ ⦆ n)} δ₅                ≡⟨ (∐-of-ε∞s σ) ⁻¹ ⟩
  σ                                                 ∎
   where
-   f : (n m : ℕ) → ⟨ 𝓓∞ ⟩
+   f : ℕ → ℕ → ⟨ 𝓓∞ ⟩
    f n m = π-exp-family (ε-exp-family σ n) m
    δ₁ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-family σ)
    δ₁ = ε-exp-family-is-directed σ
@@ -479,8 +479,8 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
    δ₂ = image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
    δ₃ : (n : ℕ) → is-Directed 𝓓∞ (π-exp-family (ε-exp-family σ n))
    δ₃ n = π-exp-family-is-directed (ε-exp-family σ n)
-   p : π-exp∞ ∘ ε-exp-family σ ≡ λ m → ∐ 𝓓∞ (δ₃ m)
-   p = dfunext fe (λ m → π-exp∞-alt (ε-exp-family σ m))
+   p : π-exp∞ ∘ ε-exp-family σ ≡ λ n → ∐ 𝓓∞ (δ₃ n)
+   p = dfunext fe (λ n → π-exp∞-alt (ε-exp-family σ n))
    δ₄ : is-Directed 𝓓∞ (λ n → ∐ 𝓓∞ (δ₃ n))
    δ₄ = transport (is-Directed 𝓓∞) p δ₂
    δ₅ : is-Directed 𝓓∞ (ε∞-family σ)
@@ -539,6 +539,81 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 \begin{code}
 
 π-exp∞-is-section-of-ε-exp∞ : ε-exp∞ ∘ π-exp∞ ∼ id
-π-exp∞-is-section-of-ε-exp∞ = ?
+π-exp∞-is-section-of-ε-exp∞ φ =
+ ε-exp∞ (π-exp∞ φ)                               ≡⟨ e₁ ⟩
+ ε-exp∞ (∐ 𝓓∞ δ₁)                                ≡⟨ e₂ ⟩
+ ∐ 𝓔 {ℕ} {λ n → (ε-exp∞ ∘ π-exp-family φ) n} δ₂  ≡⟨ e₃ ⟩
+ ∐ 𝓔 {ℕ} {λ n → ∐ 𝓔 {ℕ} {λ m → f n m} (δ₃ n)} δ₄ ≡⟨ e₄ ⟩
+ ∐ 𝓔 {ℕ} {λ n → f n n} δ₅                        ≡⟨ e₅ ⟩
+ ∐ 𝓔 {ℕ} {λ n → {!!}} δ₆          ≡⟨ e₆ ⟩
+ φ ∎
+  where
+   𝓔 : DCPO {𝓤₁} {𝓤₁}
+   𝓔 = 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞
+   f : ℕ → ℕ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+   f n m = ε-exp-family (π-exp-family φ n) m
+   δ₁ = π-exp-family-is-directed φ
+   δ₂ = image-is-directed' 𝓓∞ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp∞' δ₁
+   δ₃ : (n : ℕ) → is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-family (π-exp-family φ n))
+   δ₃ n = ε-exp-family-is-directed (π-exp-family φ n)
+   p : ε-exp∞ ∘ π-exp-family φ ≡ (λ n → ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (δ₃ n))
+   p = dfunext fe (λ n → ε-exp∞-alt (π-exp-family φ n))
+   δ₄ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (λ n → ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (δ₃ n))
+   δ₄ = (transport (is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)) p δ₂)
+   δ₅ : {!!}
+   δ₅ = {!!}
+   δ₆ : {!!}
+   δ₆ = {!!}
+   e₁ = ap ε-exp∞ (π-exp∞-alt φ)
+   e₂ = continuous-∐-≡ 𝓓∞ 𝓔 ε-exp∞' δ₁
+   e₃ = ∐-family-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) p δ₂
+   e₄ = {!!}
+   e₅ = {!!}
+   e₆ = {!antisymmetry 𝓔 (∐ 𝓔 δ₆) φ l₁ l₂!}
+    where
+     l₁ : ∐ 𝓔 δ₆ ⊑⟨ 𝓔 ⟩ φ
+     l₁ = ∐-is-lowerbound-of-upperbounds 𝓔 δ₆ φ γ
+      where
+       γ : is-upperbound (underlying-order 𝓔) φ {!!}
+       γ n σ = {!!} ⊑⟨ 𝓓∞ ⟩[ {!!} ]
+               (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ n ∘ π∞ n) σ ⊑⟨ 𝓓∞ ⟩[ {!!} ]
+               (ϕ ∘ ε∞ n ∘ π∞ n) σ               ⊑⟨ 𝓓∞ ⟩[ ϕ-mon {!!} {!!} {!!} ]
+               ϕ σ                               ∎⟨ 𝓓∞ ⟩
+        where
+         ϕ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
+         ϕ = [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
+         ϕ-mon : is-monotone 𝓓∞ 𝓓∞ ϕ
+         ϕ-mon = {!!}
+     l₂ : φ ⊑⟨ 𝓔 ⟩ ∐ 𝓔 δ₆
+     l₂ = {!!}
+
+
+{-
+
+ π-exp∞ (ε-exp∞ σ)                                 ≡⟨ ap π-exp∞ (ε-exp∞-alt σ) ⟩
+ π-exp∞ (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁)                       ≡⟨ e₁ ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → (π-exp∞ ∘ ε-exp-family σ) n} δ₂   ≡⟨ ∐-family-≡ 𝓓∞ p δ₂ ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → ∐ 𝓓∞ {ℕ} {λ m → f n m} (δ₃ n)} δ₄ ≡⟨ e₂ ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → ε∞ n (⦅ σ ⦆ n)} δ₅                ≡⟨ (∐-of-ε∞s σ) ⁻¹ ⟩
+ σ                                                 ∎
+  where
+   f : (n m : ℕ) → ⟨ 𝓓∞ ⟩
+   f n m = π-exp-family (ε-exp-family σ n) m
+   δ₁ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-family σ)
+   δ₁ = ε-exp-family-is-directed σ
+   δ₂ : is-Directed 𝓓∞ (π-exp∞ ∘ ε-exp-family σ)
+   δ₂ = image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
+   δ₃ : (n : ℕ) → is-Directed 𝓓∞ (π-exp-family (ε-exp-family σ n))
+   δ₃ n = π-exp-family-is-directed (ε-exp-family σ n)
+   p : π-exp∞ ∘ ε-exp-family σ ≡ λ m → ∐ 𝓓∞ (δ₃ m)
+   p = dfunext fe (λ m → π-exp∞-alt (ε-exp-family σ m))
+   δ₄ : is-Directed 𝓓∞ (λ n → ∐ 𝓓∞ (δ₃ n))
+   δ₄ = transport (is-Directed 𝓓∞) p δ₂
+   δ₅ : is-Directed 𝓓∞ (ε∞-family σ)
+   δ₅ = ε∞-family-is-directed σ
+   e₁ = continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
+   e₂ = antisymmetry 𝓓∞ (∐ 𝓓∞ δ₄) (∐ 𝓓∞ δ₅) l₁ l₂
+
+-}
 
 \end{code}

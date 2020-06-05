@@ -295,6 +295,9 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 ε-exp∞ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 ε-exp∞ = colimit-mediating-arrow
 
+ε-exp∞' : DCPO[ 𝓓∞ , 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ]
+ε-exp∞' = colimit-mediating-arrow , colimit-mediating-arrow-is-continuous
+
 \end{code}
 
 \begin{code}
@@ -418,213 +421,124 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
             ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩[ ∐-is-upperbound 𝓓∞ δ₁ (succ n) ]
             ∐ 𝓓∞ δ₁              ∎⟨ 𝓓∞ ⟩
 
-ε-exp∞-is-section-of-π-exp∞ : π-exp∞ ∘ ε-exp∞ ∼ id
-ε-exp∞-is-section-of-π-exp∞ σ =
- π-exp∞ (ε-exp∞ σ)           ≡⟨ ap π-exp∞ (ε-exp∞-alt σ) ⟩
- π-exp∞ (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁) ≡⟨ continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ (π-exp∞ , limit-mediating-arrow-is-continuous) δ₁ ⟩
- ∐ 𝓓∞ {ℕ} {π-exp∞ ∘ ε-exp-family σ}
-   (image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞
-    (π-exp∞ , limit-mediating-arrow-is-continuous) δ₁) ≡⟨ {!!} ⟩
- {!!} ≡⟨ π-exp∞-alt (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁) ⟩
- ∐ 𝓓∞ {ℕ} {λ n → ε∞ (succ n) (π-exp (succ n) (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁))} δ₂                     ≡⟨ {!!} ⟩
- ∐ 𝓓∞ δ₃                        ≡⟨ (∐-of-ε∞s σ) ⁻¹ ⟩
- σ                           ∎
-  where
-   δ₁ : {!!}
-   δ₁ = ε-exp-family-is-directed σ
-   δ₂ : {!!}
-   δ₂ = π-exp-family-is-directed (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁)
-   δ₃ : {!!}
-   δ₃ = ε∞-family-is-directed σ
+\end{code}
 
-{-
-∐-of-ε∞-after-π∞-is-id : ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) {ℕ} {λ n → ε∞' n ∘ π∞' n} ? ≡ ?
-∐-of-ε∞-after-π∞-is-id = ?
--}
+\begin{code}
 
-{-
-ε-expπ-exp-succ-deflation : (n : ℕ) (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩)
-                  → ε-exp-from-succ n (π-exp-to-succ n φ) ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ φ
-ε-expπ-exp-succ-deflation n φ σ =
- [ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-from-succ n (π-exp-to-succ n φ) ⟩ σ ⊑⟨ 𝓓∞ ⟩[ l₁ ]
- (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ n ∘ π∞ n) σ              ⊑⟨ 𝓓∞ ⟩[ l₂ ]
- (ϕ ∘ ε∞ n ∘ π∞ n) σ                            ⊑⟨ 𝓓∞ ⟩[ l₃ ]
- ϕ σ                                            ∎⟨ 𝓓∞ ⟩
+π-exp-family-is-monotone : (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩) {n m : ℕ} → n ≤ m
+                         → π-exp-family φ n ⊑⟨ 𝓓∞ ⟩ π-exp-family φ m
+π-exp-family-is-monotone φ {n} {m} l =
+ π-exp-family φ n              ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ n) ]
+ ε∞-family (π-exp∞ φ) (succ n) ⊑⟨ 𝓓∞ ⟩[ u  ]
+ ε∞-family (π-exp∞ φ) (succ m) ⊑⟨ 𝓓∞ ⟩[ reflexivity 𝓓∞ (π-exp-family φ m) ]
+ π-exp-family φ m              ∎⟨ 𝓓∞ ⟩
   where
-   ϕ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-   ϕ = [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
-   l₁ = ≡-to-⊑ 𝓓∞ (happly' f g refl σ)
+   u = ε∞-family-is-monotone (π-exp∞ φ) (succ n) (succ m) l
+
+π-exp-family-is-monotone' : (φ ψ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩) {n : ℕ}
+                          → φ ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ ψ
+                          → π-exp-family φ n ⊑⟨ 𝓓∞ ⟩ π-exp-family ψ n
+π-exp-family-is-monotone' φ ψ {n} l =
+ π-exp-family φ n               ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+ ε∞ (succ n) (π-exp (succ n) φ) ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+ ε∞ (succ n) (π-exp (succ n) ψ) ⊑⟨ 𝓓∞ ⟩[ u₃ ]
+ π-exp-family ψ n ∎⟨ 𝓓∞ ⟩
+  where
+   u₁ = reflexivity 𝓓∞ (ε∞ (succ n) (π-exp (succ n) φ))
+   u₂ = continuous-implies-monotone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ f φ ψ l
     where
-     f : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-     f = [ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-from-succ n (π-exp-to-succ n φ) ⟩
-     g : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-     g = ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ n ∘ π∞ n
-   l₂ = ε∞π∞-deflation ((ϕ ∘ ε∞ n ∘ π∞ n) σ)
-   l₃ = mon (ε∞ n (π∞ n σ)) σ (ε∞π∞-deflation σ)
-    where
-     mon : is-monotone 𝓓∞ 𝓓∞ ϕ
-     mon = continuous-implies-monotone 𝓓∞ 𝓓∞ φ
+     f : DCPO[ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ , 𝓓∞ ]
+     f = DCPO-∘ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 (succ n)) 𝓓∞
+          (π-exp (succ n) , π-exp-is-continuous (succ n))
+          (ε∞' (succ n))
+   u₃ = reflexivity 𝓓∞ (ε∞ (succ n) (π-exp (succ n) ψ))
 
-ε-expπ-exp-deflation : (n : ℕ) (φ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩) → ε-exp n (π-exp n φ) ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ φ
-ε-expπ-exp-deflation zero φ = -- Because of implicit arguments, I use transitivity
-                              -- rather than the cleaner ⊑⟨...⟩[...] syntax.
- transitivity (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
-  ((ε-exp-from-succ 0 ∘ ε 0 ∘ π 0 ∘ π-exp-to-succ 0) φ)
-  ((ε-exp-from-succ 0 ∘ π-exp-to-succ 0) φ) φ
-  l₁ l₂
- where
-  l₁ : (ε-exp-from-succ 0 ∘ ε 0 ∘ π 0 ∘ π-exp-to-succ 0) φ
-     ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ (ε-exp-from-succ 0 ∘ π-exp-to-succ 0) φ
-  l₁ = mon ((ε 0 ∘ π 0 ∘ π-exp-to-succ 0) φ) (π-exp-to-succ 0 φ)
-        (επ-deflation 0 (π-exp-to-succ 0 φ))
-   where
-    mon : is-monotone (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-from-succ 0)
-    mon = continuous-implies-monotone (𝓓 1) (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
-           (ε-exp-from-succ 0 , ε-exp-from-succ-is-continuous 0)
-  l₂ : (ε-exp-from-succ 0 ∘ π-exp-to-succ 0) φ ⊑⟨ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ⟩ φ
-  l₂ = ε-expπ-exp-succ-deflation 0 φ
-ε-expπ-exp-deflation (succ n) φ = ε-expπ-exp-succ-deflation n φ
-
-π-expε-exp-succ-section : (n : ℕ) → π-exp-to-succ n ∘ ε-exp-from-succ n ∼ id
-π-expε-exp-succ-section n (f , c) = to-continuous-function-≡ (𝓓 n) (𝓓 n) γ
- where
-  γ : [ 𝓓 n , 𝓓 n ]⟨ π-exp-to-succ n (ε-exp-from-succ n (f , c)) ⟩ ∼ f
-  γ x = [ 𝓓 n , 𝓓 n ]⟨ π-exp-to-succ n (ε-exp-from-succ n (f , c)) ⟩ x ≡⟨ refl ⟩
-        (π∞ n ∘ ε∞ n ∘ f ∘ π∞ n ∘ ε∞ n) x                      ≡⟨ e₁   ⟩
-        (f ∘ π∞ n ∘ ε∞ n) x                                    ≡⟨ e₂   ⟩
-        f x ∎
-   where
-    e₁ = ε∞-section-of-π∞ ((f ∘ π∞ n ∘ ε∞ n) x)
-    e₂ = ap f (ε∞-section-of-π∞ x)
-
-ε-exp-section-of-π-exp : (n : ℕ) → π-exp n ∘ ε-exp n ∼ id
-ε-exp-section-of-π-exp zero x =
- (π-exp 0 ∘ ε-exp 0) x                               ≡⟨ refl ⟩
- (π 0 ∘ π-exp-to-succ 0 ∘ ε-exp-from-succ 0 ∘ ε 0) x ≡⟨ p ⟩
- (π 0 ∘ ε 0) x                               ≡⟨ ε-section-of-π 0 x ⟩
- x                                           ∎
-  where
-   p = ap (π 0) (π-expε-exp-succ-section 0 (ε 0 x))
-ε-exp-section-of-π-exp (succ n) = π-expε-exp-succ-section n
--}
+ε-exp-family-is-monotone : (σ : ⟨ 𝓓∞ ⟩) {n m : ℕ} → n ≤ m
+                         → ε-exp-family σ n ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ ε-exp-family σ m
+ε-exp-family-is-monotone σ {n} {m} l =
+ colimit-family-is-monotone σ (succ n) (succ m) l
 
 \end{code}
 
 \begin{code}
 
-{-
-key₁ : (n m k : ℕ) (l₁ : n ≤ k) (l₂ : m ≤ k) (σ : ⟨ 𝓓∞ ⟩) → π-exp n (β m (⦅ σ ⦆ m)) ≡ π⁺ l₁ (ε⁺ l₂ (⦅ σ ⦆ m))
-key₁ zero zero k l₁ l₂ σ = {!!}
-key₁ zero (succ m) k l₁ l₂ σ = {!!}
-key₁ (succ n) zero k l₁ l₂ σ = {!!}
-key₁ (succ n) (succ m) k l₁ l₂ σ = {!!}
+ε-exp∞-is-section-of-π-exp∞ : π-exp∞ ∘ ε-exp∞ ∼ id
+ε-exp∞-is-section-of-π-exp∞ σ =
+ π-exp∞ (ε-exp∞ σ)                                 ≡⟨ ap π-exp∞ (ε-exp∞-alt σ) ⟩
+ π-exp∞ (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁)                       ≡⟨ e₁ ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → (π-exp∞ ∘ ε-exp-family σ) n} δ₂   ≡⟨ ∐-family-≡ 𝓓∞ p δ₂ ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → ∐ 𝓓∞ {ℕ} {λ m → f n m} (δ₃ n)} δ₄ ≡⟨ e₂ ⟩
+ ∐ 𝓓∞ {ℕ} {λ n → ε∞ n (⦅ σ ⦆ n)} δ₅                ≡⟨ (∐-of-ε∞s σ) ⁻¹ ⟩
+ σ                                                 ∎
+  where
+   f : (n m : ℕ) → ⟨ 𝓓∞ ⟩
+   f n m = π-exp-family (ε-exp-family σ n) m
+   δ₁ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-family σ)
+   δ₁ = ε-exp-family-is-directed σ
+   δ₂ : is-Directed 𝓓∞ (π-exp∞ ∘ ε-exp-family σ)
+   δ₂ = image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
+   δ₃ : (n : ℕ) → is-Directed 𝓓∞ (π-exp-family (ε-exp-family σ n))
+   δ₃ n = π-exp-family-is-directed (ε-exp-family σ n)
+   p : π-exp∞ ∘ ε-exp-family σ ≡ λ m → ∐ 𝓓∞ (δ₃ m)
+   p = dfunext fe (λ m → π-exp∞-alt (ε-exp-family σ m))
+   δ₄ : is-Directed 𝓓∞ (λ n → ∐ 𝓓∞ (δ₃ n))
+   δ₄ = transport (is-Directed 𝓓∞) p δ₂
+   δ₅ : is-Directed 𝓓∞ (ε∞-family σ)
+   δ₅ = ε∞-family-is-directed σ
+   e₁ = continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
+   e₂ = antisymmetry 𝓓∞ (∐ 𝓓∞ δ₄) (∐ 𝓓∞ δ₅) l₁ l₂
+    where
+     r : (n : ℕ) → f n n ≡ ε∞-family σ (succ n)
+     r n = ap (ε∞ (succ n)) γ
+      where
+       γ : π-exp (succ n) (ε-exp-family σ n) ≡ ⦅ σ ⦆ (succ n)
+       γ = to-continuous-function-≡ (𝓓 n) (𝓓 n) ψ
+        where
+         σ' : ⟨ 𝓓 n ⟩ → ⟨ 𝓓 n ⟩
+         σ' = [ 𝓓 n , 𝓓 n ]⟨ ⦅ σ ⦆ (succ n) ⟩
+         ψ : π∞ n ∘ ε∞ n ∘ σ' ∘ π∞ n ∘ ε∞ n ∼ σ'
+         ψ x = (π∞ n ∘ ε∞ n ∘ σ' ∘ π∞ n ∘ ε∞ n) x ≡⟨ p₁ ⟩
+               (σ' ∘ π∞ n ∘ ε∞ n) x               ≡⟨ p₂ ⟩
+               σ' x                               ∎
+          where
+           p₁ = ε∞-section-of-π∞ (σ' (π∞ n (ε∞ n x)))
+           p₂ = ap σ' (ε∞-section-of-π∞ x)
+     l₁ : ∐ 𝓓∞ δ₄ ⊑⟨ 𝓓∞ ⟩ ∐ 𝓓∞ δ₅
+     l₁ = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ₄ (∐ 𝓓∞ δ₅) γ
+      where
+       γ : is-upperbound (underlying-order 𝓓∞) (∐ 𝓓∞ δ₅) (λ n → ∐ 𝓓∞ (δ₃ n))
+       γ n = ∐-is-lowerbound-of-upperbounds 𝓓∞ (δ₃ n) (∐ 𝓓∞ δ₅) ψ
+        where
+         ψ : is-upperbound (underlying-order 𝓓∞) (∐ 𝓓∞ δ₅) (f n)
+         ψ m = f n m                       ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+               f (n +' m) m                ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+               f (n +' m) (n +' m)         ⊑⟨ 𝓓∞ ⟩[ u₃ ]
+               ε∞-family σ (succ (n +' m)) ⊑⟨ 𝓓∞ ⟩[ u₄ ]
+               ∐ 𝓓∞ δ₅ ∎⟨ 𝓓∞ ⟩
+          where
+           u₁ = π-exp-family-is-monotone'
+                 (ε-exp-family σ n) (ε-exp-family σ (n +' m))
+                 (ε-exp-family-is-monotone σ (≤-+ n m))
+           u₂ = π-exp-family-is-monotone (ε-exp-family σ (n +' m)) (≤-+' n m)
+           u₃ = ≡-to-⊑ 𝓓∞ (r (n +' m))
+           u₄ = ∐-is-upperbound 𝓓∞ δ₅ (succ (n +' m))
+     l₂ : ∐ 𝓓∞ δ₅ ⊑⟨ 𝓓∞ ⟩ ∐ 𝓓∞ δ₄
+     l₂ = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ₅ (∐ 𝓓∞ δ₄) γ
+      where
+       γ : is-upperbound (underlying-order 𝓓∞) (∐ 𝓓∞ δ₄) (ε∞-family σ)
+       γ n = ε∞-family σ n        ⊑⟨ 𝓓∞ ⟩[ u ]
+             ε∞-family σ (succ n) ⊑⟨ 𝓓∞ ⟩[ ≡-to-⊑ 𝓓∞ ((r n) ⁻¹) ]
+             f n n                ⊑⟨ 𝓓∞ ⟩[ ∐-is-upperbound 𝓓∞ (δ₃ n) n ]
+             ∐ 𝓓∞ (δ₃ n)          ⊑⟨ 𝓓∞ ⟩[ ∐-is-upperbound 𝓓∞ δ₄ n ]
+             ∐ 𝓓∞ δ₄              ∎⟨ 𝓓∞ ⟩
+        where
+         u = ε∞-family-is-monotone σ n (succ n) (≤-succ n)
 
-π-exp∞-after-β∞-is-id : π-exp∞ ∘ β∞ ∼ id
-π-exp∞-after-β∞-is-id σ = to-𝓓∞-≡ γ
- where
-  γ : (n : ℕ) → ⦅ (π-exp∞ ∘ β∞) σ ⦆ n ≡ ⦅ σ ⦆ n
-  γ n = ⦅ (π-exp∞ ∘ β∞) σ ⦆ n ≡⟨ refl ⟩
-        π-exp n (β∞ σ) ≡⟨ refl ⟩
-        π-exp n (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁) ≡⟨ u₁ ⟩
-        ∐ (𝓓 n) {ℕ} {π-exp n ∘ colimit-family σ} δ₂ ≡⟨ refl ⟩
-        ∐ (𝓓 n) {ℕ} {λ m → π-exp n (β m (⦅ σ ⦆ m))} δ₂ ≡⟨ p ⟩
-        ⦅ σ ⦆ n ∎
-{-        ∐ (𝓓 n) {ℕ} {λ m → ⦅ ε∞ m (⦅ σ ⦆ m) ⦆ n} δ₄ ≡⟨ refl ⟩
-          ⦅ ∐ 𝓓∞ δ₃ ⦆ n ≡⟨ ap (λ - → ⦅ - ⦆ n) ((∐-of-ε∞s σ) ⁻¹) ⟩
-          ⦅ σ ⦆ n ∎ -}
-   where
-    δ₁ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (colimit-family σ)
-    δ₁ = colimit-family-is-directed σ
-    δ₂ : is-Directed (𝓓 n) (π-exp n ∘ colimit-family σ)
-    δ₂ = image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (π-exp n , π-exp-is-continuous n) δ₁
-    δ₃ : is-Directed 𝓓∞ (ε∞-family σ)
-    δ₃ = ε∞-family-is-directed σ
-    δ₄ : is-Directed (𝓓 n) (family-at-ith-component (ε∞-family σ) n)
-    δ₄ = family-at-ith-component-is-directed (ε∞-family σ) δ₃ n
-    u₁ = continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (𝓓 n) (π-exp n , π-exp-is-continuous n) δ₁
-    p = antisymmetry (𝓓 n) (∐ (𝓓 n) δ₂) (⦅ σ ⦆ n) u v
-     where
-      u : ∐ (𝓓 n) δ₂ ⊑⟨ 𝓓 n ⟩ ⦅ σ ⦆ n
-      u = ∐-is-lowerbound-of-upperbounds (𝓓 n) δ₂ (⦅ σ ⦆ n) ub
-       where
-        ub : is-upperbound (underlying-order (𝓓 n)) (⦅ σ ⦆ n)
-              (λ m → π-exp n (β m (⦅ σ ⦆ m)))
-        ub m = π-exp n (β m (⦅ σ ⦆ m)) ⊑⟨ 𝓓 n ⟩[ {!!} ]
-               ⦅ ε∞ m (⦅ σ ⦆ m) ⦆ n ⊑⟨ 𝓓 n ⟩[ ∐-is-upperbound (𝓓 n) δ₄ m ]
-               ∐ (𝓓 n) δ₄ ⊑⟨ 𝓓 n ⟩[ ≡-to-⊑ (𝓓 n) (ap (λ - → ⦅ - ⦆ n) ((∐-of-ε∞s σ) ⁻¹)) ]
-               ⦅ σ ⦆ n ∎⟨ 𝓓 n ⟩
-      v : ⦅ σ ⦆ n ⊑⟨ 𝓓 n ⟩ ∐ (𝓓 n) δ₂
-      v = ⦅ σ ⦆ n ⊑⟨ 𝓓 n ⟩[ ≡-to-⊑ (𝓓 n) ((β-section-of-π-exp n (⦅ σ ⦆ n)) ⁻¹) ]
-          π-exp n (β n (⦅ σ ⦆ n)) ⊑⟨ 𝓓 n ⟩[ ∐-is-upperbound (𝓓 n) δ₂ n ]
-          ∐ (𝓓 n) δ₂ ∎⟨ 𝓓 n ⟩
+\end{code}
 
-blah : (n m : ℕ) (l : n ≤ m) (f : ⟨ 𝓓 (succ m) ⟩)
-     → [ 𝓓 n , 𝓓 n ]⟨ π⁺ {succ n} {succ m} l f ⟩
-     ≡ π⁺ {n} {m} l ∘  [ 𝓓 m , 𝓓 m ]⟨ f ⟩ ∘ ε⁺ {n} {m} l
-blah n m l f = [ 𝓓 n , 𝓓 n ]⟨ π⁺ {succ n} {succ m} l f ⟩ ≡⟨ {!!} ⟩
-               [ 𝓓 n , 𝓓 n ]⟨ π⁺-helper-Σ (succ n) (succ m) (subtraction' (succ n) (succ m) l) f ⟩ ≡⟨ ap (λ - → [ 𝓓 n , 𝓓 n ]⟨ - ⟩) (π⁺-helper-on-succ (succ n) m _ _ f) ⟩
-               [ 𝓓 n , 𝓓 n ]⟨ (π⁺-helper-Σ (succ n) m _ ∘ π m) f ⟩ ≡⟨ {!!} ⟩
-               {!!} ≡⟨ {!!} ⟩
-               π⁺ l ∘ underlying-function (𝓓 m) (𝓓 m) f ∘ ε⁺ l ∎
+\begin{code}
 
-test : (n m : ℕ) → π-exp n ∘ β m ∼ π⁺ {n} {n +' m} (≤-+ n m) ∘ ε⁺ {m} {n +' m} (≤-+' n m)
-test zero m = {!!}
-test (succ n) zero = {!!}
-test (succ n) (succ m) (f , c) = to-continuous-function-≡ (𝓓 n) (𝓓 n) γ
- where
-  γ : π∞ n ∘ ε∞ m ∘ f ∘ π∞ m ∘ ε∞ n ∼ [ 𝓓 n , 𝓓 n ]⟨ (π⁺ {succ n} {succ n +' succ m} (≤-+ (succ n) (succ m)) ∘ ε⁺ {succ m} {succ n +' succ m} (≤-+' (succ n) (succ m))) (f , c) ⟩
-  γ = {!!}
-
-β∞-after-π-exp∞-is-id : β∞ ∘ π-exp∞ ∼ id
-β∞-after-π-exp∞-is-id φ = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
- where
-  γ : [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (π-exp∞ φ) ⟩ ∼ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
-  γ σ = to-𝓓∞-≡ ψ
-   where
-    ψ : (n : ℕ) → ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (π-exp∞ φ) ⟩ σ ⦆ n ≡ ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n
-    ψ n = ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β∞ (π-exp∞ φ) ⟩ σ ⦆ n ≡⟨ refl ⟩
-          ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁ ⟩ σ ⦆ n ≡⟨ refl ⟩
-          ⦅ ∐ 𝓓∞ δ₂ ⦆ n ≡⟨ refl ⟩
-          ∐ (𝓓 n) {ℕ} {λ m → ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β m (π-exp m φ) ⟩ σ ⦆ n} δ₃ ≡⟨ {!!} ⟩
-          ∐ (𝓓 n) {ℕ} {λ m → ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ (ε∞ m (⦅ σ ⦆ m)) ⦆ n} δ₆ ≡⟨ refl ⟩
-          ⦅ ∐ 𝓓∞ δ₅ ⦆ n ≡⟨ ap (λ - → ⦅ - ⦆ n) ((continuous-∐-≡ 𝓓∞ 𝓓∞ φ δ₄) ⁻¹) ⟩
-          ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ (∐ 𝓓∞ δ₄) ⦆ n ≡⟨ ap (λ - → ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ - ⦆ n) ((∐-of-ε∞s σ) ⁻¹) ⟩
-          ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n ∎
-     where
-      δ₁ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (colimit-family (π-exp∞ φ))
-      δ₁ = colimit-family-is-directed (π-exp∞ φ)
-      δ₂ : is-Directed 𝓓∞ (pointwise-family 𝓓∞ 𝓓∞ (colimit-family (π-exp∞ φ)) σ)
-      δ₂ = pointwise-family-is-directed 𝓓∞ 𝓓∞ (colimit-family (π-exp∞ φ)) δ₁ σ
-      δ₃ : is-Directed (𝓓 n) (family-at-ith-component
-                               (pointwise-family 𝓓∞ 𝓓∞ (colimit-family (π-exp∞ φ)) σ) n)
-      δ₃ = family-at-ith-component-is-directed
-            (pointwise-family 𝓓∞ 𝓓∞ (colimit-family (π-exp∞ φ)) σ) δ₂ n
-      δ₄ : is-Directed 𝓓∞ (ε∞-family σ)
-      δ₄ = ε∞-family-is-directed σ
-      δ₅ : is-Directed 𝓓∞ ([ 𝓓∞ ,  𝓓∞ ]⟨ φ ⟩ ∘ ε∞-family σ)
-      δ₅ = image-is-directed' 𝓓∞ 𝓓∞ φ δ₄
-      δ₆ : is-Directed (𝓓 n)
-             (family-at-ith-component
-              ([ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ ∘ ε∞-family σ) n)
-      δ₆ = family-at-ith-component-is-directed ([ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ ∘ ε∞-family σ) δ₅ n
-      {-
-      p = antisymmetry (𝓓 n) (∐ (𝓓 n) δ₃) (⦅ [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩ σ ⦆ n)
-          u v
-       where
-        u : ∐ (𝓓 n) δ₃ ⊑⟨ 𝓓 n ⟩ ⦅ [ 𝓓∞ ,  𝓓∞ ]⟨ φ ⟩ σ ⦆ n
-        u = {!\!}
-        v : ⦅ [ 𝓓∞ ,  𝓓∞ ]⟨ φ ⟩ σ ⦆ n ⊑⟨ 𝓓 n ⟩ ∐ (𝓓 n) δ₃
-        v = ⦅ [ 𝓓∞ ,  𝓓∞ ]⟨ φ ⟩ σ ⦆ n ⊑⟨ 𝓓 n ⟩[ βα-deflation {!n!} φ σ {!n!} ]
-            ⦅ [ 𝓓∞ , 𝓓∞ ]⟨ β n (α n φ) ⟩ σ ⦆ n ⊑⟨ 𝓓 n ⟩[ ∐-is-upperbound (𝓓 n) δ₃ n ]
-            ∐ (𝓓 n) δ₃ ∎⟨ 𝓓 n ⟩ -}
-
-{-
-  colimit-family : ⟨ 𝓓∞ ⟩ → I → ⟨ 𝓔 ⟩
-  colimit-family σ i = g i (⦅ σ ⦆ i)
-
-          family-at-ith-component
-                               (pointwise-family 𝓓∞ 𝓓∞ (colimit-family (α∞ φ)) σ) n m}
--}
--}
+π-exp∞-is-section-of-ε-exp∞ : ε-exp∞ ∘ π-exp∞ ∼ id
+π-exp∞-is-section-of-ε-exp∞ = ?
 
 \end{code}

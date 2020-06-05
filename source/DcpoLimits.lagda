@@ -2,7 +2,7 @@ Tom de Jong, 5 May 2020 - 10 May 2020
 
 \begin{code}
 
-{-# OPTIONS --without-K --exact-split --safe #-}
+{-# OPTIONS --without-K --exact-split --safe --experimental-lossy-unification #-}
 
 open import SpartanMLTT
 open import UF-PropTrunc hiding (⊥)
@@ -547,6 +547,58 @@ module Diagram
            mon = continuous-implies-monotone (𝓓 k) (𝓓 j)
                   (π lⱼ , π-is-continuous lⱼ)
          u₇ = ≡-to-⊑ (𝓓 j) (π-equality σ lⱼ)
+
+\end{code}
+
+TO DO: Write some comment here.
+
+Curried version of ε∞-family
+
+\begin{code}
+
+ open import DcpoExponential pt fe 𝓥
+
+ ε∞π∞-family : I → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+ ε∞π∞-family i = DCPO-∘ 𝓓∞ (𝓓 i) 𝓓∞ (π∞' i) (ε∞' i)
+
+ ε∞π∞-family-is-monotone : {i j : I} → i ⊑ j
+                         → ε∞π∞-family i ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ ε∞π∞-family j
+ ε∞π∞-family-is-monotone {i} {j} l σ = ε∞-family-is-monotone σ i j l
+
+ ε∞π∞-family-is-directed : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε∞π∞-family
+ ε∞π∞-family-is-directed = I-inhabited , δ
+  where
+   δ : is-weakly-directed (underlying-order (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)) ε∞π∞-family
+   δ i j = ∥∥-functor γ (I-weakly-directed i j)
+    where
+     γ : (Σ k ꞉ I , i ⊑ k × j ⊑ k)
+       → (Σ k ꞉ I , ε∞π∞-family i ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ ε∞π∞-family k
+                  × ε∞π∞-family j ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ ε∞π∞-family k)
+     γ (k , lᵢ , lⱼ) =
+      k , ε∞π∞-family-is-monotone lᵢ ,
+          ε∞π∞-family-is-monotone lⱼ
+
+ ∐-ε∞π∞s-is-id : ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) {I} {ε∞π∞-family} ε∞π∞-family-is-directed
+               ≡ id , id-is-continuous 𝓓∞
+ ∐-ε∞π∞s-is-id = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
+  where
+   δ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε∞π∞-family
+   δ = ε∞π∞-family-is-directed
+   γ : [ 𝓓∞ , 𝓓∞ ]⟨ ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) {I} {ε∞π∞-family} δ ⟩ ∼ id
+   γ σ = ∐ 𝓓∞ {I} {λ i → ε∞ i (⦅ σ ⦆ i)} δ₁ ≡⟨ e₁ ⟩
+         ∐ 𝓓∞ {I} {λ i → ε∞ i (⦅ σ ⦆ i)} δ₂ ≡⟨ e₂ ⟩
+         σ                                  ∎
+    where
+     δ₁ : is-Directed 𝓓∞ (λ i → ε∞ i (⦅ σ ⦆ i))
+     δ₁ = pointwise-family-is-directed 𝓓∞ 𝓓∞ ε∞π∞-family δ σ
+     δ₂ : is-Directed 𝓓∞ (λ i → ε∞ i (⦅ σ ⦆ i))
+     δ₂ = ε∞-family-is-directed σ
+     e₁ = ∐-independent-of-directedness-witness 𝓓∞ δ₁ δ₂
+     e₂ = (∐-of-ε∞s σ) ⁻¹
+
+\end{code}
+
+\begin{code}
 
  module DcpoCocone
          (𝓔 : DCPO {𝓤'} {𝓣'})

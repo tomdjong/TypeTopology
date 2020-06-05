@@ -578,9 +578,9 @@ Curried version of ε∞-family
       k , ε∞π∞-family-is-monotone lᵢ ,
           ε∞π∞-family-is-monotone lⱼ
 
- ∐-ε∞π∞s-is-id : ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) {I} {ε∞π∞-family} ε∞π∞-family-is-directed
-               ≡ id , id-is-continuous 𝓓∞
- ∐-ε∞π∞s-is-id = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
+ ∐-of-ε∞π∞s-is-id : ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) {I} {ε∞π∞-family} ε∞π∞-family-is-directed
+                  ≡ id , id-is-continuous 𝓓∞
+ ∐-of-ε∞π∞s-is-id = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
   where
    δ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε∞π∞-family
    δ = ε∞π∞-family-is-directed

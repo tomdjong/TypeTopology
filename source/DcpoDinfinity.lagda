@@ -458,6 +458,22 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 ε-exp-family-is-monotone σ {n} {m} l =
  colimit-family-is-monotone σ (succ n) (succ m) l
 
+ε-exp-family-is-monotone' : (σ τ : ⟨ 𝓓∞ ⟩) {n : ℕ} → σ ⊑⟨ 𝓓∞ ⟩ τ
+                          → ε-exp-family σ n ⊑⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ ε-exp-family τ n
+ε-exp-family-is-monotone' σ τ {n} l ρ =
+ [ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-family σ n ⟩ ρ                 ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+ (ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ ⦅ σ ⦆ (succ n) ⟩ ∘ π∞ n) ρ ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+ (ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ ⦅ τ ⦆ (succ n) ⟩ ∘ π∞ n) ρ ⊑⟨ 𝓓∞ ⟩[ u₃ ]
+ [ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-family τ n ⟩ ρ ∎⟨ 𝓓∞ ⟩
+  where
+   u₁ = reflexivity 𝓓∞ ([ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-family σ n ⟩ ρ)
+   u₂ = continuous-implies-monotone (𝓓 n) 𝓓∞ (ε∞' n)
+         ([ 𝓓 n , 𝓓 n ]⟨ ⦅ σ ⦆ (succ n) ⟩ (π∞ n ρ))
+         ([ 𝓓 n , 𝓓 n ]⟨ ⦅ τ ⦆ (succ n) ⟩ (π∞ n ρ))
+         (l (succ n) (π∞ n ρ))
+    where
+   u₃ = reflexivity 𝓓∞ ([ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-family τ n ⟩ ρ)
+
 \end{code}
 
 \begin{code}
@@ -594,15 +610,14 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
     where
      δ₅' : is-weakly-directed (underlying-order 𝓔) (λ n → f' n n)
      δ₅' n m = ∣ n +' m , f'-mon n (n +' m) (≤-+ n m) ,
-                          f'-mon m (n +' m) (≤-+' n m) ∣
+                          {!!} ∣ -- f'-mon ? (n +' m) (≤-+' n m)
       where
        f'-mon : (i j : ℕ) → i ≤ j → f' i i ⊑⟨ 𝓔 ⟩ f' j j
        f'-mon i j l =
-        f' i i ⊑⟨ 𝓔 ⟩[ ? ]
-        ? ⊑⟨ 𝓔 ⟩[ ? ]
-        ? ⊑⟨ 𝓔 ⟩[ ? ]
-        ? ⊑⟨ 𝓔 ⟩[ ? ]
-        ? ⊑⟨ 𝓔 ⟩[ ? ]
+        f' i i                            ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f' i i) ]
+        ε-exp-family (π-exp-family φ i) i ⊑⟨ 𝓔 ⟩[ {!!} ]
+        ε-exp-family (π-exp-family φ j) i ⊑⟨ 𝓔 ⟩[ ε-exp-family-is-monotone (π-exp-family φ j) l ]
+        ε-exp-family (π-exp-family φ j) j ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f' j j) ]
         f' j j ∎⟨ 𝓔 ⟩
    δ₆ : is-Directed 𝓔 (λ n → g' n n)
    δ₆ = transport (is-Directed 𝓔) q δ₅

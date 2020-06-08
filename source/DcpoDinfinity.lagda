@@ -573,18 +573,28 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
    f : ℕ → ℕ → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
    f n m = [ 𝓓∞ , 𝓓∞ ]⟨ f' n m ⟩
    f'-mon : (n₁ n₂ m₁ m₂ : ℕ) → n₁ ≤ n₂ → m₁ ≤ m₂ → f' n₁ m₁ ⊑⟨ 𝓔 ⟩ f' n₂ m₂
-   f'-mon n₁ n₂ m₁ m₂ lₙ lₘ σ =
-    f n₁ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₁ ]
-    f n₂ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₂ ]
-    f n₂ m₂ σ ∎⟨ 𝓓∞ ⟩
-     where
-      u₁ = ε-exp-family-is-monotone' (π-exp-family φ n₁) (π-exp-family φ n₂)
-            (π-exp-family-is-monotone φ lₙ) σ
-      u₂ = ε-exp-family-is-monotone (π-exp-family φ n₂) lₘ σ
+   f'-mon n₁ n₂ m₁ m₂ lₙ lₘ σ = f n₁ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+                                f n₂ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+                                f n₂ m₂ σ ∎⟨ 𝓓∞ ⟩
+    where
+     u₁ = ε-exp-family-is-monotone' (π-exp-family φ n₁) (π-exp-family φ n₂)
+           (π-exp-family-is-monotone φ lₙ) σ
+     u₂ = ε-exp-family-is-monotone (π-exp-family φ n₂) lₘ σ
    g' : ℕ → ℕ → ⟨ 𝓔 ⟩
    g' n m = DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ (ε∞π∞-family m) φ (ε∞π∞-family n)
    g : ℕ → ℕ → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
    g n m = [ 𝓓∞ , 𝓓∞ ]⟨ g' n m ⟩
+   g'-mon : (n₁ n₂ m₁ m₂ : ℕ) → n₁ ≤ n₂ → m₁ ≤ m₂ → g' n₁ m₁ ⊑⟨ 𝓔 ⟩ g' n₂ m₂
+   g'-mon n₁ n₂ m₁ m₂ lₙ lₘ σ = g n₁ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+                                g n₂ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+                                g n₂ m₂ σ ∎⟨ 𝓓∞ ⟩
+    where
+     u₁ = ε∞π∞-family-is-monotone lₙ ((ϕ ∘ ε∞ m₁ ∘ π∞ m₁) σ)
+     u₂ = continuous-implies-monotone 𝓓∞ 𝓓∞ (ε∞π∞-family n₂)
+           ((ϕ ∘ ε∞ m₁ ∘ π∞ m₁) σ) ((ϕ ∘ ε∞ m₂ ∘ π∞ m₂) σ)
+           (continuous-implies-monotone 𝓓∞ 𝓓∞ φ
+            (ε∞ m₁ (π∞ m₁ σ)) (ε∞ m₂ (π∞ m₂ σ))
+            (ε∞π∞-family-is-monotone lₘ σ))
    q : (λ n → f' n n) ≡ (λ n → g' n n)
    q = dfunext fe γ
     where
@@ -649,7 +659,70 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
               (∐-is-upperbound 𝓔 (δ₃ n) n)
               (∐-is-upperbound 𝓔 δ₄ n)
    e₅ = ∐-family-≡ 𝓔 q δ₅
-   e₆ = {!!}
+   e₆ = antisymmetry 𝓔 (∐ 𝓔 δ₆) (DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s) l₁ l₂
+    where
+     s₁ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
+     s₁ = [ 𝓓∞ , 𝓓∞ ]⟨ s ⟩
+     l₁ : ∐ 𝓔 δ₆ ⊑⟨ 𝓔 ⟩ DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s
+     l₁ = ∐-is-lowerbound-of-upperbounds 𝓔 δ₆ (DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s) γ
+      where
+       γ : is-upperbound (underlying-order 𝓔) (DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s)
+            (λ n → g' n n)
+       γ n σ = g n n σ                           ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+               (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ n ∘ π∞ n) σ ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+               (s₁ ∘ ϕ) (ε∞ n (π∞ n σ))          ⊑⟨ 𝓓∞ ⟩[ u₃ ]
+               (s₁ ∘ ϕ ∘ s₁) σ ∎⟨ 𝓓∞ ⟩
+        where
+         δ : is-Directed 𝓓∞ (pointwise-family 𝓓∞ 𝓓∞ ε∞π∞-family
+              ((ϕ ∘ ε∞ n ∘ π∞ n) σ))
+         δ = pointwise-family-is-directed 𝓓∞ 𝓓∞ ε∞π∞-family
+              ε∞π∞-family-is-directed ((ϕ ∘ ε∞ n ∘ π∞ n) σ)
+         δ' : is-Directed 𝓓∞ (pointwise-family 𝓓∞ 𝓓∞ ε∞π∞-family σ)
+         δ' = pointwise-family-is-directed 𝓓∞ 𝓓∞ ε∞π∞-family
+               ε∞π∞-family-is-directed σ
+         u₁ = reflexivity 𝓓∞ (g n n σ)
+         u₂ = ∐-is-upperbound 𝓓∞ δ n
+         u₃ = continuous-implies-monotone 𝓓∞ 𝓓∞ (DCPO-∘ 𝓓∞ 𝓓∞ 𝓓∞ φ s)
+               (ε∞ n (π∞ n σ)) (s₁ σ) (∐-is-upperbound 𝓓∞ δ' n)
+     l₂ : DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s ⊑⟨ 𝓔 ⟩ ∐ 𝓔 δ₆
+     l₂ σ = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ) γ
+      where
+       δ : is-Directed 𝓓∞ (pointwise-family 𝓓∞ 𝓓∞ ε∞π∞-family (ϕ (s₁ σ)))
+       δ = pointwise-family-is-directed 𝓓∞ 𝓓∞ ε∞π∞-family
+            ε∞π∞-family-is-directed (ϕ (s₁ σ))
+       γ : is-upperbound (underlying-order 𝓓∞) ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ)
+            (pointwise-family 𝓓∞ 𝓓∞ ε∞π∞-family (ϕ (s₁ σ)))
+       γ n = (ε∞ n ∘ π∞ n ∘ ϕ ∘ s₁) σ ⊑⟨ 𝓓∞ ⟩[ continuous-∐-⊑ 𝓓∞ 𝓓∞ h δ₁' ]
+             ∐ 𝓓∞ δ₂'                 ⊑⟨ 𝓓∞ ⟩[ γ₁ ]
+             [ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ  ∎⟨ 𝓓∞ ⟩
+        where
+         h : DCPO[ 𝓓∞ , 𝓓∞ ]
+         h = DCPO-∘₃ 𝓓∞ 𝓓∞ (𝓓 n) 𝓓∞ φ (π∞' n) (ε∞' n)
+         δ₁' : is-Directed 𝓓∞ (pointwise-family 𝓓∞ 𝓓∞ ε∞π∞-family σ)
+         δ₁' = pointwise-family-is-directed 𝓓∞ 𝓓∞ ε∞π∞-family
+               ε∞π∞-family-is-directed σ
+         δ₂' : is-Directed 𝓓∞
+                (λ m → (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ m ∘ π∞ m) σ)
+         δ₂' = image-is-directed' 𝓓∞ 𝓓∞ h δ₁'
+         γ₁ : ∐ 𝓓∞ δ₂' ⊑⟨ 𝓓∞ ⟩ [ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ
+         γ₁ = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ₂'
+               ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ) γ₂
+          where
+           γ₂ : is-upperbound (underlying-order 𝓓∞) ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ)
+                 (λ m → (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ m ∘ π∞ m) σ)
+           γ₂ m = (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ m ∘ π∞ m) σ ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+                  g n m σ                           ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+                  g (n +' m) m σ                    ⊑⟨ 𝓓∞ ⟩[ u₃ ]
+                  g (n +' m) (n +' m) σ             ⊑⟨ 𝓓∞ ⟩[ u₄ ]
+                  [ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ         ∎⟨ 𝓓∞ ⟩
+            where
+             δ₃' : is-Directed 𝓓∞ (pointwise-family 𝓓∞ 𝓓∞ (λ k → g' k k) σ)
+             δ₃' = pointwise-family-is-directed 𝓓∞ 𝓓∞ (λ k → g' k k) δ₆ σ
+             u₁ = reflexivity 𝓓∞ (g n m σ)
+             u₂ = g'-mon n (n +' m) m m (≤-+ n m) (≤-refl m) σ
+             u₃ = g'-mon (n +' m) (n +' m) m (n +' m)
+                   (≤-refl (n +' m)) (≤-+' n m) σ
+             u₄ = ∐-is-upperbound 𝓓∞ δ₃' (n +' m)
    e₇ = DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s ≡⟨ p₁ ⟩
         DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ ι φ ι ≡⟨ p₂ ⟩
         φ                         ∎
@@ -660,91 +733,6 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
       where
        e : s ≡ ι
        e = ∐-of-ε∞π∞s-is-id
-     p₂ = to-continuous-function-≡ 𝓓∞ 𝓓∞ γ
-      where
-       γ : id ∘ ϕ ∘ id ∼ ϕ
-       γ σ = refl
-
-
-
-
-
-{- antisymmetry 𝓔 (∐ 𝓔 δ₆) φ l₁ l₂
-    where
-     ϕ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
-     ϕ = [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
-     l₁ : ∐ 𝓔 δ₆ ⊑⟨ 𝓔 ⟩ φ
-     l₁ = ∐-is-lowerbound-of-upperbounds 𝓔 δ₆ φ γ
-      where
-       γ : is-upperbound (underlying-order 𝓔) φ (λ n → g' n n)
-       γ n σ = (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ n ∘ π∞ n) σ ⊑⟨ 𝓓∞ ⟩[ u₁ ]
-               (ϕ ∘ ε∞ n ∘ π∞ n) σ               ⊑⟨ 𝓓∞ ⟩[ u₂ ]
-               ϕ σ                               ∎⟨ 𝓓∞ ⟩
-        where
-         u₁ = ε∞π∞-deflation ((ϕ ∘ ε∞ n ∘ π∞ n) σ)
-         u₂ = ϕ-mon (ε∞ n (π∞ n σ)) σ (ε∞π∞-deflation σ)
-          where
-           ϕ-mon : is-monotone 𝓓∞ 𝓓∞ ϕ
-           ϕ-mon = continuous-implies-monotone 𝓓∞ 𝓓∞ φ
-     l₂ : φ ⊑⟨ 𝓔 ⟩ ∐ 𝓔 δ₆
-     l₂ σ = ϕ σ                     ⊑⟨ 𝓓∞ ⟩[ ≡-to-⊑ 𝓓∞ (ap ϕ (∐-of-ε∞s σ)) ]
-            ϕ (∐ 𝓓∞ δ₁')            ⊑⟨ 𝓓∞ ⟩[ continuous-∐-⊑ 𝓓∞ 𝓓∞ φ δ₁' ]
-            ∐ 𝓓∞ δ₂'                ⊑⟨ 𝓓∞ ⟩[ ≡-to-⊑ 𝓓∞ (∐-of-ε∞s (∐ 𝓓∞ δ₂')) ]
-            ∐ 𝓓∞ δ₃'                ⊑⟨ 𝓓∞ ⟩[ u ]
-            [ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ ∎⟨ 𝓓∞ ⟩
-      where
-       δ₁' = ε∞-family-is-directed σ
-       δ₂' = image-is-directed' 𝓓∞ 𝓓∞ φ δ₁'
-       δ₃' = ε∞-family-is-directed (∐ 𝓓∞ δ₂')
-       u = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ₃' ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ) γ
-        where
-         γ : is-upperbound (underlying-order 𝓓∞)
-              ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ) (ε∞-family (∐ 𝓓∞ δ₂'))
-         γ n = (ε∞ n ∘ π∞ n) (∐ 𝓓∞ δ₂')     ⊑⟨ 𝓓∞ ⟩[ u₁ ]
-               ∐ 𝓓∞ {ℕ} {λ m → g n m σ} δ₄' ⊑⟨ 𝓓∞ ⟩[ u₂ ]
-               [ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ      ∎⟨ 𝓓∞ ⟩
-          where
-           δ₄' : is-Directed 𝓓∞ (λ m → (ε∞ n ∘ π∞ n ∘ ϕ ∘ ε∞ m ∘ π∞ m) σ)
-           δ₄' = image-is-directed' 𝓓∞ 𝓓∞ (h' n) δ₂'
-           u₁ = continuous-∐-⊑ 𝓓∞ 𝓓∞ (DCPO-∘ 𝓓∞ (𝓓 n) 𝓓∞ (π∞' n) (ε∞' n)) δ₂'
-           u₂ = ∐-is-lowerbound-of-upperbounds 𝓓∞ δ₄'
-                 ([ 𝓓∞ ,  𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ) v
-            where
-             v : is-upperbound (underlying-order 𝓓∞) ([ 𝓓∞ , 𝓓∞ ]⟨ ∐ 𝓔 δ₆ ⟩ σ)
-                  (λ m → g n m σ)
-             v m = g n m σ ⊑⟨ 𝓓∞ ⟩[ {!!} ]
-                   g (n +' m) m σ ⊑⟨ 𝓓∞ ⟩[ {!!} ]
-                   g (n +' m) (n +' m) σ ⊑⟨ 𝓓∞ ⟩[ {!!} ]
-                   {!!} ∎⟨ 𝓓∞ ⟩
--}
-
-
-{-
-
- π-exp∞ (ε-exp∞ σ)                                 ≡⟨ ap π-exp∞ (ε-exp∞-alt σ) ⟩
- π-exp∞ (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁)                       ≡⟨ e₁ ⟩
- ∐ 𝓓∞ {ℕ} {λ n → (π-exp∞ ∘ ε-exp-family σ) n} δ₂   ≡⟨ ∐-family-≡ 𝓓∞ p δ₂ ⟩
- ∐ 𝓓∞ {ℕ} {λ n → ∐ 𝓓∞ {ℕ} {λ m → f n m} (δ₃ n)} δ₄ ≡⟨ e₂ ⟩
- ∐ 𝓓∞ {ℕ} {λ n → ε∞ n (⦅ σ ⦆ n)} δ₅                ≡⟨ (∐-of-ε∞s σ) ⁻¹ ⟩
- σ                                                 ∎
-  where
-   f : (n m : ℕ) → ⟨ 𝓓∞ ⟩
-   f n m = π-exp-family (ε-exp-family σ n) m
-   δ₁ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-family σ)
-   δ₁ = ε-exp-family-is-directed σ
-   δ₂ : is-Directed 𝓓∞ (π-exp∞ ∘ ε-exp-family σ)
-   δ₂ = image-is-directed' (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
-   δ₃ : (n : ℕ) → is-Directed 𝓓∞ (π-exp-family (ε-exp-family σ n))
-   δ₃ n = π-exp-family-is-directed (ε-exp-family σ n)
-   p : π-exp∞ ∘ ε-exp-family σ ≡ λ m → ∐ 𝓓∞ (δ₃ m)
-   p = dfunext fe (λ m → π-exp∞-alt (ε-exp-family σ m))
-   δ₄ : is-Directed 𝓓∞ (λ n → ∐ 𝓓∞ (δ₃ n))
-   δ₄ = transport (is-Directed 𝓓∞) p δ₂
-   δ₅ : is-Directed 𝓓∞ (ε∞-family σ)
-   δ₅ = ε∞-family-is-directed σ
-   e₁ = continuous-∐-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞' δ₁
-   e₂ = antisymmetry 𝓓∞ (∐ 𝓓∞ δ₄) (∐ 𝓓∞ δ₅) l₁ l₂
-
--}
+     p₂ = to-continuous-function-≡ 𝓓∞ 𝓓∞ (λ σ → refl─ (ϕ σ))
 
 \end{code}

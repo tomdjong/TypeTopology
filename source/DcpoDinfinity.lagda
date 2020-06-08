@@ -471,7 +471,6 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
          ([ 𝓓 n , 𝓓 n ]⟨ ⦅ σ ⦆ (succ n) ⟩ (π∞ n ρ))
          ([ 𝓓 n , 𝓓 n ]⟨ ⦅ τ ⦆ (succ n) ⟩ (π∞ n ρ))
          (l (succ n) (π∞ n ρ))
-    where
    u₃ = reflexivity 𝓓∞ ([ 𝓓∞ , 𝓓∞ ]⟨ ε-exp-family τ n ⟩ ρ)
 
 \end{code}
@@ -569,11 +568,20 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
    𝓔 = 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞
    ϕ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
    ϕ = [ 𝓓∞ , 𝓓∞ ]⟨ φ ⟩
-   f' : ℕ → ℕ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+   f' : ℕ → ℕ → ⟨ 𝓔 ⟩
    f' n m = ε-exp-family (π-exp-family φ n) m
    f : ℕ → ℕ → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
    f n m = [ 𝓓∞ , 𝓓∞ ]⟨ f' n m ⟩
-   g' : ℕ → ℕ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
+   f'-mon : (n₁ n₂ m₁ m₂ : ℕ) → n₁ ≤ n₂ → m₁ ≤ m₂ → f' n₁ m₁ ⊑⟨ 𝓔 ⟩ f' n₂ m₂
+   f'-mon n₁ n₂ m₁ m₂ lₙ lₘ σ =
+    f n₁ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₁ ]
+    f n₂ m₁ σ ⊑⟨ 𝓓∞ ⟩[ u₂ ]
+    f n₂ m₂ σ ∎⟨ 𝓓∞ ⟩
+     where
+      u₁ = ε-exp-family-is-monotone' (π-exp-family φ n₁) (π-exp-family φ n₂)
+            (π-exp-family-is-monotone φ lₙ) σ
+      u₂ = ε-exp-family-is-monotone (π-exp-family φ n₂) lₘ σ
+   g' : ℕ → ℕ → ⟨ 𝓔 ⟩
    g' n m = DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ (ε∞π∞-family m) φ (ε∞π∞-family n)
    g : ℕ → ℕ → ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
    g n m = [ 𝓓∞ , 𝓓∞ ]⟨ g' n m ⟩
@@ -595,36 +603,51 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
           ψ = DCPO-∘₃ (𝓓 n) 𝓓∞ 𝓓∞ (𝓓 n) (ε∞' n) φ (π∞' n)
           q' = ap (λ - → (ε∞ n ∘ [ 𝓓 n , 𝓓 n ]⟨ - ⟩ ∘ π∞ n) σ)
                 (ε∞-section-of-π∞ ψ)
-   s : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
-   s = ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε∞π∞-family-is-directed
+   s : ⟨ 𝓔 ⟩
+   s = ∐ 𝓔 ε∞π∞-family-is-directed
    δ₁ = π-exp-family-is-directed φ
-   δ₂ = image-is-directed' 𝓓∞ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp∞' δ₁
-   δ₃ : (n : ℕ) → is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (ε-exp-family (π-exp-family φ n))
+   δ₂ = image-is-directed' 𝓓∞ 𝓔 ε-exp∞' δ₁
+   δ₃ : (n : ℕ) → is-Directed 𝓔 (ε-exp-family (π-exp-family φ n))
    δ₃ n = ε-exp-family-is-directed (π-exp-family φ n)
-   p : ε-exp∞ ∘ π-exp-family φ ≡ (λ n → ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (δ₃ n))
+   p : ε-exp∞ ∘ π-exp-family φ ≡ (λ n → ∐ 𝓔 (δ₃ n))
    p = dfunext fe (λ n → ε-exp∞-alt (π-exp-family φ n))
-   δ₄ : is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (λ n → ∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) (δ₃ n))
-   δ₄ = (transport (is-Directed (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)) p δ₂)
+   δ₄ : is-Directed 𝓔 (λ n → ∐ 𝓔 (δ₃ n))
+   δ₄ = (transport (is-Directed 𝓔) p δ₂)
    δ₅ : is-Directed 𝓔 (λ n → f' n n)
    δ₅ = ∣ 0 ∣ , δ₅'
     where
      δ₅' : is-weakly-directed (underlying-order 𝓔) (λ n → f' n n)
-     δ₅' n m = ∣ n +' m , f'-mon n (n +' m) (≤-+ n m) ,
-                          {!!} ∣ -- f'-mon ? (n +' m) (≤-+' n m)
+     δ₅' n m = ∣ n +' m , uₙ  , uₘ ∣
       where
-       f'-mon : (i j : ℕ) → i ≤ j → f' i i ⊑⟨ 𝓔 ⟩ f' j j
-       f'-mon i j l =
-        f' i i                            ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f' i i) ]
-        ε-exp-family (π-exp-family φ i) i ⊑⟨ 𝓔 ⟩[ {!!} ]
-        ε-exp-family (π-exp-family φ j) i ⊑⟨ 𝓔 ⟩[ ε-exp-family-is-monotone (π-exp-family φ j) l ]
-        ε-exp-family (π-exp-family φ j) j ⊑⟨ 𝓔 ⟩[ reflexivity 𝓔 (f' j j) ]
-        f' j j ∎⟨ 𝓔 ⟩
+       abstract
+        uₙ : f' n n ⊑⟨ 𝓔 ⟩ f' (n +' m) (n +' m)
+        uₙ = f'-mon n (n +' m) n (n +' m) (≤-+ n m) (≤-+ n m)
+        uₘ : f' m m ⊑⟨ 𝓔 ⟩ f' (n +' m) (n +' m)
+        uₘ = f'-mon m (n +' m) m (n +' m) (≤-+' n m) (≤-+' n m)
    δ₆ : is-Directed 𝓔 (λ n → g' n n)
    δ₆ = transport (is-Directed 𝓔) q δ₅
    e₁ = ap ε-exp∞ (π-exp∞-alt φ)
    e₂ = continuous-∐-≡ 𝓓∞ 𝓔 ε-exp∞' δ₁
-   e₃ = ∐-family-≡ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) p δ₂
-   e₄ = {!!}
+   e₃ = ∐-family-≡ 𝓔 p δ₂
+   e₄ = antisymmetry 𝓔 (∐ 𝓔 δ₄) (∐ 𝓔 δ₅) l₁ l₂
+    where
+     l₁ : ∐ 𝓔 δ₄ ⊑⟨ 𝓔 ⟩ ∐ 𝓔 δ₅
+     l₁ = ∐-is-lowerbound-of-upperbounds 𝓔 δ₄ (∐ 𝓔 δ₅) γ
+      where
+       γ : is-upperbound (underlying-order 𝓔) (∐ 𝓔 δ₅) (λ n → ∐ 𝓔 (δ₃ n))
+       γ n = ∐-is-lowerbound-of-upperbounds 𝓔 (δ₃ n) (∐ 𝓔 δ₅) γ'
+        where
+         γ' : is-upperbound (underlying-order 𝓔) (∐ 𝓔 δ₅) (λ m → f' n m)
+         γ' m = transitivity 𝓔 (f' n m) (f' (n +' m) (n +' m)) (∐ 𝓔 δ₅)
+                 (f'-mon n (n +' m) m (n +' m) (≤-+ n m) (≤-+' n m))
+                 (∐-is-upperbound 𝓔 δ₅ (n +' m))
+     l₂ : ∐ 𝓔 δ₅ ⊑⟨ 𝓔 ⟩ ∐ 𝓔 δ₄
+     l₂ = ∐-is-lowerbound-of-upperbounds 𝓔 δ₅ (∐ 𝓔 δ₄) γ
+      where
+       γ : is-upperbound (underlying-order 𝓔) (∐ 𝓔 δ₄) (λ n → f' n n)
+       γ n = transitivity 𝓔 (f' n n) (∐ 𝓔 (δ₃ n)) (∐ 𝓔 δ₄)
+              (∐-is-upperbound 𝓔 (δ₃ n) n)
+              (∐-is-upperbound 𝓔 δ₄ n)
    e₅ = ∐-family-≡ 𝓔 q δ₅
    e₆ = {!!}
    e₇ = DCPO-∘₃ 𝓓∞ 𝓓∞ 𝓓∞ 𝓓∞ s φ s ≡⟨ p₁ ⟩

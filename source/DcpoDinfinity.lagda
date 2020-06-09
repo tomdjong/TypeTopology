@@ -234,8 +234,11 @@ open DcpoCone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) π-exp π-exp-is-continuous π-e
 π-exp∞ : ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟩
 π-exp∞ = limit-mediating-arrow
 
+π-exp∞-is-continuous : is-continuous (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) 𝓓∞ π-exp∞
+π-exp∞-is-continuous = limit-mediating-arrow-is-continuous
+
 π-exp∞' : DCPO[ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ , 𝓓∞ ]
-π-exp∞' = limit-mediating-arrow , limit-mediating-arrow-is-continuous
+π-exp∞' = π-exp∞ , π-exp∞-is-continuous
 
 \end{code}
 
@@ -295,8 +298,11 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 ε-exp∞ : ⟨ 𝓓∞ ⟩ → ⟨ 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ⟩
 ε-exp∞ = colimit-mediating-arrow
 
+ε-exp∞-is-continuous : is-continuous 𝓓∞ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp∞
+ε-exp∞-is-continuous = colimit-mediating-arrow-is-continuous
+
 ε-exp∞' : DCPO[ 𝓓∞ , 𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞ ]
-ε-exp∞' = colimit-mediating-arrow , colimit-mediating-arrow-is-continuous
+ε-exp∞' = ε-exp∞ , ε-exp∞-is-continuous
 
 \end{code}
 
@@ -477,8 +483,8 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 
 \begin{code}
 
-ε-exp∞-is-section-of-π-exp∞ : π-exp∞ ∘ ε-exp∞ ∼ id
-ε-exp∞-is-section-of-π-exp∞ σ =
+ε-exp∞-section-of-π-exp∞ : π-exp∞ ∘ ε-exp∞ ∼ id
+ε-exp∞-section-of-π-exp∞ σ =
  π-exp∞ (ε-exp∞ σ)                                 ≡⟨ ap π-exp∞ (ε-exp∞-alt σ) ⟩
  π-exp∞ (∐ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) δ₁)                       ≡⟨ e₁ ⟩
  ∐ 𝓓∞ {ℕ} {λ n → (π-exp∞ ∘ ε-exp-family σ) n} δ₂   ≡⟨ ∐-family-≡ 𝓓∞ p δ₂ ⟩
@@ -553,8 +559,8 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 
 \begin{code}
 
-π-exp∞-is-section-of-ε-exp∞ : ε-exp∞ ∘ π-exp∞ ∼ id
-π-exp∞-is-section-of-ε-exp∞ φ =
+π-exp∞-section-of-ε-exp∞ : ε-exp∞ ∘ π-exp∞ ∼ id
+π-exp∞-section-of-ε-exp∞ φ =
  ε-exp∞ (π-exp∞ φ)                                ≡⟨ e₁ ⟩
  ε-exp∞ (∐ 𝓓∞ δ₁)                                 ≡⟨ e₂ ⟩
  ∐ 𝓔 {ℕ} {λ n → (ε-exp∞ ∘ π-exp-family φ) n} δ₂   ≡⟨ e₃ ⟩
@@ -739,6 +745,11 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 
 \begin{code}
 
+𝓓∞-isomorphic-to-its-self-exponential : 𝓓∞ ≃ᵈᶜᵖᵒ (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞)
+𝓓∞-isomorphic-to-its-self-exponential =
+ ε-exp∞ , π-exp∞ , ε-exp∞-section-of-π-exp∞ , π-exp∞-section-of-ε-exp∞ ,
+ ε-exp∞-is-continuous , π-exp∞-is-continuous
+
 \end{code}
 
 \begin{code}
@@ -792,5 +803,9 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 
 𝓓∞⊥ : DCPO⊥ {𝓤₁} {𝓤₁}
 𝓓∞⊥ = 𝓓∞ , 𝓓∞-has-least
+
+𝓓∞⊥-strict-isomorphic-to-its-self-exponential : 𝓓∞⊥ ≃ᵈᶜᵖᵒ⊥ (𝓓∞⊥ ⟹ᵈᶜᵖᵒ⊥ 𝓓∞⊥)
+𝓓∞⊥-strict-isomorphic-to-its-self-exponential =
+ ≃ᵈᶜᵖᵒ-to-≃ᵈᶜᵖᵒ⊥ 𝓓∞⊥ (𝓓∞⊥ ⟹ᵈᶜᵖᵒ⊥ 𝓓∞⊥) 𝓓∞-isomorphic-to-its-self-exponential
 
 \end{code}

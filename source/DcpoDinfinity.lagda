@@ -736,3 +736,58 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
      p₂ = to-continuous-function-≡ 𝓓∞ 𝓓∞ (λ σ → refl─ (ϕ σ))
 
 \end{code}
+
+\begin{code}
+
+\end{code}
+
+\begin{code}
+
+π-is-strict : (n : ℕ) → π n (⊥ (𝓓⊥ (succ n))) ≡ ⊥ (𝓓⊥ n)
+π-is-strict zero = refl
+π-is-strict (succ n) = to-continuous-function-≡ (𝓓 n) (𝓓 n) γ
+ where
+  f' : ⟨ 𝓓 (succ (succ n)) ⟩
+  f' = ⊥ (𝓓⊥ (succ (succ n)))
+  f : ⟨ 𝓓 (succ n) ⟩ → ⟨ 𝓓 (succ n) ⟩
+  f = [ 𝓓 (succ n) , 𝓓 (succ n) ]⟨ f' ⟩
+  γ : [ 𝓓 n , 𝓓 n ]⟨ π (succ n) f' ⟩ ∼ [ 𝓓 n , 𝓓 n ]⟨ ⊥ (𝓓⊥ (succ n)) ⟩
+  γ x = [ 𝓓 n , 𝓓 n ]⟨ π (succ n) f' ⟩ x   ≡⟨ refl ⟩
+        (π n ∘ f ∘ ε n) x                  ≡⟨ refl ⟩
+        π n (⊥ (𝓓⊥ (succ n)))              ≡⟨ IH ⟩
+        [ 𝓓 n , 𝓓 n ]⟨ ⊥ (𝓓⊥ (succ n)) ⟩ x ∎
+   where
+    IH : π n (⊥ (𝓓⊥ (succ n))) ≡ ⊥ (𝓓⊥ n)
+    IH = π-is-strict n
+
+π⁺-is-strict-helper : (n m k : ℕ) (p : n +' k ≡ m)
+                    → π⁺-helper n m k p (⊥ (𝓓⊥ m)) ≡ ⊥ (𝓓⊥ n)
+π⁺-is-strict-helper n n zero refl = refl
+π⁺-is-strict-helper n m (succ k) refl =
+ π⁺-helper n m (succ k) refl (⊥ (𝓓⊥ m))              ≡⟨ refl ⟩
+ π⁺-helper n (n +' k) k refl (π (n +' k) (⊥ (𝓓⊥ m))) ≡⟨ q    ⟩
+ π⁺-helper n (n +' k) k refl (⊥ (𝓓⊥ (n +' k)))       ≡⟨ IH   ⟩
+ ⊥ (𝓓⊥ n)                                            ∎
+  where
+   q = ap (π⁺-helper n (n +' k) k refl) (π-is-strict (n +' k))
+   IH = π⁺-is-strict-helper n (n +' k) k refl
+
+π⁺-is-strict : (n m : ℕ) (l : n ≤ m) → π⁺ l (⊥ (𝓓⊥ m)) ≡ ⊥ (𝓓⊥ n)
+π⁺-is-strict n m l = π⁺-is-strict-helper n m k p
+ where
+  k : ℕ
+  k = pr₁ (subtraction' n m l)
+  p : n +' k ≡ m
+  p = pr₂ (subtraction' n m l)
+
+𝓓∞-has-least : has-least (underlying-order 𝓓∞)
+𝓓∞-has-least = (σ⊥ , p) , q
+ where
+  σ⊥ : (n : ℕ) → ⟨ 𝓓 n ⟩
+  σ⊥ n = ⊥ (𝓓⊥ n)
+  p : (n m : ℕ) (l : n ≤ m) → π⁺ l (σ⊥ m) ≡ σ⊥ n
+  p = π⁺-is-strict
+  q : is-least (underlying-order 𝓓∞) (σ⊥ , p)
+  q τ n = ⊥-is-least (𝓓⊥ n) (⦅ τ ⦆ n)
+
+\end{code}

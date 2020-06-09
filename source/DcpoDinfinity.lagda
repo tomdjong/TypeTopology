@@ -790,4 +790,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
   q : is-least (underlying-order 𝓓∞) (σ⊥ , p)
   q τ n = ⊥-is-least (𝓓⊥ n) (⦅ τ ⦆ n)
 
+𝓓∞⊥ : DCPO⊥ {𝓤₁} {𝓤₁}
+𝓓∞⊥ = 𝓓∞ , 𝓓∞-has-least
+
 \end{code}

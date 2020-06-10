@@ -754,7 +754,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 
 \begin{code}
 
-π-is-strict : (n : ℕ) → π n (⊥ (𝓓⊥ (succ n))) ≡ ⊥ (𝓓⊥ n)
+π-is-strict : (n : ℕ) → is-strict (𝓓⊥ (succ n)) (𝓓⊥ n) (π n)
 π-is-strict zero = refl
 π-is-strict (succ n) = to-continuous-function-≡ (𝓓 n) (𝓓 n) γ
  where
@@ -772,7 +772,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
     IH = π-is-strict n
 
 π⁺-is-strict-helper : (n m k : ℕ) (p : n +' k ≡ m)
-                    → π⁺-helper n m k p (⊥ (𝓓⊥ m)) ≡ ⊥ (𝓓⊥ n)
+                    → is-strict (𝓓⊥ m) (𝓓⊥ n) (π⁺-helper n m k p)
 π⁺-is-strict-helper n n zero refl = refl
 π⁺-is-strict-helper n m (succ k) refl =
  π⁺-helper n m (succ k) refl (⊥ (𝓓⊥ m))              ≡⟨ refl ⟩
@@ -783,7 +783,7 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
    q = ap (π⁺-helper n (n +' k) k refl) (π-is-strict (n +' k))
    IH = π⁺-is-strict-helper n (n +' k) k refl
 
-π⁺-is-strict : (n m : ℕ) (l : n ≤ m) → π⁺ l (⊥ (𝓓⊥ m)) ≡ ⊥ (𝓓⊥ n)
+π⁺-is-strict : (n m : ℕ) (l : n ≤ m) → is-strict (𝓓⊥ m) (𝓓⊥ n) (π⁺ l)
 π⁺-is-strict n m l = π⁺-is-strict-helper n m k p
  where
   k : ℕ
@@ -807,5 +807,32 @@ open DcpoCocone (𝓓∞ ⟹ᵈᶜᵖᵒ 𝓓∞) ε-exp ε-exp-is-continuous ε
 𝓓∞⊥-strict-isomorphic-to-its-self-exponential : 𝓓∞⊥ ≃ᵈᶜᵖᵒ⊥ (𝓓∞⊥ ⟹ᵈᶜᵖᵒ⊥ 𝓓∞⊥)
 𝓓∞⊥-strict-isomorphic-to-its-self-exponential =
  ≃ᵈᶜᵖᵒ-to-≃ᵈᶜᵖᵒ⊥ 𝓓∞⊥ (𝓓∞⊥ ⟹ᵈᶜᵖᵒ⊥ 𝓓∞⊥) 𝓓∞-isomorphic-to-its-self-exponential
+
+\end{code}
+
+\begin{code}
+
+σ₀ : ⟨ 𝓓∞ ⟩
+σ₀ = σ , p
+ where
+  x₀ : ⟨ 𝓓 0 ⟩
+  x₀ = 𝟙 , id , 𝟙-is-prop
+  σ : (n : ℕ) → ⟨ 𝓓 n ⟩
+  σ n = ε⁺ {0} {n} * x₀
+  p : (n m : ℕ) (l : n ≤ m) → π⁺ l (σ m) ≡ σ n
+  p n m l = π⁺ {n} {m} l (ε⁺ {0} {m} * x₀)                  ≡⟨ e₁ ⟩
+            (π⁺ {n} {m} l ∘ ε⁺ {n} {m} l ∘ ε⁺ {0} {n} *) x₀ ≡⟨ e₂ ⟩
+            ε⁺ {0} {n} * x₀                                 ∎
+   where
+    e₁ = ap (π⁺ {n} {m} l) ((ε⁺-comp * l x₀) ⁻¹)
+    e₂ = ε⁺-section-of-π⁺ l (ε⁺ {0} {n} * x₀)
+
+𝓓∞⊥-is-non-trivial : σ₀ ≢ ⊥ 𝓓∞⊥
+𝓓∞⊥-is-non-trivial e = 𝟘-is-not-𝟙 (γ ⁻¹)
+ where
+  e₀ : ⦅ σ₀ ⦆ 0 ≡ ⊥ (𝓓⊥ 0)
+  e₀ = ap (λ - → ⦅ - ⦆ 0) e
+  γ : 𝟙 ≡ 𝟘
+  γ = ap pr₁ e₀
 
 \end{code}

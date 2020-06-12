@@ -21,6 +21,8 @@ TO DO
 
 open import Dcpo pt fe 𝓥
 
+open import Negation
+
 ≡-to-⊑ : (𝓓 : DCPO {𝓤} {𝓣}) {x y : ⟨ 𝓓 ⟩} → x ≡ y → x ⊑⟨ 𝓓 ⟩ y
 ≡-to-⊑ 𝓓 {x} {x} refl = reflexivity 𝓓 x
 
@@ -381,4 +383,11 @@ _≃ᵈᶜᵖᵒ⊥_ : (𝓓 : DCPO⊥ {𝓤} {𝓣}) (𝓔 : DCPO⊥ {𝓤'} {�
        l₁ = continuous-implies-monotone (𝓔 ⁻) (𝓓 ⁻) (g , cg) (⊥ 𝓔) (f (⊥ 𝓓))
              (⊥-is-least 𝓔 (f (⊥ 𝓓)))
        l₂ = ≡-to-⊑ (𝓓 ⁻) (gf (⊥ 𝓓))
+\end{code}
+
+\begin{code}
+
+is-a-non-trivial-pointed-dcpo : (𝓓 : DCPO⊥ {𝓤} {𝓣}) → 𝓤 ̇
+is-a-non-trivial-pointed-dcpo 𝓓 = ∃ x ꞉ ⟪ 𝓓 ⟫ , x ≢ ⊥ 𝓓
+
 \end{code}

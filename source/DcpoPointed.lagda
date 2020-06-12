@@ -63,10 +63,7 @@ subsingleton-indexed-families-are-weakly-directed : (𝓓 : DCPO⊥ {𝓤} {𝓣
                                                   → is-weakly-directed
                                                      (underlying-order (𝓓 ⁻)) α
 subsingleton-indexed-families-are-weakly-directed 𝓓 i α p q =
- ∣ p , reflexivity (𝓓 ⁻) (α p) , ≡-to-⊑ (𝓓 ⁻) (ap α (e ⁻¹)) ∣
-  where
-   e : p ≡ q
-   e = i p q
+ ∣ p , reflexivity (𝓓 ⁻) (α p) , ≡-to-⊑ (𝓓 ⁻) (ap α (i q p)) ∣
 
 ⋁ₛ : (𝓓 : DCPO⊥ {𝓤} {𝓣}) {P : 𝓥 ̇ } → is-prop P → (P → ⟪ 𝓓 ⟫) → ⟪ 𝓓 ⟫
 ⋁ₛ 𝓓 {P} i α = pr₁ (strongly-directed-complete 𝓓 δ)
@@ -94,5 +91,17 @@ subsingleton-indexed-families-are-weakly-directed 𝓓 i α p q =
   where
    δ : is-weakly-directed (underlying-order (𝓓 ⁻)) α
    δ = subsingleton-indexed-families-are-weakly-directed 𝓓 i α
+
+⋁ₛ-equality-if-inhabited : (𝓓 : DCPO⊥ {𝓤} {𝓣}) {P : 𝓥 ̇ } (i : is-prop P)
+                           (α : P → ⟪ 𝓓 ⟫) (p : P) → ⋁ₛ 𝓓 i α ≡ α p
+⋁ₛ-equality-if-inhabited 𝓓 i α p = antisymmetry (𝓓 ⁻) (⋁ₛ 𝓓 i α) (α p) u v
+ where
+  u : ⋁ₛ 𝓓 i α ⊑⟨ 𝓓 ⁻ ⟩ α p
+  u = ⋁ₛ-is-lowerbound-of-upperbounds 𝓓 i α (α p) γ
+   where
+    γ : is-upperbound (underlying-order (𝓓 ⁻)) (α p) α
+    γ q = ≡-to-⊑ (𝓓 ⁻) (ap α (i q p))
+  v : α p ⊑⟨ 𝓓 ⁻ ⟩ ⋁ₛ 𝓓 i α
+  v = ⋁ₛ-is-upperbound 𝓓 i α p
 
 \end{code}

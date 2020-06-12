@@ -183,40 +183,6 @@ TO DO
 
 \begin{code}
 
-strongly-directed-complete : (𝓓 : DCPO⊥ {𝓤} {𝓣}) {I : 𝓥 ̇ } {α : I → ⟪ 𝓓 ⟫}
-                           → is-weakly-directed (underlying-order (𝓓 ⁻)) α
-                           → has-sup (underlying-order (𝓓 ⁻)) α
-strongly-directed-complete {𝓤} {𝓣} 𝓓 {I} {α} ε = s , u , v
- where
-  _⊑_ : ⟪ 𝓓 ⟫ → ⟪ 𝓓 ⟫ → 𝓣 ̇
-  _⊑_ = underlying-order (𝓓 ⁻)
-  J : 𝓥 ̇
-  J = 𝟙{𝓥} + I
-  β : J → ⟪ 𝓓 ⟫
-  β (inl *) = ⊥ 𝓓
-  β (inr i) = α i
-  δ : is-directed _⊑_ β
-  δ = (∣ inl * ∣ , κ)
-   where
-    κ : (a b : J) → ∃ \c → (β a ⊑ β c) × (β b ⊑ β c)
-    κ (inl *) b = ∣ b , ⊥-is-least 𝓓 (β b) , reflexivity (𝓓 ⁻) (β b) ∣
-    κ (inr i) (inl *) = ∣ (inr i) , reflexivity (𝓓 ⁻) (α i) , ⊥-is-least 𝓓 (α i) ∣
-    κ (inr i) (inr j) = ∥∥-functor γ (ε i j)
-     where
-      γ : (Σ \(k : I) → (α i) ⊑ (α k) × (α j) ⊑ (α k))
-        → Σ \(c : J) → (β (inr i) ⊑ β c) × (β (inr j) ⊑ β c)
-      γ (k , l) = (inr k , l)
-  s : ⟪ 𝓓 ⟫
-  s = ∐ (𝓓 ⁻) δ
-  u : is-upperbound _⊑_ s α
-  u i = ∐-is-upperbound (𝓓 ⁻) δ (inr i)
-  v : ((t : ⟪ 𝓓 ⟫) → is-upperbound _⊑_ t α → s ⊑ t)
-  v t l = ∐-is-lowerbound-of-upperbounds (𝓓 ⁻) δ t h
-   where
-    h : (k : J) → (β k) ⊑ t
-    h (inl *) = ⊥-is-least 𝓓 t
-    h (inr i) = l i
-
 ∐-is-monotone : (𝓓 : DCPO {𝓤} {𝓣}) {I : 𝓥 ̇ } {α β : I → ⟨ 𝓓 ⟩}
                 (δ : is-Directed 𝓓 α) (ε : is-Directed 𝓓 β)
               → ((i : I) → α i ⊑⟨ 𝓓 ⟩ β i)

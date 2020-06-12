@@ -160,3 +160,34 @@ has-size-is-a-prop' {𝓤} 𝓦 ua ua' X = c
   c = equiv-to-prop b (lift-is-embedding' ua ua' (lift 𝓦 X))
 
 \end{code}
+
+The main result
+
+\begin{code}
+
+open import SizeBasics
+
+Theorem1 : is-univalent 𝓥 → is-univalent (𝓥 ⁺) -- Only to make Ω¬¬ 𝓥 has-size 𝓥
+                                               -- a proposition.
+         → (∃ 𝓓 ꞉ DCPO⊥ {𝓤} {𝓣} ,
+               is-a-non-trivial-pointed-dcpo 𝓓
+             × is-a-small-dcpo (𝓓 ⁻))
+         → Ω¬¬ 𝓥 has-size 𝓥
+Theorem1 ua ua⁺ = ∥∥-rec i γ
+ where
+  i : is-prop (Ω¬¬ 𝓥 has-size 𝓥)
+  i = has-size-is-a-prop' 𝓥 ua ua⁺ (Ω¬¬ 𝓥)
+  γ : (Σ 𝓓 ꞉ DCPO⊥ {𝓤} {𝓣} ,
+          is-a-non-trivial-pointed-dcpo 𝓓
+        × is-a-small-dcpo (𝓓 ⁻))
+    → Ω¬¬ 𝓥 has-size 𝓥
+  γ (𝓓 , nt , (E , χ)) = ∥∥-rec i ψ nt
+   where
+    ψ : (Σ x ꞉ ⟪ 𝓓 ⟫ , x ≢ ⊥ 𝓓) → Ω¬¬ 𝓥 has-size 𝓥
+    ψ (x₀ , ne) = retract-of-a-set-has-size (equiv-to-set χ (sethood (𝓓 ⁻))) r
+     where
+      r = Ω¬¬ 𝓥 ◁⟨ ρ 𝓓 x₀ (E , χ) , (σ 𝓓 x₀) , (σ-section-of-ρ 𝓓 x₀ (E , χ) ne) ⟩
+          ⟪ 𝓓 ⟫ ◁⟨ ⌜ χ ⌝ , (equivs-have-sections ⌜ χ ⌝ (⌜⌝-is-equiv χ)) ⟩
+          E ◀
+
+\end{code}

@@ -191,3 +191,83 @@ Theorem1 ua ua⁺ = ∥∥-rec i γ
           E ◀
 
 \end{code}
+
+\begin{code}
+
+open import DiscreteAndSeparated
+
+is-a-locally-small-dcpo : (𝓓 : DCPO {𝓤} {𝓣}) → 𝓥 ⁺ ⊔ 𝓤 ⊔ 𝓣 ̇
+is-a-locally-small-dcpo 𝓓 = (x y : ⟨ 𝓓 ⟩) → (x ⊑⟨ 𝓓 ⟩ y) has-size 𝓥
+
+module _
+        (𝓓 : DCPO⊥ {𝓤} {𝓣})
+        (x₀ : ⟪ 𝓓 ⟫)
+       where
+
+ σ' : Ω¬¬ 𝓥 → ⟪ 𝓓 ⟫
+ σ' (P , i , s) = ⋁ₛ 𝓓 i (λ _ → x₀)
+
+ ρ' : is-a-locally-small-dcpo (𝓓 ⁻) → ⟪ 𝓓 ⟫ → Ω¬¬ 𝓥
+ ρ' ls x = ¬ L , negated-types-are-props , negated-types-are-¬¬-stable
+  where
+   L : 𝓥 ̇
+   L = has-size-type (ls x (⊥ 𝓓))
+   ψ : (x ⊑⟨ 𝓓 ⁻ ⟩ ⊥ 𝓓) → L
+   ψ = ⌜ ≃-sym (has-size-equiv (ls x (⊥ 𝓓))) ⌝
+
+ σ'-section-of-ρ' : (ls : is-a-locally-small-dcpo (𝓓 ⁻))
+                  → x₀ ≢ ⊥ 𝓓
+                  → ρ' ls ∘ σ' ∼ id
+ σ'-section-of-ρ' ls x₀-is-not-⊥ (P , i , st) =
+  to-Ω¬¬-≡ pe (ρ'' (σ' (P , i , st))) (P , i , st) f g
+   where
+    ρ'' : ⟪ 𝓓 ⟫ → Ω¬¬ 𝓥
+    ρ'' = ρ' ls
+    L : ⟪ 𝓓 ⟫ → 𝓥 ̇
+    L x = has-size-type (ls x (⊥ 𝓓))
+    ψ : (x : ⟪ 𝓓 ⟫) → (x ⊑⟨ 𝓓 ⁻ ⟩ ⊥ 𝓓) → L x
+    ψ x = ⌜ ≃-sym (has-size-equiv (ls x (⊥ 𝓓))) ⌝
+    φ : (x : ⟪ 𝓓 ⟫) → L x → (x ⊑⟨ 𝓓 ⁻ ⟩ ⊥ 𝓓)
+    φ x = ⌜ has-size-equiv (ls x (⊥ 𝓓)) ⌝
+    α : P → ⟪ 𝓓 ⟫
+    α _ = x₀
+    f : ¬ (L (⋁ₛ 𝓓 i α)) → ¬¬ P
+    f nl np = nl l
+     where
+      l : L (⋁ₛ 𝓓 i α)
+      l = ψ (⋁ₛ 𝓓 i α) l'
+       where
+        l' : ⋁ₛ 𝓓 i α ⊑⟨ 𝓓 ⁻ ⟩ ⊥ 𝓓
+        l' = ⋁ₛ-is-lowerbound-of-upperbounds 𝓓 i α (⊥ 𝓓) γ
+         where
+          γ : is-upperbound (underlying-order (𝓓 ⁻)) (⊥ 𝓓) α
+          γ p = 𝟘-induction (np p)
+    g : P → ¬¬ (¬ (L (⋁ₛ 𝓓 i α)))
+    g p = double-negation-intro γ
+     where
+      γ : ¬ L (⋁ₛ 𝓓 i α)
+      γ l = x₀-is-not-⊥ e
+       where
+        e : x₀ ≡ ⊥ 𝓓
+        e = antisymmetry (𝓓 ⁻) x₀ (⊥ 𝓓) ϕ (⊥-is-least 𝓓 x₀)
+         where
+          ϕ = x₀       ⊑⟨ 𝓓 ⁻ ⟩[ ⋁ₛ-is-upperbound 𝓓 i α p ]
+              ⋁ₛ 𝓓 i α ⊑⟨ 𝓓 ⁻ ⟩[ φ (⋁ₛ 𝓓 i α) l ]
+              ⊥ 𝓓      ∎⟨ 𝓓 ⁻ ⟩
+
+open import UF-Miscelanea
+
+Theorem1' : (𝓓 : DCPO⊥ {𝓤} {𝓣})
+          → is-a-non-trivial-pointed-dcpo 𝓓
+          → is-a-locally-small-dcpo (𝓓 ⁻)
+          → is-discrete ⟪ 𝓓 ⟫
+          → is-discrete (Ω¬¬ 𝓥)
+Theorem1' 𝓓 nt ls d = ∥∥-rec (being-discrete-is-a-prop (λ _ _ → fe)) γ nt
+ where
+  γ : (Σ x ꞉ ⟪ 𝓓 ⟫ , x ≢ ⊥ 𝓓) → is-discrete (Ω¬¬ 𝓥)
+  γ (x₀ , x₀-is-not-⊥) = retract-discrete-discrete g d
+   where
+    g : retract Ω¬¬ 𝓥 of ⟪ 𝓓 ⟫
+    g = (ρ' 𝓓 x₀ ls) , (σ' 𝓓 x₀) , (σ'-section-of-ρ' 𝓓 x₀ ls x₀-is-not-⊥)
+
+\end{code}

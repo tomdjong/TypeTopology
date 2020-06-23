@@ -231,12 +231,12 @@ only include basis elements in the newly constructed directed family.
   ε : is-weakly-directed (underlying-order 𝓓) (≪-INT₂-aux-map 𝓓 cd α)
   ε (b₁ , i₁ , u₁) (b₂ , i₂ , u₂) = do
    l₃ , l₁ , l₂ ← t
-   𝓐 , ϕ , wb , ε , e ← c (β (α l₃))
+   𝓐 , ϕ , wb , ε' , e ← c (β (α l₃))
    let v₁ = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 cd b₁ (α i₁) u₁) l₁
    let v₂ = ≪-⊑-to-≪ 𝓓 (≪ᴮ-to-≪ 𝓓 cd b₂ (α i₂) u₂) l₂
-   a₁ , m₁ ← v₁ 𝓐 (β ∘ ϕ) ε (≡-to-⊑ 𝓓 (e ⁻¹))
-   a₂ , m₂ ← v₂ 𝓐 (β ∘ ϕ) ε (≡-to-⊑ 𝓓 (e ⁻¹))
-   (a₃ , n₁ , n₂) ← Directed-implies-weakly-directed 𝓓 ε a₁ a₂
+   a₁ , m₁ ← v₁ 𝓐 (β ∘ ϕ) ε' (≡-to-⊑ 𝓓 (e ⁻¹))
+   a₂ , m₂ ← v₂ 𝓐 (β ∘ ϕ) ε' (≡-to-⊑ 𝓓 (e ⁻¹))
+   (a₃ , n₁ , n₂) ← Directed-implies-weakly-directed 𝓓 ε' a₁ a₂
    let w = ≪-to-≪ᴮ 𝓓 cd (ϕ a₃) (α l₃) (wb a₃)
    let k₁ = β b₁     ⊑⟨ 𝓓 ⟩[ m₁ ]
             β (ϕ a₁) ⊑⟨ 𝓓 ⟩[ n₁ ]
